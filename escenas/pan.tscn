@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/pan.gd" id="1_pan"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pan"]
+radius = 15.0
+
+[node name="Pan" type="CharacterBody2D"]
+motion_mode = 1
+script = ExtResource("1_pan")
+
+[node name="Colision" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_pan")
+
+[node name="Camara" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
