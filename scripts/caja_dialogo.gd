@@ -51,8 +51,9 @@ func _mostrar_linea(linea: Dictionary) -> void:
 	nombre.text = quien
 	nombre.visible = quien != ""
 	var ruta_retrato := "res://arte/retratos/%s.png" % linea.get("retrato", "")
-	if linea.has("retrato") and ResourceLoader.exists(ruta_retrato):
-		retrato.texture = load(ruta_retrato)
+	var cara: Texture2D = Juego.textura(ruta_retrato) if linea.has("retrato") else null
+	if cara != null:
+		retrato.texture = cara
 		retrato.visible = true
 	else:
 		retrato.visible = false

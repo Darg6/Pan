@@ -213,6 +213,8 @@ func _version_suficiente() -> bool:
 
 func _ready() -> void:
 	randomize()
+	if OS.has_feature("editor"):
+		get_tree().node_added.connect(_al_agregar_nodo)
 	if not _version_suficiente():
 		_mostrar_error.call_deferred("Tu Godot es muy viejo para este proyecto: los mapas usan TileMapLayer, que existe desde Godot 4.3.\nDescarga Godot 4.3 o más nuevo desde godotengine.org.")
 	else:
@@ -314,10 +316,67 @@ func crear_luchador(id: String, nivel: int, hp_actual: int = -1) -> Dictionary:
 
 
 func textura_criatura(id: String) -> Texture2D:
-	var ruta := "res://arte/criaturas/%s.png" % id
+	var t := textura("res://arte/criaturas/%s.png" % id)
+	return t if t != null else load("res://icon.svg")
+
+
+# ---------------------------------------------------------------------------
+# Imágenes siempre al día
+# ---------------------------------------------------------------------------
+# Si actualizas el proyecto (Pull) y Godot no volvió a importar un PNG, el juego mostraría la
+# imagen vieja (o nada, si el PNG es nuevo). Al jugar desde el editor (F5), aquí se compara cada
+# PNG con lo que Godot importó y, si no coincide, se usa el PNG directo del disco.
+var _texturas_frescas := {}   # ruta -> Texture2D cargada del disco (o null si la importada está al día)
+var pngs_sin_importar: Array[String] = []
+
+
+## Úsalo en vez de load() para cualquier PNG que se cargue desde código.
+func textura(ruta: String) -> Texture2D:
+	var fresca := _textura_fresca(ruta)
+	if fresca != null:
+		return fresca
 	if ResourceLoader.exists(ruta):
-		return load(ruta)
-	return load("res://icon.svg")
+		return load(ruta) as Texture2D
+	return null
+
+
+func _textura_fresca(ruta: String) -> Texture2D:
+	if not OS.has_feature("editor") or not ruta.ends_with(".png"):
+		return null  # en el juego exportado (celular / navegador) todo viene importado
+	if _texturas_frescas.has(ruta):
+		return _texturas_frescas[ruta]
+	var tex: Texture2D = null
+	if FileAccess.file_exists(ruta) and _importacion_vieja(ruta):
+		var img := Image.load_from_file(ProjectSettings.globalize_path(ruta))
+		if img != null and not img.is_empty():
+			tex = ImageTexture.create_from_image(img)
+			pngs_sin_importar.append(ruta.trim_prefix("res://"))
+	_texturas_frescas[ruta] = tex
+	return tex
+
+
+## true si Godot todavía no importó este PNG o lo importó cuando era otra versión.
+func _importacion_vieja(ruta: String) -> bool:
+	var info := ConfigFile.new()
+	if info.load(ruta + ".import") != OK:
+		return true
+	var destino: String = info.get_value("remap", "path", "")
+	if destino == "" or not FileAccess.file_exists(destino):
+		return true
+	var md5 := ConfigFile.new()
+	if md5.load(destino.get_basename() + ".md5") != OK:
+		return true
+	return str(md5.get_value("", "source_md5", "")) != FileAccess.get_md5(ruta)
+
+
+## Cada Sprite2D / TextureRect que aparece en pantalla usa la versión al día de su PNG.
+func _al_agregar_nodo(nodo: Node) -> void:
+	if nodo is Sprite2D or nodo is TextureRect:
+		var t: Texture2D = nodo.texture
+		if t != null and t.resource_path.ends_with(".png"):
+			var fresca := _textura_fresca(t.resource_path)
+			if fresca != null:
+				nodo.texture = fresca
 
 
 # ---------------------------------------------------------------------------
