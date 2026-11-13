@@ -83,6 +83,7 @@ func _ready() -> void:
 	hud.transicion.color.a = 1.0
 	await hud.fundido(false, 0.5)
 	await correr(Historia.al_entrar_mapa.bind(self))
+	Juego.guardar()   # guardado automático al llegar a cada lugar
 	for m in Juego.mensajes_pendientes:
 		hud.mostrar_aviso(m)
 	Juego.mensajes_pendientes.clear()
@@ -101,6 +102,15 @@ func correr(evento: Callable) -> void:
 	pan.puede_moverse = true
 	hud.set_controles(true)
 	refrescar()
+	if Juego.guardar_pronto:   # ej. después de dormir
+		Juego.guardar_pronto = false
+		if Juego.guardar():
+			hud.mostrar_aviso("Partida guardada")
+
+
+## ¿Se puede guardar ahora? (no en medio de un diálogo, un evento o un cambio de mapa)
+func puede_guardar() -> bool:
+	return is_inside_tree() and not ocupado and not Juego.cambiando_escena and nombre_mapa != ""
 
 
 # ---------------------------------------------------------------------------

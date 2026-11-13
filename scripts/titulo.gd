@@ -14,6 +14,7 @@ func _ready() -> void:
 	Juego.cambiando_escena = false
 	Sonido.musica("recuerdo")
 	Sonido.ambiente("viento" if true else "")
+	titulo.text = Juego.NOMBRE_JUEGO
 	titulo.modulate.a = 0.0
 	subtitulo.modulate.a = 0.0
 	imagen.pivot_offset = Vector2(150, 200)

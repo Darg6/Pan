@@ -36,6 +36,22 @@ Ya están configurados los dos en *Proyecto > Exportar*.
 La exportación Web no usa hilos (*thread support* apagado), así funciona en itch.io y en celulares
 sin configuración especial del servidor.
 
+## Menú principal y partida guardada
+
+Al abrir el juego aparece el **menú principal**:
+
+- **Continuar**: solo aparece si hay una partida guardada. Muestra dónde estabas, tus cartas,
+  monedas y tiempo jugado, y te lleva justo a ese lugar.
+- **Nueva partida**: empieza desde la intro. Si ya tenías una partida, pregunta antes de borrarla.
+
+La partida se guarda **sola** al entrar a cada lugar, al dormir y al minimizar o cerrar el juego.
+También puedes guardar cuando quieras con el botón **Guardar** de la Mochila, y volver al menú con
+**Menú principal** (guarda antes de salir). En el celular y en el navegador funciona igual: se
+guarda en la memoria del juego (`user://partida.json`).
+
+El nombre que se ve en el menú y en la pantalla de título está en `scripts/juego.gd`:
+`NOMBRE_JUEGO` y `SUBTITULO_JUEGO`.
+
 ## La historia que ya se puede jugar (prólogo)
 
 1. **El Recuerdo**: la intro con Diego, Danitza y Pan, la Organización, la rejilla y la promesa.
@@ -76,6 +92,8 @@ Entra por el portón de contenedores (al noreste de la Superficie).
 
 | Quiero cambiar...            | Archivo |
 |------------------------------|---------|
+| El nombre del juego          | `NOMBRE_JUEGO` y `SUBTITULO_JUEGO` en `scripts/juego.gd` |
+| El menú principal            | `scripts/menu.gd` (fondo, botones y textos) |
 | Los textos y diálogos        | `datos/dialogos.json` |
 | Las imágenes de la intro     | `arte/cinematica/` (cada frase de la intro elige su imagen con `"imagen"` en `datos/dialogos.json`) |
 | Qué pasa en cada evento      | `scripts/historia.gd` |
@@ -96,7 +114,7 @@ Para probar sin repetir la intro, pon `SALTAR_PROLOGO = true` en `scripts/juego.
 
 | Carpeta              | Qué contiene |
 |----------------------|--------------|
-| `escenas/`           | `intro.tscn`, `titulo.tscn`, `combate.tscn`, `pan.tscn` |
+| `escenas/`           | `menu.tscn` (menú principal), `intro.tscn`, `titulo.tscn`, `combate.tscn`, `pan.tscn` |
 | `escenas/mapas/`     | `refugio_cero.tscn`, `superficie.tscn` y `bastion_oxido.tscn` |
 | `escenas/ui/`        | HUD, caja de diálogo |
 | `scripts/`           | Código. `juego.gd` = estado (mochila, cartas, flags); `historia.gd` = la historia |
