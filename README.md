@@ -38,6 +38,8 @@ llegar a las afueras de Bastión (campamento, cartel, ciudadano y portón).
 | Los mapas                    | `escenas/mapas/*.tscn` (ábrelos y pinta con el editor de TileMap) |
 | El arte                      | `arte/` (reemplaza un PNG por el tuyo con el **mismo nombre y tamaño**) |
 | Botones, paneles y letra     | `arte/tema.tres` y `arte/interfaz/` |
+| Música y sonidos             | `audio/` (reemplaza un .ogg por el tuyo con el **mismo nombre**) |
+| Música/clima de cada mapa    | `AMBIENTACION` al inicio de `scripts/mapa.gd` (música, viento, color de luz, ceniza) |
 
 Para probar sin repetir la intro, pon `SALTAR_PROLOGO = true` en `scripts/juego.gd`.
 
@@ -61,6 +63,9 @@ Para probar sin repetir la intro, pon `SALTAR_PROLOGO = true` en `scripts/juego.
 | `arte/interfaz/`     | Paneles, botones y joystick |
 | `arte/objetos/`      | Mochila, cartas, collar, etc. |
 | `arte/fuentes/`      | Letras pixel |
+| `audio/musica/`      | Música (recuerdo = intro, paramo = exploración, combate) |
+| `audio/ambiente/`    | Sonidos de fondo en bucle (viento, búnker) |
+| `audio/sfx/`         | Efectos (golpes, captura, botones, voz de los diálogos...) |
 | `herramientas/`      | Scripts que generaron el arte y los mapas (solo para regenerarlos desde cero) |
 
 **Ojo:** si vuelves a correr las herramientas, sobrescriben el arte y los mapas. Si ya

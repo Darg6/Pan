@@ -60,6 +60,12 @@ func _ready() -> void:
 			Juego.agregar_carta("gato_mutado")
 			Juego.dar_objeto("carta_vinculo", 3)
 	tipo = datos.get("tipo", "salvaje")
+	Sonido.musica("combate")
+	Sonido.ambiente("viento")
+	var ceniza := Ambiente.ceniza(Vector2(480, 270))
+	ceniza.position = Vector2(240, 135)
+	ceniza.z_index = 0
+	escenario.add_child(ceniza)
 	equipo_enemigo = datos.get("equipo", []).duplicate()
 
 	_preparar_barra(barra_aliado)
@@ -208,6 +214,7 @@ func _agregar_boton(texto: String, accion: Callable, desactivado := false) -> vo
 		b.add_theme_font_size_override("font_size", 10)  # textos largos en letra más chica
 	b.disabled = desactivado
 	if accion.is_valid():
+		b.pressed.connect(Sonido.efecto.bind("boton"))
 		b.pressed.connect(accion)
 	opciones.add_child(b)
 
@@ -353,6 +360,7 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 			await _rafaga(spr_atacante, spr_defensor)
 		if randf() < defensor["evasion"] or randf() > precision:
 			_esquivar(spr_defensor)
+			Sonido.efecto("lanzar", 1.4, -4.0)
 			_texto_flotante(spr_defensor, "Fallo", Color(1, 1, 1, 0.7))
 			continue
 		var danio := _calcular_danio(atacante, defensor, mov)
@@ -454,6 +462,7 @@ func _sacar_carta(i: int) -> void:
 	# Pan lanza la carta, estalla en luz y la criatura aparece de golpe
 	var c := await _lanzar(TEX_CARTA, POS_ALIADO + Vector2(0, -20), 0.3)
 	c.queue_free()
+	Sonido.efecto("aparecer")
 	_chispa(POS_ALIADO + Vector2(0, -24), Color("#9fe8ff"), 1.5)
 	sprite_aliado.visible = true
 	sprite_aliado.modulate = Color.WHITE
@@ -476,6 +485,7 @@ func _lanzar(textura: Texture2D, destino: Vector2, duracion := 0.4) -> Sprite2D:
 	s.texture = textura
 	s.position = sprite_pan.position + Vector2(8, -30)
 	escenario.add_child(s)
+	Sonido.efecto("lanzar")
 	var inicio := s.position
 	var medio := (inicio + destino) / 2.0 + Vector2(0, -50)
 	var t := create_tween()
@@ -494,6 +504,7 @@ func _usar_granada() -> void:
 	transicion.color = Color(1, 1, 1, 0.9)
 	create_tween().tween_property(transicion, "color:a", 0.0, 0.4)
 	_chispa(sprite_enemigo.position + Vector2(0, -24), Color("#fff2a8"), 2.0)
+	Sonido.efecto("golpe_fuerte")
 	_sacudir_pantalla(6.0)
 	var objetivo := maxi(1, roundi(enemigo["hp_max"] * 0.15))
 	var danio: int = enemigo["hp"] - objetivo if enemigo["hp"] > objetivo else mini(5, enemigo["hp"] - 1)
@@ -531,6 +542,7 @@ func _intentar_captura() -> void:
 
 	if randf() < probabilidad:
 		carta.modulate = Color(0.6, 1.0, 0.6)
+		Sonido.efecto("captura")
 		_guardar_aliado()  # antes de agregar la carta (por si es un duplicado del aliado)
 		var r := Juego.agregar_carta(enemigo["id"])
 		var especie: String = enemigo["nombre_especie"]
@@ -551,6 +563,7 @@ func _intentar_captura() -> void:
 		_terminar("captura")
 	else:
 		carta.queue_free()
+		Sonido.efecto("fallo")
 		var t4 := create_tween().set_parallel()
 		t4.tween_property(sprite_enemigo, "scale", Vector2.ONE, 0.2)
 		t4.tween_property(sprite_enemigo, "modulate", Color.WHITE, 0.2)
@@ -776,6 +789,7 @@ func _impacto(df: Sprite2D, color: Color, fuerte: bool) -> void:
 	var base: Vector2 = df.get_meta("base")
 	var dir := -1.0 if df.flip_h else 1.0  # se lo empuja hacia atrás
 	_destello(df, Color.WHITE, 0.18)
+	Sonido.efecto("golpe_fuerte" if fuerte else "golpe", randf_range(0.9, 1.1))
 	_chispa(base + Vector2(0, -26) + Vector2(randf_range(-6, 6), randf_range(-6, 6)), color, 1.6 if fuerte else 1.0)
 	_sacudir_pantalla(6.0 if fuerte else 3.0)
 	_sacudir_panel(hud_aliado if df == sprite_aliado else $HUDEnemigo)
@@ -818,6 +832,7 @@ func _animar_evasion(s: Sprite2D) -> void:
 ## Cae derrotado: destello rojo, se aplasta contra el suelo y desaparece.
 func _caer(s: Sprite2D) -> void:
 	_destello(s, COLOR_DEBILIDAD, 0.3)
+	Sonido.efecto("caer")
 	var t := create_tween()
 	t.tween_interval(0.15)
 	t.tween_property(s, "scale", Vector2(1.3, 0.0), 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)

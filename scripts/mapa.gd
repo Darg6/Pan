@@ -67,6 +67,7 @@ func _ready() -> void:
 		_dentro_de[d] = d.contiene(pan.global_position)
 
 	refrescar()
+	_preparar_ambiente()
 	hud.transicion.color.a = 1.0
 	await hud.fundido(false, 0.5)
 	await correr(Historia.al_entrar_mapa.bind(self))
@@ -90,6 +91,42 @@ func correr(evento: Callable) -> void:
 	refrescar()
 
 
+# ---------------------------------------------------------------------------
+# Ambiente de cada mapa: música, sonido de fondo, color de la luz y partículas.
+# Cambia los valores aquí para darle otro clima a un mapa.
+# ---------------------------------------------------------------------------
+const AMBIENTACION := {
+	"refugio_cero": { "musica": "", "ambiente": "bunker", "tinte": Color(0.86, 0.88, 1.0), "particulas": "polvo",
+		"luces": { "generador": Color(0.45, 1.0, 0.55), "escalera": Color(1.0, 0.85, 0.6) } },
+	"superficie": { "musica": "paramo", "ambiente": "viento", "tinte": Color(1.0, 0.9, 0.8), "particulas": "ceniza",
+		"luces": { "fogata": Color(1.0, 0.6, 0.25) } },
+}
+
+
+func _preparar_ambiente() -> void:
+	var a: Dictionary = AMBIENTACION.get(nombre_mapa, {})
+	Sonido.musica(a.get("musica", ""))
+	Sonido.ambiente(a.get("ambiente", ""))
+	var tinte := CanvasModulate.new()
+	tinte.color = a.get("tinte", Color.WHITE)
+	add_child(tinte)
+	var camara: Camera2D = pan.get_node("Camara")
+	match a.get("particulas", ""):
+		"ceniza":
+			camara.add_child(Ambiente.ceniza(get_viewport_rect().size / zoom_camara))
+		"polvo":
+			camara.add_child(Ambiente.polvo(get_viewport_rect().size / zoom_camara))
+	# Luces: un brillo suave que titila sobre ciertos tiles (fogatas, generadores...)
+	var luces: Dictionary = a.get("luces", {})
+	for nombre_tile in luces:
+		for celda in Ambiente.celdas_con_tile(suelo, nombre_tile):
+			var centro := suelo.map_to_local(celda)
+			$Entidades.add_child(Ambiente.luz(centro, luces[nombre_tile], nombre_tile == "fogata"))
+			if nombre_tile == "fogata":
+				$Entidades.add_child(Ambiente.brasas(centro))
+	hud.agregar_vineta()
+
+
 func refrescar() -> void:
 	for nodo in get_tree().get_nodes_in_group("interactuables"):
 		nodo.actualizar()
@@ -105,7 +142,8 @@ func _process(_delta: float) -> void:
 	var cercano = _interactuable_cercano()
 	_exclamacion.visible = cercano != null
 	if cercano != null:
-		_exclamacion.global_position = cercano.global_position + Vector2(0, -24 if cercano.solido else -14)
+		var rebote := roundf(sin(Time.get_ticks_msec() / 160.0) * 1.5)  # el "!" sube y baja
+		_exclamacion.global_position = cercano.global_position + Vector2(0, (-24 if cercano.solido else -14) + rebote)
 
 	for d in get_tree().get_nodes_in_group("disparadores"):
 		var dentro: bool = d.contiene(pan.global_position)
@@ -177,6 +215,7 @@ func iniciar_combate(datos: Dictionary) -> void:
 	pan.puede_moverse = false
 	Juego.posicion_pan = pan.global_position
 	Juego.encuentro = datos
+	Sonido.efecto("alerta")
 	var t := create_tween()
 	for i in 2:
 		t.tween_property(hud.transicion, "color", Color(1, 1, 1, 0.8), 0.07)
@@ -189,5 +228,5 @@ func iniciar_combate(datos: Dictionary) -> void:
 ## Empuja a Pan un poco hacia atrás (para caminos bloqueados).
 func retroceder_pan(direccion: Vector2, distancia := 12.0) -> void:
 	var t := create_tween()
-	t.tween_property(pan, "global_position", pan.global_position + direccion * distancia, 0.2)
+	t.tween_property(pan, "global_position", pan.global_position + direccion * distancia, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	await t.finished

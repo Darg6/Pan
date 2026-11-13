@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Juego="*res://scripts/juego.gd"
 Historia="*res://scripts/historia.gd"
+Sonido="*res://scripts/sonido.gd"
 
 [display]
 

@@ -10,6 +10,8 @@ const DISTANCIA_PASO := 16.0
 const FILA := { "abajo": 0, "izquierda": 1, "derecha": 2, "arriba": 3 }
 
 @export var velocidad := 70.0
+@export var aceleracion := 700.0   # qué tan rápido arranca (más alto = más brusco)
+@export var frenado := 900.0       # qué tan rápido se detiene
 
 var joystick: Node = null      # el mapa se lo asigna
 var puede_moverse := true
@@ -21,20 +23,23 @@ var _tiempo_anim := 0.0
 @onready var sprite: Sprite2D = $Sprite
 
 
-func _physics_process(delta: float) -> void:
+## Se mueve en _process (cada cuadro de la pantalla) para que se vea fluido
+## en cualquier monitor, también en los de 120 o 144 Hz.
+func _process(delta: float) -> void:
 	var direccion := Vector2.ZERO
 	if puede_moverse:
 		direccion = Input.get_vector("mover_izquierda", "mover_derecha", "mover_arriba", "mover_abajo")
 		if joystick != null and joystick.direccion != Vector2.ZERO:
 			direccion = joystick.direccion
 
-	velocity = direccion * velocidad
+	var objetivo := direccion * velocidad
+	velocity = velocity.move_toward(objetivo, (aceleracion if direccion != Vector2.ZERO else frenado) * delta)
 	var antes := global_position
 	move_and_slide()
 
 	if direccion != Vector2.ZERO:
 		mirando = direccion
-		_tiempo_anim += delta
+		_tiempo_anim += delta * clampf(velocity.length() / velocidad, 0.3, 1.0)
 		_distancia += global_position.distance_to(antes)
 		if _distancia >= DISTANCIA_PASO:
 			_distancia -= DISTANCIA_PASO
