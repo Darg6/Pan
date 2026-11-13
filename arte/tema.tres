@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=17 format=3]
+[gd_resource type="Theme" load_steps=18 format=3]
 
 [ext_resource type="FontFile" path="res://arte/fuentes/PressStart2P-Regular.ttf" id="1_m81r6"]
 [ext_resource type="Texture2D" path="res://arte/interfaz/boton_desactivado.png" id="2_2g7da"]
@@ -8,7 +8,7 @@
 [ext_resource type="Texture2D" path="res://arte/interfaz/panel.png" id="6_yr127"]
 [ext_resource type="FontFile" path="res://arte/fuentes/PixelifySans.ttf" id="7_jsngr"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bp2k2"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g1n0e"]
 bg_color = Color(0.75, 0.42, 0.21, 0.75)
 border_width_left = 2
 border_width_top = 2
@@ -21,7 +21,7 @@ corner_radius_bottom_right = 18
 corner_radius_bottom_left = 18
 anti_aliasing = false
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_egv4g"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f1dss"]
 bg_color = Color(1, 0.7, 0.35, 0.9)
 border_width_left = 2
 border_width_top = 2
@@ -34,7 +34,7 @@ corner_radius_bottom_right = 18
 corner_radius_bottom_left = 18
 anti_aliasing = false
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_hmuhg"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_f25m0"]
 content_margin_left = 6.0
 content_margin_top = 3.0
 content_margin_right = 6.0
@@ -45,9 +45,9 @@ texture_margin_top = 4.0
 texture_margin_right = 4.0
 texture_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vwqp8"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r5wiv"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_e8huc"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lmik0"]
 content_margin_left = 6.0
 content_margin_top = 3.0
 content_margin_right = 6.0
@@ -58,7 +58,7 @@ texture_margin_top = 4.0
 texture_margin_right = 4.0
 texture_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_32dns"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_llk3k"]
 content_margin_left = 6.0
 content_margin_top = 3.0
 content_margin_right = 6.0
@@ -69,7 +69,7 @@ texture_margin_top = 4.0
 texture_margin_right = 4.0
 texture_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_sp2jq"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_5vquu"]
 content_margin_left = 6.0
 content_margin_top = 3.0
 content_margin_right = 6.0
@@ -80,7 +80,7 @@ texture_margin_top = 4.0
 texture_margin_right = 4.0
 texture_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ddoel"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_2go4c"]
 content_margin_left = 8.0
 content_margin_top = 6.0
 content_margin_right = 8.0
@@ -91,7 +91,7 @@ texture_margin_top = 6.0
 texture_margin_right = 6.0
 texture_margin_bottom = 6.0
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_gvko4"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lt8in"]
 content_margin_left = 8.0
 content_margin_top = 6.0
 content_margin_right = 8.0
@@ -101,27 +101,33 @@ texture_margin_left = 6.0
 texture_margin_top = 6.0
 texture_margin_right = 6.0
 texture_margin_bottom = 6.0
+
+[sub_resource type="FontVariation" id="FontVariation_pee5h"]
+base_font = ExtResource("7_jsngr")
+spacing_glyph = 1
+spacing_space = 3
 
 [resource]
-default_font = ExtResource("7_jsngr")
+default_font = SubResource("FontVariation_pee5h")
 default_font_size = 11
 BotonRedondo/base_type = &"Button"
 BotonRedondo/font_sizes/font_size = 16
 BotonRedondo/fonts/font = ExtResource("1_m81r6")
-BotonRedondo/styles/hover = SubResource("StyleBoxFlat_bp2k2")
-BotonRedondo/styles/normal = SubResource("StyleBoxFlat_bp2k2")
-BotonRedondo/styles/pressed = SubResource("StyleBoxFlat_egv4g")
+BotonRedondo/styles/hover = SubResource("StyleBoxFlat_g1n0e")
+BotonRedondo/styles/normal = SubResource("StyleBoxFlat_g1n0e")
+BotonRedondo/styles/pressed = SubResource("StyleBoxFlat_f1dss")
 Button/colors/font_color = Color(0.941176, 0.901961, 0.823529, 1)
 Button/colors/font_disabled_color = Color(0.431373, 0.384314, 0.345098, 1)
 Button/colors/font_hover_color = Color(1, 0.878431, 0.627451, 1)
 Button/colors/font_pressed_color = Color(1, 0.956863, 0.815686, 1)
-Button/styles/disabled = SubResource("StyleBoxTexture_hmuhg")
-Button/styles/focus = SubResource("StyleBoxEmpty_vwqp8")
-Button/styles/hover = SubResource("StyleBoxTexture_e8huc")
-Button/styles/normal = SubResource("StyleBoxTexture_32dns")
-Button/styles/pressed = SubResource("StyleBoxTexture_sp2jq")
+Button/styles/disabled = SubResource("StyleBoxTexture_f25m0")
+Button/styles/focus = SubResource("StyleBoxEmpty_r5wiv")
+Button/styles/hover = SubResource("StyleBoxTexture_lmik0")
+Button/styles/normal = SubResource("StyleBoxTexture_llk3k")
+Button/styles/pressed = SubResource("StyleBoxTexture_5vquu")
 Label/colors/font_color = Color(0.941176, 0.901961, 0.823529, 1)
 Label/colors/font_shadow_color = Color(0, 0, 0, 0.6)
+Label/constants/line_spacing = 4
 Label/constants/shadow_offset_x = 1
 Label/constants/shadow_offset_y = 1
 NombreDialogo/base_type = &"Label"
@@ -131,8 +137,8 @@ NumeroDanio/colors/font_outline_color = Color(0, 0, 0, 1)
 NumeroDanio/constants/outline_size = 4
 NumeroDanio/font_sizes/font_size = 8
 NumeroDanio/fonts/font = ExtResource("1_m81r6")
-Panel/styles/panel = SubResource("StyleBoxTexture_ddoel")
-PanelContainer/styles/panel = SubResource("StyleBoxTexture_gvko4")
+Panel/styles/panel = SubResource("StyleBoxTexture_2go4c")
+PanelContainer/styles/panel = SubResource("StyleBoxTexture_lt8in")
 TextoChico/base_type = &"Label"
 TextoChico/font_sizes/font_size = 10
 Titulo/base_type = &"Label"

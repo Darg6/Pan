@@ -54,6 +54,7 @@ llegar a las afueras de Bastión (campamento, cartel, ciudadano y portón).
 | Quiero cambiar...            | Archivo |
 |------------------------------|---------|
 | Los textos y diálogos        | `datos/dialogos.json` |
+| Las imágenes de la intro     | `arte/cinematica/` (cada frase de la intro elige su imagen con `"imagen"` en `datos/dialogos.json`) |
 | Qué pasa en cada evento      | `scripts/historia.gd` |
 | Criaturas, ataques y stats   | `datos/criaturas.json` |
 | Los mapas                    | `escenas/mapas/*.tscn` (ábrelos y pinta con el editor de TileMap) |
