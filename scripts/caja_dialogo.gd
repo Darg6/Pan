@@ -31,6 +31,8 @@ func mostrar(dialogo) -> void:
 		return
 	_activa = true
 	visible = true
+	modulate.a = 0.0
+	create_tween().tween_property(self, "modulate:a", 1.0, 0.12)  # aparece suave
 	for linea in lineas:
 		await _mostrar_linea(linea)
 	visible = false
@@ -58,10 +60,15 @@ func _mostrar_linea(linea: Dictionary) -> void:
 	_escribiendo = true
 	var total := texto.get_total_character_count()
 	var t := 0.0
+	var tono := 1.25 if quien == "Pan" else (1.0 if quien != "" else 0.85)
+	var ultimo_sonido := 0
 	while _escribiendo and texto.visible_characters < total:
 		await get_tree().process_frame
 		t += get_process_delta_time()
 		texto.visible_characters = int(t * LETRAS_POR_SEGUNDO)
+		if texto.visible_characters - ultimo_sonido >= 3:  # "voz" suave mientras escribe
+			ultimo_sonido = texto.visible_characters
+			Sonido.efecto("dialogo", tono * randf_range(0.95, 1.05), -6.0)
 	texto.visible_characters = -1
 	_escribiendo = false
 	flecha.visible = true

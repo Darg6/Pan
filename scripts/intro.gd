@@ -15,6 +15,8 @@ var _saltando := false
 
 func _ready() -> void:
 	Juego.cambiando_escena = false
+	Sonido.musica("recuerdo")
+	Sonido.ambiente("viento" if false else "")
 	if Juego.SALTAR_PROLOGO:
 		_preparar_partida_de_prueba()
 		return
@@ -48,6 +50,7 @@ func _vineta(ruta: String, id_dialogo: String, disparo := false) -> void:
 	if disparo:
 		await dialogo.mostrar(Juego.dialogos[id_dialogo].slice(0, 2))
 		# Destello blanco: el disparo
+		Sonido.efecto("golpe_fuerte", 0.6, 4.0)
 		transicion.color = Color(1, 1, 1, 1)
 		t = create_tween()
 		t.tween_property(transicion, "color", Color(0, 0, 0, 1), 0.5)

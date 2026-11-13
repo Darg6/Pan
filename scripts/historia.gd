@@ -109,6 +109,7 @@ func _recluta_aparece() -> void:
 		var t := mapa.create_tween()
 		t.tween_property(recluta, "position", destino, 1.2)
 		await t.finished
+	Sonido.efecto("alerta")
 	await decir("recluta_aparece")
 	await _pelear_con_recluta()
 
@@ -132,6 +133,7 @@ func ejecutar(evento: String, nodo: Node = null) -> void:
 		# --- Refugio Cero ---
 		"mochila":
 			Juego.flags["tiene_mochila"] = true
+			Sonido.efecto("objeto")
 			await decir("mochila")
 			_mision_equipo()
 		"mesa":
@@ -141,10 +143,12 @@ func ejecutar(evento: String, nodo: Node = null) -> void:
 			Juego.flags["reviso_mesa"] = true
 			Juego.dar_objeto("carta_vinculo", 3)
 			Juego.dar_objeto("granada_aturdidora", 1)
+			Sonido.efecto("objeto")
 			await decir("mesa")
 			_mision_equipo()
 		"collar":
 			Juego.flags["tiene_collar"] = true
+			Sonido.efecto("objeto")
 			await decir("collar")
 			_mision_equipo()
 		"cama":
@@ -160,6 +164,7 @@ func ejecutar(evento: String, nodo: Node = null) -> void:
 			if _equipo_listo() < 3:
 				await decir("falta_equipo")
 			else:
+				Sonido.efecto("metal")
 				await mapa.hud.fundido(true, 0.4)
 				Juego.ir_a_mapa(SUPERFICIE, "Escotilla")
 
@@ -168,6 +173,7 @@ func ejecutar(evento: String, nodo: Node = null) -> void:
 			if Juego.flag("refugio_sellado"):
 				await decir("escotilla_sellada")
 			else:
+				Sonido.efecto("metal")
 				await mapa.hud.fundido(true, 0.4)
 				Juego.ir_a_mapa(REFUGIO, "Escalera")
 		"gato_atrapado":

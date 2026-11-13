@@ -21,6 +21,7 @@ var _mostrando_aviso := false
 func _ready() -> void:
 	boton_accion.pressed.connect(func(): accion_pulsada.emit())
 	boton_mochila.pressed.connect(abrir_mochila)
+	boton_mochila.pressed.connect(Sonido.efecto.bind("boton"))
 	panel_mochila.cerrado.connect(func(): set_controles(true))
 	aviso.visible = false
 	actualizar()
@@ -30,6 +31,21 @@ func actualizar() -> void:
 	mision.text = Juego.mision
 	panel_mision.visible = Juego.mision != ""
 	boton_mochila.visible = Juego.flag("tiene_mochila")
+
+
+## Bordes de la pantalla un poco más oscuros: da ambiente y centra la mirada.
+func agregar_vineta() -> void:
+	if has_node("Vineta"):
+		return
+	var v := TextureRect.new()
+	v.name = "Vineta"
+	v.texture = Ambiente.textura_vineta()
+	v.set_anchors_preset(Control.PRESET_FULL_RECT)
+	v.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	v.stretch_mode = TextureRect.STRETCH_SCALE
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(v)
+	move_child(v, 0)
 
 
 ## Muestra u oculta los controles (durante diálogos y menús se ocultan).
@@ -52,7 +68,7 @@ func decir(id_o_lineas) -> void:
 
 func fundido(a_negro: bool, duracion := 0.5) -> void:
 	var t := create_tween()
-	t.tween_property(transicion, "color:a", 1.0 if a_negro else 0.0, duracion)
+	t.tween_property(transicion, "color:a", 1.0 if a_negro else 0.0, duracion).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	await t.finished
 
 
