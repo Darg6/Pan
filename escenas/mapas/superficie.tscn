@@ -50,6 +50,7 @@ criaturas = Array[String](["aves_negras", "bestia_blanca", "oso_de_escoria"])
 nivel_minimo = 1
 nivel_maximo = 3
 probabilidad = 0.12
+fondo = "paramo"
 
 [node name="PastizalBastion" type="Node2D" parent="Zonas"]
 position = Vector2(816, 192)
@@ -59,6 +60,7 @@ criaturas = Array[String](["aves_negras", "oso_de_escoria", "gato_mutado"])
 nivel_minimo = 2
 nivel_maximo = 3
 probabilidad = 0.12
+fondo = "chatarra"
 
 [node name="Disparadores" type="Node2D" parent="."]
 
