@@ -45,13 +45,100 @@ var mensajes_pendientes: Array = []
 var cambiando_escena := false     # true mientras se carga otra escena
 
 
+## Cambia de escena. Si algo falla, muestra el error en pantalla (nunca deja la pantalla en negro).
 func cambiar_escena(ruta: String) -> void:
 	cambiando_escena = true
-	get_tree().change_scene_to_file(ruta)
+	if not ResourceLoader.exists(ruta):
+		_mostrar_error("No encuentro la escena:\n%s" % ruta)
+		return
+	var err := get_tree().change_scene_to_file(ruta)
+	if err != OK:
+		_mostrar_error("No se pudo abrir la escena:\n%s\n(código de error %d)" % [ruta, err])
+		return
+	_escena_pedida = ruta
+	_tiempo_cambio = 0.0
+
+
+# ---------------------------------------------------------------------------
+# Protección contra la pantalla negra
+#  1) Si un cambio de escena no termina en 4 segundos, se muestra el motivo en pantalla.
+#  2) Si un fundido negro (grupo "fundido") se queda tapando la pantalla más de 4 segundos
+#     sin ningún diálogo a la vista, se aclara solo.
+# ---------------------------------------------------------------------------
+const VERSION_MINIMA := [4, 3]
+const ESPERA_MAXIMA := 4.0
+var _escena_pedida := ""
+var _tiempo_cambio := 0.0
+var _tiempo_negro := {}          # fundido -> segundos que lleva tapando la pantalla
+var _capa_error: CanvasLayer = null
+
+
+func _process(delta: float) -> void:
+	# 1) ¿El cambio de escena terminó?
+	if _escena_pedida != "":
+		var actual := get_tree().current_scene
+		if actual != null and actual.scene_file_path == _escena_pedida:
+			_escena_pedida = ""
+		else:
+			_tiempo_cambio += delta
+			if _tiempo_cambio > ESPERA_MAXIMA:
+				_mostrar_error("La escena %s no terminó de cargar." % _escena_pedida)
+				_escena_pedida = ""
+
+	# 2) ¿Algún fundido negro se quedó pegado?
+	var hay_dialogo := false
+	for caja in get_tree().get_nodes_in_group("caja_dialogo"):
+		if caja.is_visible_in_tree():
+			hay_dialogo = true
+	for f in get_tree().get_nodes_in_group("fundido"):
+		var r := f as ColorRect
+		if r == null or not r.is_visible_in_tree() or r.color.a < 0.9 or hay_dialogo or cambiando_escena:
+			_tiempo_negro.erase(f)
+			continue
+		_tiempo_negro[f] = _tiempo_negro.get(f, 0.0) + delta
+		if _tiempo_negro[f] > ESPERA_MAXIMA:
+			push_warning("Un fundido negro se quedó pegado en %s: se aclara solo." % r.get_path())
+			_tiempo_negro.erase(f)
+			r.create_tween().tween_property(r, "color:a", 0.0, 0.4)
+
+
+## Pantalla de error visible (en vez de un negro sin explicación).
+func _mostrar_error(texto: String) -> void:
+	push_error(texto)
+	cambiando_escena = false
+	if _capa_error != null:
+		_capa_error.get_node("Texto").text += "\n\n" + texto
+		return
+	_capa_error = CanvasLayer.new()
+	_capa_error.layer = 128
+	var fondo := ColorRect.new()
+	fondo.color = Color(0.12, 0.05, 0.05, 0.92)
+	fondo.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_capa_error.add_child(fondo)
+	var etiqueta := Label.new()
+	etiqueta.name = "Texto"
+	etiqueta.set_anchors_preset(Control.PRESET_FULL_RECT)
+	etiqueta.offset_left = 16
+	etiqueta.offset_right = -16
+	etiqueta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	etiqueta.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	etiqueta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	etiqueta.text = "Algo falló (el juego no se colgó):\n\n" + texto \
+		+ "\n\nVersión de Godot: %s. Este proyecto necesita Godot 4.3 o más nuevo." % Engine.get_version_info()["string"] \
+		+ "\nCopia este mensaje y la pestaña Salida (Output) de Godot y mándamelo."
+	_capa_error.add_child(etiqueta)
+	add_child(_capa_error)
+
+
+func _version_suficiente() -> bool:
+	var v := Engine.get_version_info()
+	return v["major"] > VERSION_MINIMA[0] or (v["major"] == VERSION_MINIMA[0] and v["minor"] >= VERSION_MINIMA[1])
 
 
 func _ready() -> void:
 	randomize()
+	if not _version_suficiente():
+		_mostrar_error.call_deferred("Tu Godot es muy viejo para este proyecto: los mapas usan TileMapLayer, que existe desde Godot 4.3.\nDescarga Godot 4.3 o más nuevo desde godotengine.org.")
 	criaturas = _leer_json(RUTA_CRIATURAS).get("criaturas", {})
 	dialogos = _leer_json(RUTA_DIALOGOS)
 	var inicial: String = _leer_json(RUTA_CRIATURAS).get("carta_inicial", "")

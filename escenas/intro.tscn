@@ -54,7 +54,7 @@ scale_amount_min = 1.0
 scale_amount_max = 2.0
 color_ramp = SubResource("Ceniza")
 
-[node name="Transicion" type="ColorRect" parent="."]
+[node name="Transicion" type="ColorRect" parent="." groups=["fundido"]]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

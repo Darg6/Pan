@@ -19,6 +19,7 @@ var _activa := false
 
 
 func _ready() -> void:
+	add_to_group("caja_dialogo")
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
