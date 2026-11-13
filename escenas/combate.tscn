@@ -46,23 +46,22 @@ mouse_filter = 2
 texture = ExtResource("2_fondo")
 
 [node name="Entrenador" type="Sprite2D" parent="Escenario"]
-position = Vector2(440, 168)
+position = Vector2(432, 121)
 texture = ExtResource("4_recluta")
 offset = Vector2(0, -24)
 
 [node name="Enemigo" type="Sprite2D" parent="Escenario"]
-position = Vector2(355, 170)
+position = Vector2(340, 127)
 offset = Vector2(0, -32)
 flip_h = true
 
 [node name="Pan" type="Sprite2D" parent="Escenario"]
-position = Vector2(46, 238)
+position = Vector2(56, 186)
 texture = ExtResource("3_pan")
 offset = Vector2(0, -24)
 
 [node name="Aliado" type="Sprite2D" parent="Escenario"]
-position = Vector2(132, 238)
-scale = Vector2(1.2, 1.2)
+position = Vector2(138, 185)
 offset = Vector2(0, -32)
 
 [node name="HUDAliado" type="PanelContainer" parent="."]

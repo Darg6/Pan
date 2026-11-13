@@ -798,92 +798,218 @@ def generar_retratos():
 # ---------------------------------------------------------------------------
 # CRIATURAS (64x64, para el combate)
 # ---------------------------------------------------------------------------
-def criatura(nombre, dibujar, espejo=False):
-    """Todas las criaturas miran a la DERECHA; el juego las voltea cuando son enemigas."""
+def oscurecer(col, f):
+    return (int(col[0] * f), int(col[1] * f), int(col[2] * f), col[3])
+
+def volumen(img, luz=1.18, sombra1=0.62, sombra2=0.8, piso=0.86):
+    """Sombreado de pixel art: borde de luz arriba-izquierda, sombra abajo-derecha
+    (2 niveles, el segundo tramado) y la parte baja del cuerpo un poco más oscura."""
+    w, h = img.size
+    src = img.copy()
+    px = src.load()
+    out = img.load()
+    caja = img.getbbox()
+    if not caja:
+        return img
+    y_piso = caja[1] + (caja[3] - caja[1]) * 0.62
+    def v(x, y):
+        return not (0 <= x < w and 0 <= y < h) or px[x, y][3] == 0
+    for y in range(h):
+        for x in range(w):
+            p = px[x, y]
+            if p[3] == 0:
+                continue
+            f = 1.0
+            if y > y_piso + 2 or (y > y_piso and (x + y) % 2 == 0):
+                f = piso
+            if v(x, y + 1) or v(x + 1, y) or v(x + 1, y + 1):
+                f = sombra1
+            elif (v(x, y + 2) or v(x + 2, y)) and (x + y) % 2 == 0:
+                f = min(f, sombra2)
+            elif v(x, y - 1) or v(x - 1, y):
+                f = luz
+            out[x, y] = (min(255, int(p[0] * f)), min(255, int(p[1] * f)), min(255, int(p[2] * f)), p[3])
+    return img
+
+def contorno_color(img, base=0.32):
+    """Contorno del color del vecino pero muy oscuro (más suave que el negro puro);
+    abajo se usa casi negro para que la figura "pese" sobre el suelo."""
+    w, h = img.size
+    src = img.copy()
+    px = src.load()
+    out = img.load()
+    for y in range(h):
+        for x in range(w):
+            if px[x, y][3] != 0:
+                continue
+            for dx, dy in ((0, -1), (-1, 0), (1, 0), (0, 1)):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < w and 0 <= ny < h and px[nx, ny][3] > 0:
+                    f = 0.22 if dy == -1 else base
+                    out[x, y] = oscurecer(px[nx, ny], f)[:3] + (255,)
+                    break
+    return img
+
+def P(d, pts, col):
+    d.polygon(pts, col)
+
+def criatura(nombre, base, detalles):
+    """Todas las criaturas miran a la DERECHA y apoyan las patas en la fila 60-61.
+    El juego las voltea cuando son enemigas. Formas angulosas (polígonos), sombreado
+    en 2 tonos y contorno de color: pixel art sencillo pero con volumen."""
     img = nuevo(64, 64)
-    dibujar(ImageDraw.Draw(img), img)
-    sombrear(img)
-    contorno(img)
-    if espejo:
-        img = img.transpose(Image.FLIP_LEFT_RIGHT)
+    base(ImageDraw.Draw(img), img)
+    volumen(img)
+    contorno_color(img)
+    detalles(ImageDraw.Draw(img), img)
     guardar(img, f"criaturas/{nombre}.png")
 
-def dib_gato(d, img):
-    morado, morado2 = c("8e6bbf"), c("6c4f99")
-    d.line((14, 40, 6, 26), morado2, 4)            # cola
-    d.line((6, 26, 9, 18), morado2, 3)
-    d.ellipse((12, 30, 46, 54), morado)            # cuerpo
-    d.rectangle((16, 48, 21, 58), morado2)         # patas
-    d.rectangle((36, 48, 41, 58), morado2)
-    d.rectangle((24, 50, 28, 58), morado)
-    d.ellipse((34, 14, 58, 38), morado)            # cabeza
-    d.polygon([(36, 20), (37, 6), (44, 16)], morado2)
-    d.polygon([(48, 16), (55, 6), (56, 20)], morado2)
-    d.polygon([(38, 17), (38, 10), (42, 15)], c("c07ae6"))
-    for (x, y, r) in ((20, 38, 4), (30, 44, 3), (40, 34, 3), (26, 34, 2)):
-        d.ellipse((x - r, y - r, x + r, y + r), TOXICO[0])  # manchas tóxicas
-    d.rectangle((40, 23, 44, 27), c("c6ff3d"))     # ojos
-    d.rectangle((50, 23, 54, 27), c("c6ff3d"))
-    d.line((42, 23, 42, 27), CONTORNO)
-    d.line((52, 23, 52, 27), CONTORNO)
-    d.polygon([(46, 30), (48, 30), (47, 32)], c("e05080"))
-    d.line((44, 34, 50, 34), c("f0f0f0"))          # colmillos
-    for x in (14, 34, 22):
-        d.line((x, 58, x + 3, 58), c("f0f0f0"))    # garras
+# ------------------------------------------------------------- GATO MUTADO
+GM = c("8a63b8"); GM2 = c("5f437f"); GM_V = c("b48ad6")
+def gato_base(d, img):
+    # cola en zigzag (mutada, con púas)
+    P(d, [(15, 40), (8, 34), (5, 25), (9, 17), (6, 11), (10, 9), (13, 16), (10, 24), (12, 32), (18, 36)], GM2)
+    # patas lejanas (más oscuras)
+    P(d, [(18, 46), (23, 46), (23, 57), (20, 59), (17, 59)], GM2)
+    P(d, [(39, 46), (44, 46), (44, 59), (39, 59)], GM2)
+    # cuerpo con el lomo arqueado
+    P(d, [(12, 38), (16, 31), (23, 27), (31, 27), (38, 29), (44, 33), (46, 40), (43, 47), (34, 49), (20, 49), (13, 45)], GM)
+    # púas del lomo
+    for (x, y) in ((19, 29), (25, 27), (31, 27)):
+        P(d, [(x - 2, y + 1), (x + 1, y - 5), (x + 3, y + 1)], GM)
+    # patas cercanas
+    P(d, [(12, 42), (21, 44), (19, 52), (19, 60), (13, 60), (14, 52)], GM)
+    P(d, [(35, 44), (43, 44), (42, 52), (43, 60), (36, 60), (36, 52)], GM)
+    # cabeza
+    P(d, [(38, 22), (42, 17), (51, 16), (57, 19), (60, 25), (59, 31), (53, 35), (44, 35), (38, 30)], GM)
+    # orejas
+    P(d, [(39, 21), (39, 7), (47, 17)], GM)
+    P(d, [(49, 16), (56, 5), (58, 22)], GM)
 
-def dib_bestia(d, img):
-    blanco, blanco2 = c("f2f2f2"), c("d5d8dc")
-    d.rectangle((24, 44, 29, 62), blanco2)        # piernas
-    d.rectangle((35, 44, 40, 62), blanco2)
-    d.polygon([(22, 22), (42, 22), (40, 46), (24, 46)], blanco)  # torso
-    d.line((22, 24, 12, 40), blanco2, 4)          # brazos largos
-    d.line((42, 24, 52, 40), blanco2, 4)
-    d.line((12, 40, 9, 46), blanco, 2)            # garras
-    d.line((52, 40, 56, 46), blanco, 2)
-    d.ellipse((22, 4, 42, 24), blanco)            # cabeza
-    d.polygon([(22, 10), (16, 30), (24, 22)], blanco2)  # melena
-    d.polygon([(42, 10), (48, 30), (40, 22)], blanco2)
-    d.rectangle((26, 12, 30, 15), c("b9e6ff"))    # ojos blancos brillantes
-    d.rectangle((34, 12, 38, 15), c("b9e6ff"))
-    d.point((28, 13), c("ffffff"))
-    d.point((36, 13), c("ffffff"))
+def gato_det(d, img):
+    rosa = c("c97ac9")
+    P(d, [(41, 17), (41, 11), (45, 16)], rosa)          # interior de orejas
+    P(d, [(51, 15), (55, 9), (56, 18)], rosa)
+    # ojos brillantes con pupila rasgada
+    for (x, y) in ((44, 23), (53, 22)):
+        d.rectangle((x, y, x + 3, y + 3), c("d8ff4a"))
+        d.point((x, y), c("f6ffc0"))
+        d.line((x + 2, y, x + 2, y + 3), c("1b161c"))
+    d.line((43, 22, 47, 21), c("3d2a55"))               # ceño fruncido
+    d.line((52, 21, 56, 20), c("3d2a55"))
+    d.point((59, 28), c("e05080"))                      # nariz
+    d.line((52, 32, 58, 31), c("3d2a55"))               # boca
+    d.point((54, 33), c("f4f0e8")); d.point((57, 32), c("f4f0e8"))  # colmillos
+    # manchas tóxicas irregulares (no redondas)
+    for (x, y) in ((20, 35), (29, 41), (37, 34), (15, 52), (40, 54), (24, 30)):
+        P(d, [(x, y - 2), (x + 2, y - 1), (x + 3, y + 1), (x + 1, y + 2), (x - 2, y + 2), (x - 2, y)], TOXICO[1])
+        d.point((x, y - 1), TOXICO[2]); d.point((x + 1, y), TOXICO[0])
+    d.point((31, 44), TOXICO[0]); d.point((31, 45), TOXICO[1])    # goteo
+    # garras
+    for x in (13, 15, 17, 37, 39, 41):
+        d.point((x, 60), c("f4f0e8"))
+    # pelo erizado en el pecho
+    for y in (37, 40, 43):
+        d.point((46, y), GM_V)
 
-def dib_aves(d, img):
-    negro, negro2 = c("2b2733"), c("1f1c26")
-    puestos = [(32, 12), (14, 24), (50, 22), (22, 44), (44, 46)]
-    for i, (x, y) in enumerate(puestos):
-        sube = -4 if i % 2 else 3
-        d.polygon([(x - 12, y + sube), (x, y + 4), (x + 12, y + sube), (x, y)], negro2)
-        d.ellipse((x - 4, y - 3, x + 5, y + 5), negro)
-        d.polygon([(x + 5, y), (x + 9, y + 1), (x + 5, y + 2)], c("8a7a40"))  # pico
-        d.point((x + 2, y), c("ff3b3b"))      # ojo rojo
-        d.line((x - 2, y + 5, x - 5, y + 9), negro2)  # cola
+# ------------------------------------------------------------- BESTIA BLANCA
+BB = c("e9ebee"); BB2 = c("a7adb6"); BB3 = c("c9ced5")
+def bestia_base(d, img):
+    # brazo y pierna lejanos
+    P(d, [(26, 26), (31, 27), (30, 38), (27, 50), (24, 50), (25, 38)], BB2)
+    P(d, [(22, 40), (28, 42), (26, 50), (22, 56), (24, 61), (18, 61), (19, 52)], BB2)
+    # melena de púas hacia atrás (una sola pieza dentada)
+    P(d, [(42, 15), (33, 9), (35, 14), (25, 11), (29, 17), (16, 16), (24, 22), (11, 25), (20, 27), (12, 34), (22, 32), (30, 22)], BB3)
+    # torso encorvado hacia adelante
+    P(d, [(18, 30), (22, 22), (32, 17), (42, 18), (46, 24), (42, 34), (32, 42), (22, 43), (17, 38)], BB)
+    # pierna cercana (digitígrada)
+    P(d, [(28, 38), (36, 38), (37, 46), (33, 52), (36, 60), (39, 61), (29, 61), (29, 53), (31, 46)], BB)
+    # cabeza alargada, mandíbula abierta
+    P(d, [(40, 14), (48, 11), (55, 13), (59, 17), (57, 21), (50, 22), (44, 22), (40, 20)], BB)
+    P(d, [(46, 23), (56, 24), (54, 27), (46, 26)], BB3)
+    # brazo cercano largo que llega casi al suelo
+    P(d, [(38, 24), (44, 25), (48, 36), (51, 48), (48, 50), (44, 38)], BB)
 
-def dib_oso(d, img):
-    escoria, escoria2 = c("5a4e48"), c("433a35")
-    d.ellipse((6, 18, 58, 60), escoria)            # cuerpo enorme
-    d.rectangle((10, 48, 22, 62), escoria2)
-    d.rectangle((40, 48, 52, 62), escoria2)
-    d.ellipse((4, 8, 30, 32), escoria)             # cabeza (mira a la izquierda)
-    d.ellipse((5, 6, 12, 13), escoria2)            # orejas
-    d.ellipse((20, 4, 27, 11), escoria2)
-    d.ellipse((2, 20, 14, 30), c("7a6a60"))        # hocico
-    d.point((4, 23), CONTORNO)
-    d.rectangle((10, 15, 12, 17), c("ff6a1a"))     # ojo de brasa
-    # placas de metal y escoria incrustadas
-    d.polygon([(30, 22), (44, 18), (50, 30), (36, 34)], METAL[0])
-    d.polygon([(38, 36), (54, 34), (52, 46), (40, 46)], OXIDO[1])
-    d.line((32, 24, 46, 21), METAL[4])
-    for (x, y) in ((26, 40), (46, 28), (20, 30)):
-        d.ellipse((x - 2, y - 2, x + 2, y + 2), c("ff8c1a"))  # brasas
-    for x in (8, 12, 16):
-        d.line((x, 62, x, 63), c("e8e0d0"))
+def bestia_det(d, img):
+    d.line((45, 22, 55, 23), c("4a1f2a"))               # boca
+    for x in (47, 50, 53):
+        d.point((x, 23), c("ffffff"))                    # dientes
+    d.rectangle((49, 15, 52, 16), c("7fd8ff"))          # ojo helado
+    d.point((52, 15), c("ffffff"))
+    d.line((47, 14, 52, 13), c("8a9099"))
+    for (x0, y0) in ((49, 50), (51, 50), (25, 50)):
+        d.line((x0, y0, x0 + 1, y0 + 3), c("3a3f47"))   # garras oscuras
+    d.line((36, 61, 41, 61), c("3a3f47"))
+    for y in range(26, 40, 3):                           # costillas marcadas
+        d.line((26, y, 32, y + 1), BB2)
+
+# ------------------------------------------------------------- AVES NEGRAS
+AN = c("2e2a38"); AN2 = c("4a4458"); AN3 = c("1d1a24")
+def un_ave(d, x, y, arriba):
+    # alas angulosas con plumas en sierra
+    if arriba:
+        P(d, [(x - 2, y), (x - 9, y - 9), (x - 6, y - 8), (x - 5, y - 11), (x - 2, y - 8), (x + 1, y - 10), (x + 2, y - 2)], AN2)
+    else:
+        P(d, [(x - 2, y + 1), (x - 11, y + 6), (x - 8, y + 6), (x - 8, y + 9), (x - 4, y + 7), (x - 3, y + 9), (x + 2, y + 3)], AN2)
+    P(d, [(x - 7, y + 1), (x - 3, y - 2), (x + 4, y - 2), (x + 7, y), (x + 4, y + 3), (x - 3, y + 3)], AN)   # cuerpo
+    P(d, [(x - 7, y + 1), (x - 11, y), (x - 11, y + 3), (x - 6, y + 3)], AN3)                                 # cola
+    P(d, [(x + 4, y - 4), (x + 8, y - 4), (x + 9, y - 1), (x + 5, y)], AN)                                    # cabeza
+
+AVES = [(30, 14, True), (14, 28, False), (50, 24, True), (26, 42, True), (46, 46, False)]
+def aves_base(d, img):
+    for (x, y, a) in AVES:
+        un_ave(d, x, y, a)
+
+def aves_det(d, img):
+    for (x, y, a) in AVES:
+        P(d, [(x + 9, y - 3), (x + 13, y - 2), (x + 9, y - 1)], c("b89a4a"))  # pico
+        d.point((x + 7, y - 3), c("ff3b3b"))                                  # ojo rojo
+        d.point((x + 1, y), AN2)
+
+# ------------------------------------------------------------- OSO DE ESCORIA
+OS = c("6a5c55"); OS2 = c("483e39"); OS3 = c("8a7a70")
+def oso_base(d, img):
+    # patas lejanas
+    P(d, [(16, 44), (25, 44), (25, 60), (16, 60)], OS2)
+    P(d, [(44, 44), (52, 44), (53, 60), (45, 60)], OS2)
+    # cuerpo enorme con joroba
+    P(d, [(4, 40), (6, 30), (14, 21), (26, 16), (38, 18), (46, 22), (52, 30), (52, 42), (46, 50), (10, 50), (5, 46)], OS)
+    # patas cercanas, gruesas
+    P(d, [(8, 44), (20, 44), (21, 61), (8, 61)], OS)
+    P(d, [(36, 44), (47, 44), (48, 61), (37, 61)], OS)
+    # cabeza
+    P(d, [(42, 22), (47, 17), (54, 16), (59, 20), (62, 27), (61, 33), (55, 36), (47, 35), (43, 30)], c("7a6a61"))
+    P(d, [(46, 18), (46, 12), (51, 16)], OS)  # oreja
+    P(d, [(55, 26), (62, 26), (63, 32), (57, 34)], OS3)  # hocico
+
+def oso_det(d, img):
+    # placas de metal remachadas
+    P(d, [(14, 24), (28, 19), (32, 30), (17, 34)], METAL[0])
+    d.line((15, 24, 28, 19), METAL[4])
+    d.line((17, 34, 32, 30), METAL[3])
+    for (x, y) in ((17, 26), (27, 22), (29, 29), (19, 32)):
+        d.point((x, y), METAL[4])
+    P(d, [(36, 26), (46, 28), (44, 38), (34, 36)], OXIDO[1])
+    d.line((36, 26, 46, 28), OXIDO[2])
+    # grietas de escoria al rojo vivo
+    for pts in (((8, 38), (13, 40), (17, 37), (22, 41)), ((24, 44), (28, 41), (31, 45)), ((40, 40), (43, 43), (47, 41)), ((10, 50), (13, 54), (12, 58))):
+        d.line(pts, c("ff7a1a"))
+        for p in pts[1:-1]:
+            d.point(p, c("ffd34a"))
+    d.line((43, 29, 47, 35, 55, 36), OS2)                 # separación cabeza / cuello
+    d.rectangle((52, 22, 54, 23), c("ff6a1a"))          # ojo de brasa
+    d.point((54, 22), c("ffe08a"))
+    d.line((50, 21, 55, 20), OS2)
+    d.point((62, 27), CONTORNO); d.point((62, 28), CONTORNO)  # nariz
+    d.line((56, 33, 61, 33), c("2a201c"))
+    for x in (9, 12, 15, 18, 38, 41, 44, 47):
+        d.point((x, 61), c("e8e0d0"))                    # garras
 
 def generar_criaturas():
-    criatura("gato_mutado", dib_gato)
-    criatura("bestia_blanca", dib_bestia)
-    criatura("aves_negras", dib_aves)
-    criatura("oso_de_escoria", dib_oso, espejo=True)
+    criatura("gato_mutado", gato_base, gato_det)
+    criatura("bestia_blanca", bestia_base, bestia_det)
+    criatura("aves_negras", aves_base, aves_det)
+    criatura("oso_de_escoria", oso_base, oso_det)
 
 # ---------------------------------------------------------------------------
 # FONDOS (480x270): combate, cinemática del recuerdo y título
@@ -957,8 +1083,8 @@ def generar_fondo_combate():
     for _ in range(8):  # restos en el suelo
         x, y = rng.randrange(0, W), rng.randrange(hz + 6, hz + 50)
         d.rectangle((x, y, x + rng.randint(4, 12), y + rng.randint(2, 5)), rng.choice([OXIDO[1], METAL[1], CONCRETO[2]]))
-    plataforma(img, 352, 132, 74, 16, rng)
-    plataforma(img, 132, 192, 88, 20, rng)
+    plataforma(img, 340, 124, 66, 12, rng)
+    plataforma(img, 138, 182, 82, 13, rng)
     guardar(img, "fondos/combate_paramo.png")
 
 def silueta_adulto(d, x, y, color, escala=1.0, corriendo=True, falda=False):
@@ -1062,6 +1188,60 @@ def generar_cinematica():
     guardar(img, "cinematica/04_acantilado.png")
 
 # ---------------------------------------------------------------------------
+# EFECTOS DEL COMBATE: sombra bajo los luchadores, chispa de golpe y polvo
+# ---------------------------------------------------------------------------
+def generar_efectos():
+    # Sombra: hace que las criaturas "pisen" el suelo en vez de flotar
+    img = nuevo(44, 8)
+    d = ImageDraw.Draw(img)
+    d.ellipse((0, 0, 43, 7), (20, 12, 10, 90))
+    d.ellipse((6, 1, 37, 6), (20, 12, 10, 140))
+    guardar(img, "efectos/sombra.png")
+
+    # Chispa de impacto: 4 cuadros de 32x32 en una fila (blanca, el juego la tiñe)
+    img = nuevo(128, 32)
+    d = ImageDraw.Draw(img)
+    blanco, amarillo = c("ffffff"), c("fff2a8")
+    # cuadro 0: destello pequeño
+    d.rectangle((14, 14, 17, 17), blanco)
+    d.line((15, 9, 15, 22), amarillo); d.line((10, 15, 21, 15), amarillo)
+    # cuadro 1: estrella grande de 8 puntas
+    cx, cy = 32 + 16, 16
+    for (dx, dy, l) in ((1, 0, 14), (0, 1, 14), (1, 1, 9), (1, -1, 9)):
+        d.line((cx - dx * l, cy - dy * l, cx + dx * l, cy + dy * l), amarillo, 1)
+    d.polygon([(cx, cy - 7), (cx + 3, cy - 3), (cx + 7, cy), (cx + 3, cy + 3), (cx, cy + 7), (cx - 3, cy + 3), (cx - 7, cy), (cx - 3, cy - 3)], blanco)
+    # cuadro 2: anillo de chispas
+    cx = 64 + 16
+    for k in range(10):
+        a = k * math.tau / 10
+        x, y = cx + math.cos(a) * 11, cy + math.sin(a) * 11
+        d.line((x, y, x + math.cos(a) * 3, y + math.sin(a) * 3), blanco if k % 2 else amarillo)
+    d.rectangle((cx - 2, cy - 2, cx + 1, cy + 1), amarillo)
+    # cuadro 3: chispas sueltas apagándose
+    cx = 96 + 16
+    for k in range(8):
+        a = k * math.tau / 8 + 0.3
+        d.point((cx + math.cos(a) * 14, cy + math.sin(a) * 14), amarillo)
+    guardar(img, "efectos/impacto.png")
+
+    # Polvo al aterrizar o caer: 4 cuadros de 32x16
+    img = nuevo(128, 16)
+    d = ImageDraw.Draw(img)
+    for f in range(4):
+        x0 = f * 32
+        abre = 3 + f * 3
+        col = (200, 170, 130, 220 - f * 50)
+        col2 = (150, 120, 90, 220 - f * 50)
+        for lado in (-1, 1):
+            bx = x0 + 16 + lado * abre
+            r = 4 - f // 2
+            d.rectangle((bx - r, 12 - r - f, bx + r, 13 - f // 2), col)
+            d.rectangle((bx - r + 1, 13 - f // 2, bx + r, 14 - f // 2), col2)
+        if f < 2:
+            d.rectangle((x0 + 13, 11, x0 + 18, 14), col)
+    guardar(img, "efectos/polvo.png")
+
+# ---------------------------------------------------------------------------
 # INTERFAZ: paneles 9-slice, botones, joystick
 # ---------------------------------------------------------------------------
 def panel_9slice(nombre, fondo, borde, brillo, remaches=True, tam=24):
@@ -1125,6 +1305,7 @@ if __name__ == "__main__":
     generar_retratos()
     generar_criaturas()
     generar_fondo_combate()
+    generar_efectos()
     generar_cinematica()
     generar_interfaz()
     with open(os.path.join(ARTE, "tiles", "tiles.json"), "w", encoding="utf-8") as f:
