@@ -13,6 +13,16 @@ static func _pixel(tam := 1) -> Texture2D:
 	return ImageTexture.create_from_image(img)
 
 
+## Una rayita horizontal (arena volando con el viento).
+static func _raya() -> Texture2D:
+	var img := Image.create(10, 2, false, Image.FORMAT_RGBA8)
+	for x in 10:
+		var a := float(x + 1) / 10.0   # la cola se desvanece
+		img.set_pixel(x, 0, Color(1, 1, 1, a))
+		img.set_pixel(x, 1, Color(1, 1, 1, a * 0.5))
+	return ImageTexture.create_from_image(img)
+
+
 static func _base(cantidad: int, vida: float, area: Vector2) -> CPUParticles2D:
 	var p := CPUParticles2D.new()
 	p.amount = cantidad
@@ -197,3 +207,28 @@ static func celdas_con_tile(capa: TileMapLayer, nombre: String) -> Array[Vector2
 		if capa.get_cell_atlas_coords(celda) == coords:
 			lista.append(celda)
 	return lista
+
+
+## Tormenta de óxido: ráfagas de polvo naranja que cruzan la pantalla de izquierda a derecha.
+static func tormenta(area: Vector2) -> CPUParticles2D:
+	var p := CPUParticles2D.new()
+	p.amount = 200
+	p.lifetime = 1.6
+	p.preprocess = 1.6
+	p.local_coords = true
+	p.texture = _raya()
+	p.position = Vector2(-20, area.y / 2.0)
+	p.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	p.emission_rect_extents = Vector2(10, area.y / 2.0)
+	p.direction = Vector2(1, 0.12)
+	p.spread = 6
+	p.gravity = Vector2(0, 8)
+	p.initial_velocity_min = 260
+	p.initial_velocity_max = 380
+	p.scale_amount_min = 1.0
+	p.scale_amount_max = 2.0
+	var g := Gradient.new()   # arena clara: se distingue sobre el suelo oxidado
+	g.offsets = PackedFloat32Array([0.0, 0.2, 0.8, 1.0])
+	g.colors = PackedColorArray([Color(1.0, 0.88, 0.66, 0.0), Color(1.0, 0.88, 0.66, 0.9), Color(0.98, 0.72, 0.45, 0.75), Color(0.98, 0.72, 0.45, 0.0)])
+	p.color_ramp = g
+	return p

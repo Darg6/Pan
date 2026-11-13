@@ -11,10 +11,28 @@ const AUMENTO_STATS_POR_NIVEL := 0.15  # +15% de stats por nivel (GDD)
 ## Pon esto en true para saltarte el prólogo mientras pruebas (empiezas en la superficie con un Gato).
 const SALTAR_PROLOGO := false
 
-const NOMBRES_OBJETOS := {
-	"carta_vinculo": "Carta de Vínculo",
-	"granada_aturdidora": "Granada Aturdidora",
+## Objetos de la mochila. "precio" es lo que cuesta en las tiendas de las ciudades (0 = no se vende)
+## y "max" es cuánto cabe en los bolsillos de la mochila (Regla B del GDD: la mochila tiene límite).
+const OBJETOS := {
+	"cura_40": { "nombre": "Cura 40%", "tipo": "cura", "valor": 0.4, "precio": 15, "max": 10,
+		"desc": "Jeringa purificada. Devuelve el 40% de la vida a una carta." },
+	"cura_50": { "nombre": "Cura 50%", "tipo": "cura", "valor": 0.5, "precio": 20, "max": 10,
+		"desc": "Suero de la ciudad. Devuelve el 50% de la vida." },
+	"cura_80": { "nombre": "Cura 80%", "tipo": "cura", "valor": 0.8, "precio": 100, "max": 10,
+		"desc": "Medicina de antes del colapso. Devuelve el 80% de la vida." },
+	"potenciador_20": { "nombre": "Potenciador 20%", "tipo": "potenciador", "valor": 0.2, "precio": 30, "max": 3,
+		"desc": "Sube el ataque de tu criatura un 20% durante el combate." },
+	"potenciador_70": { "nombre": "Potenciador 70%", "tipo": "potenciador", "valor": 0.7, "precio": 80, "max": 3,
+		"desc": "Sube el ataque de tu criatura un 70% durante el combate." },
+	"racion": { "nombre": "Piña en lata", "tipo": "comida", "valor": 0.6, "precio": 50, "max": 5,
+		"desc": "Comida purificada. Devuelve el 60% de la vida." },
+	"carta_vinculo": { "nombre": "Carta de Vínculo", "tipo": "captura", "precio": 10, "max": 20,
+		"desc": "Carta vacía para capturar criaturas debilitadas." },
+	"granada_aturdidora": { "nombre": "Granada Aturdidora", "tipo": "granada", "precio": 0, "max": 5,
+		"desc": "Aturde a una criatura y baja su vida a la zona roja." },
 }
+## Lo que pagan los mercaderes por cada Reliquia del Viejo Mundo (cables, placas, relojes...).
+const PRECIO_RELIQUIA := 10
 
 ## Datos de todas las criaturas (datos/criaturas.json). Clave = id ("gato_mutado").
 var criaturas: Dictionary = {}
@@ -27,7 +45,16 @@ var mochila: Array = []
 ## Objetos consumibles: id -> cantidad
 var objetos := { "carta_vinculo": 0, "granada_aturdidora": 0 }
 var monedas := 0
-var chatarra := 0
+var chatarra := 0                 # Reliquias del Viejo Mundo (solo sirven para venderlas)
+## Partes de criaturas salvajes derrotadas (id -> cantidad). Se venden en las tiendas.
+var partes: Dictionary = {}
+## "Fuerzas" que te dan las ciudades liberadas: tus criaturas pegan más fuerte (0.1 = +10%).
+var bonus_ataque := 0.0
+## Misiones secundarias: id -> { "titulo": ..., "estado": "activa" | "completa" }
+var misiones: Dictionary = {}
+## true mientras sopla una tormenta de óxido en el mapa actual (Bastión de Óxido)
+var tormenta := false
+var tiempo_clima := 0.0           # segundos desde el último cambio de clima
 
 ## Banderas de la historia: qué ya pasó. Ej: flags["tiene_mochila"] = true
 var flags: Dictionary = {}
@@ -135,7 +162,7 @@ func _mostrar_error(texto: String) -> void:
 # Autodiagnóstico al iniciar: revisa que el tema, los tilesets y los mapas carguen bien.
 # Si algo falla, lo muestra en pantalla (y en la pestaña Salida) en vez de dejar todo negro.
 # ---------------------------------------------------------------------------
-const MAPAS := ["res://escenas/mapas/refugio_cero.tscn", "res://escenas/mapas/superficie.tscn"]
+const MAPAS := ["res://escenas/mapas/refugio_cero.tscn", "res://escenas/mapas/superficie.tscn", "res://escenas/mapas/bastion_oxido.tscn"]
 
 func _autodiagnostico() -> void:
 	var problemas: Array[String] = []
@@ -306,12 +333,19 @@ func crear_luchador(id: String, nivel: int, hp_actual: int = -1) -> Dictionary:
 		"defensa": s["defensa"],
 		"velocidad": s["velocidad"],
 		"evasion": s["evasion"],
+		"tipo": c.get("tipo", "feral"),
 		"debil_a": c.get("debil_a", []),
 		"resiste": c.get("resiste", []),
+		"inmune": c.get("inmune", []),
+		"pasiva": c.get("pasiva", ""),
+		"ataque_base": s["ataque"],
+		"defensa_base": s["defensa"],
 		"ia": c.get("ia", "agresivo"),
 		"facilidad_captura": float(c.get("facilidad_captura", 0.7)),
 		"movimientos": movimientos(id, nivel),
 		"infectado": false,
+		"paralizado": 0,
+		"bajo_tierra": false,
 	}
 
 
@@ -369,7 +403,7 @@ func _importacion_vieja(ruta: String) -> bool:
 	return str(md5.get_value("", "source_md5", "")) != FileAccess.get_md5(ruta)
 
 
-## Cada Sprite2D / TextureRect que aparece en pantalla usa la versión al día de su PNG.
+## Cada Sprite2D / TextureRect / mapa de tiles que aparece en pantalla usa la versión al día de su PNG.
 func _al_agregar_nodo(nodo: Node) -> void:
 	if nodo is Sprite2D or nodo is TextureRect:
 		var t: Texture2D = nodo.texture
@@ -377,6 +411,14 @@ func _al_agregar_nodo(nodo: Node) -> void:
 			var fresca := _textura_fresca(t.resource_path)
 			if fresca != null:
 				nodo.texture = fresca
+	elif nodo is TileMapLayer and nodo.tile_set != null:
+		var ts: TileSet = nodo.tile_set
+		for k in ts.get_source_count():
+			var fuente := ts.get_source(ts.get_source_id(k)) as TileSetAtlasSource
+			if fuente != null and fuente.texture != null and fuente.texture.resource_path.ends_with(".png"):
+				var fresca := _textura_fresca(fuente.texture.resource_path)
+				if fresca != null:
+					fuente.texture = fresca
 
 
 # ---------------------------------------------------------------------------
@@ -441,8 +483,24 @@ func hay_cartas_heridas() -> bool:
 	return false
 
 
-func dar_objeto(id: String, cantidad: int = 1) -> void:
-	objetos[id] = objetos.get(id, 0) + cantidad
+## Guarda objetos en la mochila sin pasarse del límite. Devuelve cuántos cupieron.
+func dar_objeto(id: String, cantidad: int = 1) -> int:
+	var tope := max_objeto(id)
+	var antes: int = objetos.get(id, 0)
+	objetos[id] = mini(antes + cantidad, tope)
+	return objetos[id] - antes
+
+
+func nombre_objeto(id: String) -> String:
+	return OBJETOS.get(id, {}).get("nombre", id)
+
+
+func max_objeto(id: String) -> int:
+	return int(OBJETOS.get(id, {}).get("max", 99))
+
+
+func tipo_objeto(id: String) -> String:
+	return OBJETOS.get(id, {}).get("tipo", "")
 
 
 func tiene_objeto(id: String) -> bool:
@@ -451,3 +509,104 @@ func tiene_objeto(id: String) -> bool:
 
 func usar_objeto(id: String) -> void:
 	objetos[id] = maxi(0, objetos.get(id, 0) - 1)
+
+
+# ---------------------------------------------------------------------------
+# Economía (GDD): comprar en la tienda, vender reliquias, partes y cartas
+# ---------------------------------------------------------------------------
+
+## Compra un objeto. Devuelve "" si salió bien, o el motivo si no se pudo.
+func comprar(id: String) -> String:
+	var precio := int(OBJETOS[id]["precio"])
+	if objetos.get(id, 0) >= max_objeto(id):
+		return "Tu mochila no tiene espacio para más (máx. %d)." % max_objeto(id)
+	if monedas < precio:
+		return "No te alcanza: cuesta %d monedas y tienes %d." % [precio, monedas]
+	monedas -= precio
+	dar_objeto(id, 1)
+	return ""
+
+
+## Datos de una parte de criatura ({ "nombre", "precio" }), buscándola en criaturas.json.
+func info_parte(id_parte: String) -> Dictionary:
+	for id in criaturas:
+		var p: Dictionary = criaturas[id].get("parte", {})
+		if p.get("id", "") == id_parte:
+			return p
+	return { "nombre": id_parte, "precio": 5 }
+
+
+func valor_partes() -> int:
+	var total := 0
+	for id in partes:
+		total += int(info_parte(id)["precio"]) * int(partes[id])
+	return total
+
+
+## Vende todas las reliquias y partes. Devuelve las monedas ganadas.
+func vender_botin() -> int:
+	var total := chatarra * PRECIO_RELIQUIA + valor_partes()
+	monedas += total
+	chatarra = 0
+	partes.clear()
+	return total
+
+
+func precio_carta(id: String) -> int:
+	return int(criaturas[id].get("valor", 20))
+
+
+## ¿Se puede vender una carta de esta fila de la mochila? (siempre te queda al menos una criatura)
+func puede_vender_carta(i: int) -> bool:
+	return i < mochila.size() and (mochila[i]["cantidad"] > 1 or mochila.size() > 1)
+
+
+## Vende UNA carta (un duplicado). Si era la última de esa criatura, la criatura se va.
+func vender_carta(i: int) -> int:
+	if not puede_vender_carta(i):
+		return 0
+	var carta: Dictionary = mochila[i]
+	var precio := precio_carta(carta["id"])
+	monedas += precio
+	if carta["cantidad"] > 1:
+		carta["cantidad"] -= 1
+		carta["hp"] = mini(carta["hp"], hp_max_carta(carta))
+	else:
+		mochila.remove_at(i)
+	return precio
+
+
+## Usa una cura o comida fuera de combate en una carta. Devuelve un texto con lo que pasó.
+func usar_en_carta(id: String, i: int) -> String:
+	var carta: Dictionary = mochila[i]
+	var nombre: String = criaturas[carta["id"]]["nombre"]
+	var hp_max := hp_max_carta(carta)
+	if carta["hp"] <= 0:
+		return "La carta de %s está rota. Solo se repara durmiendo en una ciudad." % nombre
+	if carta["hp"] >= hp_max:
+		return "%s ya tiene toda su vida." % nombre
+	if not tiene_objeto(id):
+		return "No te queda %s." % nombre_objeto(id)
+	var cura := maxi(1, roundi(hp_max * float(OBJETOS[id]["valor"])))
+	var antes: int = carta["hp"]
+	carta["hp"] = mini(hp_max, carta["hp"] + cura)
+	usar_objeto(id)
+	return "%s recupera %d de vida." % [nombre, carta["hp"] - antes]
+
+
+func mision_activa(id: String) -> bool:
+	return misiones.get(id, {}).get("estado", "") == "activa"
+
+
+func mision_completa(id: String) -> bool:
+	return misiones.get(id, {}).get("estado", "") == "completa"
+
+
+func empezar_mision(id: String, titulo: String) -> void:
+	if not misiones.has(id):
+		misiones[id] = { "titulo": titulo, "estado": "activa" }
+
+
+func completar_mision(id: String) -> void:
+	if misiones.has(id):
+		misiones[id]["estado"] = "completa"

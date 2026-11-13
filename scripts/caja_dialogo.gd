@@ -66,6 +66,8 @@ func _mostrar_linea(linea: Dictionary) -> void:
 	var tono := 1.25 if quien == "Pan" else (1.0 if quien != "" else 0.85)
 	var ultimo_sonido := 0
 	while _escribiendo and texto.visible_characters < total:
+		if not is_inside_tree():
+			return   # la escena cambió en medio del diálogo
 		await get_tree().process_frame
 		t += get_process_delta_time()
 		texto.visible_characters = int(t * LETRAS_POR_SEGUNDO)

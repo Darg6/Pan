@@ -44,8 +44,10 @@ func _actualizar_sprite() -> void:
 		return
 	if _sprite == null:
 		_sprite = Sprite2D.new()
+		_sprite.texture = textura   # antes de add_child: así se usa el PNG al día (Juego._al_agregar_nodo)
 		add_child(_sprite)
-	_sprite.texture = textura
+	else:
+		_sprite.texture = textura
 	if textura != null:
 		# Los personajes (24 px de alto) se apoyan en los pies; los objetos se centran.
 		_sprite.offset = Vector2(0, -9) if textura.get_height() > 16 else Vector2.ZERO

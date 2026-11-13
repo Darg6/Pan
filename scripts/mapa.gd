@@ -68,6 +68,18 @@ func _ready() -> void:
 
 	refrescar()
 	_preparar_ambiente()
+	_velocidad_pan = pan.velocidad
+	if _hay_tormentas():
+		var pantalla := get_viewport_rect().size / zoom_camara
+		_polvo_tormenta = Ambiente.tormenta(pantalla)
+		_polvo_tormenta.position = Vector2(-pantalla.x / 2.0 - 20.0, 0)
+		_polvo_tormenta.z_index = 25
+		pan.get_node("Camara").add_child(_polvo_tormenta)
+		poner_tormenta(Juego.tormenta)
+	else:
+		Juego.tormenta = false
+	Historia.mapa = self
+	ocupado = true   # nadie interactúa hasta que la historia revise este mapa
 	hud.transicion.color.a = 1.0
 	await hud.fundido(false, 0.5)
 	await correr(Historia.al_entrar_mapa.bind(self))
@@ -100,7 +112,45 @@ const AMBIENTACION := {
 		"luces": { "generador": Color(0.45, 1.0, 0.55), "escalera": Color(1.0, 0.85, 0.6) } },
 	"superficie": { "musica": "paramo", "ambiente": "viento", "tinte": Color(1.0, 0.9, 0.8), "particulas": "ceniza",
 		"luces": { "fogata": Color(1.0, 0.6, 0.25) } },
+	"bastion_oxido": { "musica": "bastion", "ambiente": "ciudad", "tinte": Color(1.0, 0.88, 0.76), "particulas": "ceniza",
+		"luces": { "fogata": Color(1.0, 0.6, 0.25), "farol": Color(1.0, 0.78, 0.4) }, "tormentas": true },
 }
+
+# ---------------------------------------------------------------------------
+# Tormentas de óxido (mecánica de Bastión de Óxido): cada cierto tiempo el viento levanta
+# polvo oxidado. Pan camina más lento, se ve menos, aparecen más bestias de chatarra y en
+# combate todos fallan más (menos la chatarra) y el óxido raspa la vida al final del turno.
+# ---------------------------------------------------------------------------
+const CLIMA_CALMA := 45.0
+const CLIMA_TORMENTA := 20.0
+var _polvo_tormenta: CPUParticles2D
+var _velocidad_pan := 70.0
+
+
+func _hay_tormentas() -> bool:
+	return AMBIENTACION.get(nombre_mapa, {}).get("tormentas", false)
+
+
+func _clima(delta: float) -> void:
+	if not _hay_tormentas() or ocupado:
+		return
+	Juego.tiempo_clima += delta
+	if Juego.tiempo_clima >= (CLIMA_TORMENTA if Juego.tormenta else CLIMA_CALMA):
+		Juego.tiempo_clima = 0.0
+		poner_tormenta(not Juego.tormenta, true)
+
+
+func poner_tormenta(activa: bool, avisar := false) -> void:
+	Juego.tormenta = activa and _hay_tormentas()
+	hud.set_tormenta(Juego.tormenta)
+	if _polvo_tormenta:
+		_polvo_tormenta.emitting = Juego.tormenta
+		_polvo_tormenta.visible = Juego.tormenta
+	pan.velocidad = _velocidad_pan * (0.7 if Juego.tormenta else 1.0)
+	var a: Dictionary = AMBIENTACION.get(nombre_mapa, {})
+	Sonido.ambiente("tormenta" if Juego.tormenta else a.get("ambiente", ""))
+	if avisar:
+		hud.mostrar_aviso("¡Tormenta de óxido! Las bestias de chatarra salen a cazar." if Juego.tormenta else "La tormenta de óxido se calma.")
 
 
 func _preparar_ambiente() -> void:
@@ -134,9 +184,10 @@ func refrescar() -> void:
 
 
 func _process(_delta: float) -> void:
-	if ocupado or hud.panel_mochila.visible:
+	_clima(_delta)
+	if ocupado or hud.menu_abierto():
 		_exclamacion.visible = false
-		pan.puede_moverse = not ocupado and not hud.panel_mochila.visible
+		pan.puede_moverse = not ocupado and not hud.menu_abierto()
 		return
 	pan.puede_moverse = true
 	var cercano = _interactuable_cercano()
@@ -175,7 +226,7 @@ func _interactuable_cercano():
 
 
 func interactuar() -> void:
-	if ocupado or hud.panel_mochila.visible:
+	if ocupado or hud.menu_abierto():
 		return
 	var nodo = _interactuable_cercano()
 	if nodo != null:
@@ -205,7 +256,7 @@ func _on_paso_dado() -> void:
 				_aviso_sin_cartas = true
 				correr(hud.decir.bind("sin_cartas_vivas"))
 			return
-		if randf() < zona.probabilidad:
+		if randf() < zona.probabilidad * (1.6 if Juego.tormenta else 1.0):
 			correr(iniciar_combate.bind(zona.elegir_encuentro()))
 		return
 

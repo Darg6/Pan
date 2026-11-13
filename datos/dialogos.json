@@ -384,10 +384,6 @@
 			"quien": "Pan",
 			"retrato": "pan",
 			"texto": "Rictus está ahí dentro. El primero de seis."
-		},
-		{
-			"quien": "",
-			"texto": "(Continuará: Bastión de Óxido llegará en la próxima versión.)"
 		}
 	],
 	"sin_cartas_vivas": [
@@ -405,6 +401,815 @@
 		{
 			"quien": "",
 			"texto": "Sus cartas se repararon mientras dormía."
+		}
+	],
+	"bastion_llegada": [
+		{
+			"quien": "",
+			"texto": "Bastión de Óxido. Un viejo puerto seco, lleno de barcos encallados y casas hechas de contenedores apilados."
+		},
+		{
+			"quien": "",
+			"texto": "En el centro, una trituradora enorme muerde metal día y noche. La gente hace fila frente a un tanque de agua, con la ropa negra de hollín."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Aquí la gente no vive. Aguanta."
+		}
+	],
+	"rictus_tanque": [
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "¡Abran paso, sacos de huesos! ¿Quién de ustedes no pagó la cuota de hoy?"
+		},
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "Señor Rictus... traje lo que pude. Mi nieta Lía está enferma, solo necesito un balde de agua."
+		},
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "¿\"Lo que pudiste\"? Esto no alcanza ni para un vaso. El agua es del Benefactor, vieja. Y el Benefactor cobra en chatarra."
+		}
+	],
+	"rictus_patea": [
+		{
+			"quien": "",
+			"texto": "Rictus patea el balde. El agua se pierde entre el óxido del suelo."
+		},
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "¡No! Era todo lo que teníamos..."
+		},
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "Mañana traes el doble. O mi Titán aplasta tu contenedor con tu nieta adentro."
+		}
+	],
+	"rictus_a_pan": [
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "¿Y tú qué miras, enano? No te había visto. ¿Vienes a pagar la cuota de la vieja?"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Vengo por ti."
+		},
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "¡JA! ¿Oyeron eso? ¡El niño quiere pelear!"
+		},
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "Mira, mocoso, te ahorro el viaje: mi trono está en el puerto, al final de la Avenida del Impuesto. Si llegas vivo, te dejo intentarlo."
+		},
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "Y escóndete bien esas monedas. Aquí todo me pertenece."
+		}
+	],
+	"odila_tras_rictus": [
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "Niño... no te le acerques. Ese hombre aplasta casas con su Titán por un puñado de tuercas."
+		},
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "Si necesitas dónde dormir, mi posada está al suroeste. No es mucho: cartones y una manta. Pero es tuyo."
+		}
+	],
+	"pan_prepararse": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Rictus tiene criaturas fuertes. Si voy así nomás, me va a triturar."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Primero tengo que prepararme: comprar suministros con Mila, entrenar mis cartas en el vertedero o en las dunas... y ayudar a esta gente."
+		},
+		{
+			"quien": "",
+			"texto": "Consejo: en Bastión hay muchas cosas para investigar. Acércate y pulsa A cuando veas el \"!\"."
+		}
+	],
+	"odila_pide": [
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "Lía tiene fiebre desde hace tres días. Necesita agua limpia, no la que sale de las cañerías del vertedero."
+		},
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "El guardia del tanque acepta Reliquias del Viejo Mundo como pago. Con 3 Reliquias me daría agua para toda la semana."
+		},
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "Las encuentras en la chatarra de la ciudad, en el buque y en las dunas... Por favor, niño. Yo ya no puedo caminar tanto."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Te las traigo. Lo prometo."
+		}
+	],
+	"odila_gracias": [
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "¡Tres Reliquias! Ya mismo voy al tanque..."
+		},
+		{
+			"quien": "",
+			"texto": "Un rato después, Lía bebe agua limpia. El color le vuelve a la cara."
+		},
+		{
+			"quien": "Lía",
+			"retrato": "lia",
+			"texto": "Gracias, chico del collar. El agua sabe a lluvia."
+		},
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "No tengo mucho, pero toma esto. Y la cama de la posada es tuya cuando quieras, sin pagar."
+		}
+	],
+	"odila_despues": [
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "Lía ya se levanta sola. Hace mucho que no la oía reír."
+		},
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "Ten cuidado con Rictus. Su Titán aguanta los golpes como si nada... dicen que solo la electricidad y el agua lo oxidan."
+		}
+	],
+	"odila_despues_libre": [
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "El tanque está abierto para todos. Agua para cada familia, sin cuota. ¿Te das cuenta de lo que hiciste?"
+		}
+	],
+	"odila_libre": [
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "Ya no necesito tus Reliquias, niño. El tanque es de todos ahora y Lía ya bebió hasta cansarse."
+		},
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "Gracias por pensar en nosotras. La posada siempre será tu casa."
+		}
+	],
+	"lia_enferma": [
+		{
+			"quien": "",
+			"texto": "Una niña tiembla bajo una manta de cartón. Tiene la frente caliente."
+		},
+		{
+			"quien": "Lía",
+			"retrato": "lia",
+			"texto": "*cof cof*... ¿Eres de afuera? Mi abuela dice que afuera el cielo es más oscuro todavía..."
+		}
+	],
+	"lia_sana": [
+		{
+			"quien": "Lía",
+			"retrato": "lia",
+			"texto": "¡Ya no me duele nada! Cuando sea grande voy a capturar una Bailarina Eléctrica, como tú."
+		},
+		{
+			"quien": "Lía",
+			"retrato": "lia",
+			"texto": "Las Bailarinas viven entre las torres eléctricas de las dunas. Dicen que bailan cuando cae la tormenta."
+		}
+	],
+	"lia_libre": [
+		{
+			"quien": "Lía",
+			"retrato": "lia",
+			"texto": "¡Hoy me tomé tres vasos de agua! ¿Te vas a ir a otra ciudad? Llévale agua a la gente de allá también."
+		}
+	],
+	"cama_posada": [
+		{
+			"quien": "",
+			"texto": "Pagas 5 monedas a la posada. Duermes sobre cartones, escuchando la trituradora a lo lejos."
+		},
+		{
+			"quien": "",
+			"texto": "Tus cartas de criaturas se repararon."
+		}
+	],
+	"cama_posada_gratis": [
+		{
+			"quien": "",
+			"texto": "Odila te guardó la mejor manta. Duermes tranquilo por primera vez en días."
+		},
+		{
+			"quien": "",
+			"texto": "Tus cartas de criaturas se repararon."
+		}
+	],
+	"cama_posada_fiada": [
+		{
+			"quien": "",
+			"texto": "No te alcanza para pagar, pero Odila te deja dormir igual. \"Ya me pagarás, niño.\""
+		},
+		{
+			"quien": "",
+			"texto": "Tus cartas de criaturas se repararon."
+		}
+	],
+	"mila": [
+		{
+			"quien": "Mila",
+			"retrato": "mila",
+			"texto": "Psst. Entra rápido, que los guardias de Rictus revisan quién compra."
+		},
+		{
+			"quien": "Mila",
+			"retrato": "mila",
+			"texto": "Tengo curas, potenciadores y comida. También te compro Reliquias, partes de criaturas... y si te sobran cartas, las vendo en el Mercado de Bestias."
+		},
+		{
+			"quien": "Mila",
+			"retrato": "mila",
+			"texto": "Un consejo gratis: no lleves todo tu dinero encima. Aquí las monedas desaparecen."
+		}
+	],
+	"mila_libre": [
+		{
+			"quien": "Mila",
+			"retrato": "mila",
+			"texto": "¡El héroe de Bastión! Ya no tengo que esconder la mercancía. Pasa, pasa."
+		}
+	],
+	"bruno_pide": [
+		{
+			"quien": "Bruno",
+			"retrato": "bruno",
+			"texto": "¿Tú eres el niño que le habló así a Rictus? Estás loco... me caes bien."
+		},
+		{
+			"quien": "Bruno",
+			"retrato": "bruno",
+			"texto": "Yo arreglaba la grúa del puerto, la de las dunas del este. Unas Aves Negras hicieron un nido arriba y no me dejan acercarme."
+		},
+		{
+			"quien": "Bruno",
+			"retrato": "bruno",
+			"texto": "Mi caja de herramientas quedó allá. Sin ella no puedo trabajar y sin trabajo no pago la cuota. ¿Me ayudas?"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Voy a la grúa."
+		}
+	],
+	"bruno_espera": [
+		{
+			"quien": "Bruno",
+			"retrato": "bruno",
+			"texto": "La grúa está pasando el muro del este, en las dunas. Cuidado con los Gusanos: se meten bajo la arena y no los puedes golpear."
+		}
+	],
+	"bruno_gracias": [
+		{
+			"quien": "Bruno",
+			"retrato": "bruno",
+			"texto": "¡Mi caja! ¡Y las Aves se fueron! Eres un salvavidas, niño."
+		},
+		{
+			"quien": "Bruno",
+			"retrato": "bruno",
+			"texto": "Escucha, yo he visto pelear al Titán de Chatarra de Rictus. Te digo lo que sé:"
+		},
+		{
+			"quien": "Bruno",
+			"retrato": "bruno",
+			"texto": "No le afectan las infecciones y aguanta los zarpazos como una pared. Pero la electricidad y el agua lo oxidan por dentro."
+		},
+		{
+			"quien": "Bruno",
+			"retrato": "bruno",
+			"texto": "Las Bailarinas Eléctricas viven entre las torres de las dunas. Si consigues una... ese Titán va a temblar."
+		}
+	],
+	"bruno_despues": [
+		{
+			"quien": "Bruno",
+			"retrato": "bruno",
+			"texto": "Con la grúa funcionando puedo sacar chatarra del barco sin arriesgar el pellejo. Gracias otra vez."
+		}
+	],
+	"bruno_despues_libre": [
+		{
+			"quien": "Bruno",
+			"retrato": "bruno",
+			"texto": "¿Sabes qué voy a hacer con la grúa ahora? Levantar techos. Techos de verdad, para todos."
+		}
+	],
+	"bruno_pide_libre": [
+		{
+			"quien": "Bruno",
+			"retrato": "bruno",
+			"texto": "¡El héroe! Oye, ya que estás... unas Aves Negras se metieron en mi grúa, en las dunas del este. Mi caja de herramientas quedó allá. ¿Me ayudas?"
+		}
+	],
+	"nido": [
+		{
+			"quien": "",
+			"texto": "En lo alto de la grúa oxidada hay un nido de cables y plumas negras."
+		},
+		{
+			"quien": "",
+			"texto": "¡Un Ave Negra enorme se lanza en picada a defenderlo!"
+		}
+	],
+	"nido_libre": [
+		{
+			"quien": "",
+			"texto": "Las Aves Negras se alejan graznando. Junto a la grúa quedó una caja de herramientas."
+		}
+	],
+	"nido_vacio": [
+		{
+			"quien": "",
+			"texto": "El nido está vacío. La grúa cruje con el viento."
+		}
+	],
+	"caja_bruno": [
+		{
+			"quien": "",
+			"texto": "Una caja de herramientas pesada. Tiene grabado el nombre \"BRUNO\"."
+		}
+	],
+	"rosa": [
+		{
+			"quien": "Rosa",
+			"retrato": "rosa",
+			"texto": "Ese mural lo pintaron dos viajeros hace muchos años, cuando Bastión todavía era un puerto de verdad."
+		},
+		{
+			"quien": "Rosa",
+			"retrato": "rosa",
+			"texto": "Un hombre y una mujer. Ella llevaba un collar igualito al tuyo. Pintaron un gato, una mariposa... y un bebé en medio."
+		},
+		{
+			"quien": "Rosa",
+			"retrato": "rosa",
+			"texto": "Decían que algún día los humanos y las criaturas vivirían juntos sin hacerse daño. Yo me reí de ellos."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "..."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Mamá. Papá."
+		},
+		{
+			"quien": "Rosa",
+			"retrato": "rosa",
+			"texto": "¿Eran tus...? Ay, niño. Toma, ellos me dejaron esto para pagar la pintura. Creo que es tuyo."
+		},
+		{
+			"quien": "",
+			"texto": "Rosa te dio 2 Cartas de Vínculo."
+		}
+	],
+	"rosa_despues": [
+		{
+			"quien": "Rosa",
+			"retrato": "rosa",
+			"texto": "Ahora que lo pienso, tus ojos... ninguno de los dos los tenía verdes. Qué curioso."
+		}
+	],
+	"rosa_despues_libre": [
+		{
+			"quien": "Rosa",
+			"retrato": "rosa",
+			"texto": "Voy a retocar el mural. Esta vez le pinto a un niño con collar, de pie frente a una trituradora apagada."
+		}
+	],
+	"tavo": [
+		{
+			"quien": "Tavo",
+			"retrato": "tavo",
+			"texto": "Soy chatarrero. Paso más horas en el vertedero que en mi casa."
+		},
+		{
+			"quien": "Tavo",
+			"retrato": "tavo",
+			"texto": "Fíjate en el cielo: cuando sopla la tormenta de óxido, todo se pone naranja. Caminas más lento y las criaturas salen el doble."
+		},
+		{
+			"quien": "Tavo",
+			"retrato": "tavo",
+			"texto": "En la tormenta, las bestias que no son de chatarra pierden vida cada turno y fallan más. A las de chatarra, en cambio, no les hace ni cosquillas."
+		},
+		{
+			"quien": "Tavo",
+			"retrato": "tavo",
+			"texto": "Y el Enjambre Mecánico solo sale del vertedero cuando hay tormenta. Si quieres uno, ese es el momento."
+		},
+		{
+			"quien": "Tavo",
+			"retrato": "tavo",
+			"texto": "Ah, y en las dunas: el Gusano Devorador vive bajo tierra. La electricidad no le hace nada. Nada."
+		}
+	],
+	"tavo_libre": [
+		{
+			"quien": "Tavo",
+			"retrato": "tavo",
+			"texto": "Ahora lo que saco del vertedero es mío. ¡Mío! Voy a construirle una ventana a mi contenedor."
+		}
+	],
+	"vecino_cola": [
+		{
+			"quien": "Vecino",
+			"retrato": "ciudadano",
+			"texto": "*susurra* Oye, niño. Esconde tus monedas. Si un guardia las ve, son de Rictus."
+		},
+		{
+			"quien": "Vecino",
+			"retrato": "ciudadano",
+			"texto": "Llevo desde el amanecer en esta fila. Si no junto la cuota hoy, me quitan la ración de agua."
+		}
+	],
+	"vecino_cola_libre": [
+		{
+			"quien": "Vecino",
+			"retrato": "ciudadano",
+			"texto": "¡Ya no hay fila! Agua para todos. Todavía no me lo creo."
+		}
+	],
+	"vecina_cola": [
+		{
+			"quien": "Vecina",
+			"texto": "La semana pasada no cumplimos la cuota. El Titán de Rictus aplastó nuestro contenedor... con todo adentro."
+		},
+		{
+			"quien": "Vecina",
+			"texto": "Ahora dormimos en el buque. Hace frío, pero al menos el barco no lo puede aplastar."
+		}
+	],
+	"vecina_cola_libre": [
+		{
+			"quien": "Vecina",
+			"texto": "Bruno dice que nos va a ayudar a levantar una casa nueva. Gracias, niño."
+		}
+	],
+	"guardia_puerta": [
+		{
+			"quien": "Guardia",
+			"retrato": "recluta",
+			"texto": "Entra y sale lo que quieras, mocoso. Igual nadie se escapa de Bastión."
+		},
+		{
+			"quien": "Guardia",
+			"retrato": "recluta",
+			"texto": "Para ver a Rictus, sube por la avenida. Mis compañeros te van a cobrar el peaje."
+		}
+	],
+	"inv_trituradora": [
+		{
+			"quien": "",
+			"texto": "La trituradora ruge. Un cartel oxidado dice: \"CUOTA DIARIA: 20 KG DE METAL POR FAMILIA. QUIEN NO PAGA, NO BEBE.\""
+		},
+		{
+			"quien": "",
+			"texto": "Por la cinta transportadora pasan cucharas, juguetes, marcos de fotos... todo lo que la gente tenía."
+		}
+	],
+	"inv_trituradora_libre": [
+		{
+			"quien": "",
+			"texto": "La trituradora está en silencio. Alguien colgó flores secas de los dientes de la máquina."
+		}
+	],
+	"inv_tanque": [
+		{
+			"quien": "",
+			"texto": "Un tanque de agua limpia con un candado enorme. Tiene pintado: \"PROPIEDAD DE EL BENEFACTOR. AGUA SOLO PARA QUIEN CUMPLE.\""
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "El Benefactor... Marcus. Hasta el agua es suya."
+		}
+	],
+	"inv_tanque_libre": [
+		{
+			"quien": "",
+			"texto": "El candado está roto. La gente llena sus baldes riendo."
+		}
+	],
+	"inv_tablon": [
+		{
+			"quien": "",
+			"texto": "Un tablón de anuncios. Hay una lista larga: \"FAMILIAS SIN AGUA ESTA SEMANA\". Casi todos los nombres están tachados con rojo."
+		},
+		{
+			"quien": "",
+			"texto": "Abajo, un cartel nuevo: \"SE BUSCA: NIÑO DE OJOS VERDES CON COLLAR. RECOMPENSA: AGUA POR UN AÑO. — El Benefactor\"."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Ya saben que estoy vivo."
+		}
+	],
+	"inv_tablon_libre": [
+		{
+			"quien": "",
+			"texto": "Alguien arrancó los carteles de Rictus. Ahora el tablón dice: \"Turnos para el agua: TODOS\"."
+		}
+	],
+	"inv_estatua": [
+		{
+			"quien": "",
+			"texto": "Una estatua de Rictus hecha de chatarra soldada. Debajo dice \"NUESTRO PROTECTOR\"."
+		},
+		{
+			"quien": "",
+			"texto": "Alguien rayó encima con un clavo: \"el rey de nada\"."
+		}
+	],
+	"inv_estatua_libre": [
+		{
+			"quien": "",
+			"texto": "Los niños de Bastión le pusieron un balde en la cabeza a la estatua de Rictus."
+		}
+	],
+	"inv_mural": [
+		{
+			"quien": "",
+			"texto": "Un mural viejo y descolorido: un gato, una mariposa y un bebé dibujados en medio, rodeados de manos que se toman."
+		},
+		{
+			"quien": "",
+			"texto": "En la esquina, dos firmas casi borradas: \"D\" y \"D\"."
+		}
+	],
+	"inv_radio": [
+		{
+			"quien": "",
+			"texto": "Una radio de manivela. Entre el ruido se escucha una voz tranquila y elegante:"
+		},
+		{
+			"quien": "Radio",
+			"texto": "\"...ciudadanos de Bastión: la cuota mantiene el orden, y el orden mantiene la vida. Trabajen, y la Organización los cuidará. Les habla su Benefactor.\""
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Esa voz. La escuché a través de la rejilla aquella noche."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Marcus."
+		}
+	],
+	"inv_radio_libre": [
+		{
+			"quien": "",
+			"texto": "La radio solo da estática. Alguien la sintonizó en una estación de música vieja."
+		}
+	],
+	"inv_cinta": [
+		{
+			"quien": "",
+			"texto": "La cinta transportadora lleva chatarra hacia la trituradora. Algunas piezas se cayeron a un lado."
+		}
+	],
+	"inv_buque": [
+		{
+			"quien": "",
+			"texto": "Un buque de carga encallado en el puerto seco. En el casco, letras gigantes casi borradas: \"ESPERANZA\"."
+		}
+	],
+	"inv_buque_libre": [
+		{
+			"quien": "",
+			"texto": "Las familias que dormían en el buque ya planean mudarse a contenedores nuevos."
+		}
+	],
+	"sin_cartas_pelea": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Todas mis cartas están rotas. Así no puedo pelear... tengo que dormir en la posada primero."
+		}
+	],
+	"guardia_1": [
+		{
+			"quien": "Recluta Brizna",
+			"retrato": "recluta",
+			"texto": "¡Alto ahí! Esta es la Avenida del Impuesto. Para pasar se paga."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "No tengo nada para ti."
+		},
+		{
+			"quien": "Recluta Brizna",
+			"retrato": "recluta",
+			"texto": "Entonces pagas con tu bestia."
+		}
+	],
+	"guardia_1_derrotado": [
+		{
+			"quien": "Recluta Brizna",
+			"retrato": "recluta",
+			"texto": "Está bien, está bien... pasa. Pero arriba está Toño, y él no es tan blando como yo."
+		}
+	],
+	"guardia_2": [
+		{
+			"quien": "Recluta Toño",
+			"retrato": "recluta",
+			"texto": "El jefe dijo que vendrías. Dijo que te dejara pasar... en pedazos."
+		}
+	],
+	"guardia_2_derrotado": [
+		{
+			"quien": "Recluta Toño",
+			"retrato": "recluta",
+			"texto": "Uf... ve, pues. Rictus está en su trono, en el muelle. Que te vaya bonito."
+		}
+	],
+	"rictus_reto": [
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "¡Vaya, vaya! El enano llegó. Admito que pensé que Brizna te iba a comer vivo."
+		},
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "¿Ves ese barco? ¿Esa trituradora? ¿Esa gente muerta de sed? Todo es mío. El Benefactor me lo dio porque sé tomar lo que quiero."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Le quitas el agua a una niña enferma. Eso no es fuerza."
+		},
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "¡Es la ÚNICA fuerza que existe! Ven acá. Te voy a mandar a la trituradora con tu collarcito."
+		}
+	],
+	"rictus_derrotado": [
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "No... no puede ser. ¡Un mocoso! ¡Me ganó un mocoso!"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "¿Dónde está Marcus?"
+		},
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "¿Marcus? ¡JA! ¿Crees que el Benefactor se va a dignar a verte? Primero tendrías que pasar por los otros cuatro comandantes."
+		},
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "La Doctora Vesper te espera en el Sumidero, bajo tierra. Ella te va a abrir en canal para ver cómo funcionas."
+		},
+		{
+			"quien": "Rictus",
+			"retrato": "rictus",
+			"texto": "¡Esto no se queda así, mocoso!"
+		},
+		{
+			"quien": "",
+			"texto": "Rictus huye por el muelle, dejando atrás su trono."
+		}
+	],
+	"palanca": [
+		{
+			"quien": "",
+			"texto": "Junto al trono hay una palanca roja, conectada por cables a la trituradora de la plaza."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Esa máquina se comió las cosas de toda esta gente. Ya basta."
+		},
+		{
+			"quien": "",
+			"texto": "Pan baja la palanca con todas sus fuerzas."
+		}
+	],
+	"trituradora_apagada": [
+		{
+			"quien": "",
+			"texto": "A lo lejos, la trituradora tose, chirría... y se detiene."
+		},
+		{
+			"quien": "",
+			"texto": "Por primera vez en años, Bastión de Óxido queda en silencio."
+		}
+	],
+	"celebracion": [
+		{
+			"quien": "",
+			"texto": "Cuando Pan baja a la plaza, toda la ciudad lo está esperando."
+		},
+		{
+			"quien": "",
+			"texto": "¡La gente de Bastión de Óxido aplaude!"
+		},
+		{
+			"quien": "Odila",
+			"retrato": "odila",
+			"texto": "¡Abrimos el tanque! ¡Agua para todas las familias, sin cuota!"
+		},
+		{
+			"quien": "Bruno",
+			"retrato": "bruno",
+			"texto": "¡Ese niño le ganó a Rictus! ¡A RICTUS!"
+		},
+		{
+			"quien": "Mila",
+			"retrato": "mila",
+			"texto": "¡Esta noche nadie esconde nada! ¡Que suenen esas latas!"
+		},
+		{
+			"quien": "Rosa",
+			"retrato": "rosa",
+			"texto": "Tus padres soñaban con esto, niño. Gente que no tiene miedo."
+		},
+		{
+			"quien": "Lía",
+			"retrato": "lia",
+			"texto": "¡Toma! Es una insignia de tuerca. La hice yo. Para que no te olvides de Bastión."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "No me voy a olvidar. Lo prometo."
+		}
+	],
+	"celebracion_fuerzas": [
+		{
+			"quien": "",
+			"texto": "Los aplausos de Bastión le dan fuerzas a Pan para continuar."
+		},
+		{
+			"quien": "",
+			"texto": "Todas tus criaturas ganan +10% de ataque para siempre."
+		},
+		{
+			"quien": "",
+			"texto": "Recibiste 100 monedas, 2 Curas 50% y una Piña en lata. Tus cartas se repararon."
+		}
+	],
+	"bastion_libre": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Uno menos. Quedan cinco."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Vesper, en el Sumidero... Aguanta, Marcus. Ya voy."
+		},
+		{
+			"quien": "",
+			"texto": "¡Bastión de Óxido es libre! La aventura hacia la Ciudad 2 llegará en una próxima versión. Mientras tanto, puedes seguir explorando y capturando criaturas."
 		}
 	]
 }

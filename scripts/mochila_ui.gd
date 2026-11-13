@@ -1,10 +1,12 @@
 extends PanelContainer
-## Ventana de la Mochila: cartas de criaturas (con nivel y progreso) y objetos.
+## Ventana de la Mochila: cartas de criaturas (con nivel y progreso), suministros
+## (curas y comida se pueden usar fuera de combate) y misiones.
 
 signal cerrado
 
 var _lista: VBoxContainer
 var _resumen: Label
+var _usando := ""          # id del objeto que se va a usar (esperando que elijas una carta)
 
 
 func _ready() -> void:
@@ -22,6 +24,7 @@ func _ready() -> void:
 	_resumen = Label.new()
 	_resumen.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_resumen.theme_type_variation = &"TextoChico"
+	_resumen.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	caja.add_child(_resumen)
 
 	var scroll := ScrollContainer.new()
@@ -36,21 +39,49 @@ func _ready() -> void:
 	var cerrar := Button.new()
 	cerrar.text = "Cerrar"
 	cerrar.custom_minimum_size = Vector2(0, 22)
+	cerrar.focus_mode = Control.FOCUS_NONE
 	cerrar.pressed.connect(cerrar_mochila)
 	caja.add_child(cerrar)
 
 
 func abrir() -> void:
+	_usando = ""
+	_refrescar()
+	visible = true
+
+
+func cerrar_mochila() -> void:
+	visible = false
+	cerrado.emit()
+
+
+func _refrescar(aviso := "") -> void:
 	for hijo in _lista.get_children():
+		_lista.remove_child(hijo)
 		hijo.queue_free()
-	var partes: Array = []
-	for id in Juego.objetos:
-		if Juego.objetos[id] > 0:
-			partes.append("%s x%d" % [Juego.NOMBRES_OBJETOS.get(id, id), Juego.objetos[id]])
-	partes.append("Monedas: %d" % Juego.monedas)
+	var partes: Array = ["Monedas: %d" % Juego.monedas]
 	if Juego.chatarra > 0:
-		partes.append("Chatarra: %d" % Juego.chatarra)
-	_resumen.text = "  ·  ".join(PackedStringArray(partes))
+		partes.append("Reliquias: %d" % Juego.chatarra)
+	var n_partes := 0
+	for id in Juego.partes:
+		n_partes += int(Juego.partes[id])
+	if n_partes > 0:
+		partes.append("Partes de criaturas: %d" % n_partes)
+	_resumen.text = aviso if aviso != "" else "  ·  ".join(PackedStringArray(partes))
+
+	if _usando != "":
+		_seccion("¿En qué carta usas %s?" % Juego.nombre_objeto(_usando))
+		for i in Juego.mochila.size():
+			var carta: Dictionary = Juego.mochila[i]
+			var nombre: String = Juego.criaturas[carta["id"]]["nombre"]
+			var rota: bool = carta["hp"] <= 0
+			var llena: bool = carta["hp"] >= Juego.hp_max_carta(carta)
+			var estado := "rota" if rota else ("%d/%d HP" % [carta["hp"], Juego.hp_max_carta(carta)])
+			_boton("%s  (%s)" % [nombre, estado], _usar_en.bind(i), rota or llena)
+		_boton("Cancelar", _elegir_objeto.bind(""))
+		return
+
+	_seccion("Cartas")
 	if Juego.mochila.is_empty():
 		var vacio := Label.new()
 		vacio.text = "Todavía no tienes cartas de criaturas."
@@ -58,12 +89,77 @@ func abrir() -> void:
 		_lista.add_child(vacio)
 	for i in Juego.mochila.size():
 		_lista.add_child(_crear_fila(Juego.mochila[i], i < Juego.MAX_EQUIPO))
-	visible = true
+
+	_seccion("Suministros")
+	var alguno := false
+	for id in Juego.OBJETOS:
+		var cantidad: int = Juego.objetos.get(id, 0)
+		if cantidad <= 0:
+			continue
+		alguno = true
+		var fila := HBoxContainer.new()
+		var etiqueta := Label.new()
+		etiqueta.theme_type_variation = &"TextoChico"
+		etiqueta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		etiqueta.text = "%s  x%d/%d" % [Juego.nombre_objeto(id), cantidad, Juego.max_objeto(id)]
+		fila.add_child(etiqueta)
+		if Juego.tipo_objeto(id) in ["cura", "comida"]:
+			var b := Button.new()
+			b.text = "Usar"
+			b.focus_mode = Control.FOCUS_NONE
+			b.custom_minimum_size = Vector2(56, 18)
+			b.pressed.connect(_elegir_objeto.bind(id))
+			b.pressed.connect(Sonido.efecto.bind("boton"))
+			fila.add_child(b)
+		_lista.add_child(fila)
+	if not alguno:
+		_texto("No llevas suministros. Cómpralos en las tiendas de las ciudades.")
+
+	if not Juego.misiones.is_empty() or Juego.mision != "":
+		_seccion("Misiones")
+		if Juego.mision != "":
+			_texto("Principal: " + Juego.mision)
+		for id in Juego.misiones:
+			var m: Dictionary = Juego.misiones[id]
+			_texto(("[Hecha] " if m["estado"] == "completa" else "[  ] ") + m["titulo"])
 
 
-func cerrar_mochila() -> void:
-	visible = false
-	cerrado.emit()
+func _elegir_objeto(id: String) -> void:
+	_usando = id
+	_refrescar()
+
+
+func _usar_en(i: int) -> void:
+	var id := _usando
+	_usando = ""
+	var texto := Juego.usar_en_carta(id, i)
+	Sonido.efecto("objeto")
+	_refrescar(texto)
+
+
+func _seccion(texto: String) -> void:
+	var l := Label.new()
+	l.text = texto
+	l.theme_type_variation = &"NombreDialogo"
+	_lista.add_child(l)
+
+
+func _texto(texto: String) -> void:
+	var l := Label.new()
+	l.text = texto
+	l.theme_type_variation = &"TextoChico"
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lista.add_child(l)
+
+
+func _boton(texto: String, accion: Callable, desactivado := false) -> void:
+	var b := Button.new()
+	b.text = texto
+	b.focus_mode = Control.FOCUS_NONE
+	b.custom_minimum_size = Vector2(0, 20)
+	b.disabled = desactivado
+	b.pressed.connect(accion)
+	_lista.add_child(b)
 
 
 func _crear_fila(carta: Dictionary, en_equipo: bool) -> Control:
@@ -94,10 +190,14 @@ func _crear_fila(carta: Dictionary, en_equipo: bool) -> Control:
 	var nombres: Array = []
 	for mov in Juego.movimientos(carta["id"], nivel):
 		nombres.append(mov["nombre"])
-	texto.text = "%s  Nvl %d%s\n%s  ·  %s\n%s" % [
+	texto.text = "%s  Nvl %d%s\n%s  ·  %s  ·  tipo %s\n%s" % [
 		datos["nombre"], nivel, siguiente,
-		estado, "Equipo" if en_equipo else "Colección",
+		estado, "Equipo" if en_equipo else "Colección", _tipo_bonito(datos.get("tipo", "feral")),
 		", ".join(PackedStringArray(nombres)),
 	]
 	fila.add_child(texto)
 	return fila
+
+
+func _tipo_bonito(t: String) -> String:
+	return { "toxico": "Tóxico", "termico": "Térmico", "energia": "Energía", "sonico": "Sónico" }.get(t, t.capitalize())
