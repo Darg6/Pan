@@ -1,6 +1,7 @@
 extends Control
-## Fase 1 del prólogo: "El Recuerdo". Viñetas en pixel art (sepia y rojo oscuro) con lluvia de ceniza.
-## Las imágenes están en arte/cinematica/ y los textos en datos/dialogos.json (intro_1 ... intro_4).
+## Fase 1 del prólogo: "El Recuerdo". Escenas en pixel art con lluvia de ceniza.
+## Los textos están en datos/dialogos.json (intro_1 ... intro_4). Una frase con "imagen": "03_familia"
+## cambia la ilustración a arte/cinematica/03_familia.png justo cuando empieza esa frase.
 
 const REFUGIO := "res://escenas/mapas/refugio_cero.tscn"
 const SUPERFICIE := "res://escenas/mapas/superficie.tscn"
@@ -11,19 +12,34 @@ const SUPERFICIE := "res://escenas/mapas/superficie.tscn"
 @onready var transicion: ColorRect = $Transicion
 
 var _saltando := false
+var _tween_imagen: Tween
 
 
 func _ready() -> void:
 	Juego.cambiando_escena = false
 	Sonido.musica("recuerdo")
-	Sonido.ambiente("viento" if false else "")
+	Sonido.ambiente("")
 	if Juego.SALTAR_PROLOGO:
 		_preparar_partida_de_prueba()
 		return
 	boton_saltar.pressed.connect(_saltar)
-	await _vineta("res://arte/cinematica/01_callejon.png", "intro_1")
-	await _vineta("res://arte/cinematica/02_acorralados.png", "intro_2")
-	await _vineta("res://arte/cinematica/03_rejilla.png", "intro_3", true)
+	# Cada frase puede traer "imagen" en dialogos.json: la ilustración cambia justo cuando empieza esa frase.
+	dialogo.linea_iniciada.connect(_al_iniciar_linea)
+	imagen.modulate = Color.BLACK
+	var t := create_tween()
+	t.tween_property(transicion, "color:a", 0.0, 0.6)
+	var recuerdo: Array = Juego.dialogos["intro_1"] + Juego.dialogos["intro_2"]
+	var rejilla: Array = Juego.dialogos["intro_3"]
+	await dialogo.mostrar(recuerdo + rejilla.slice(0, 2))
+	if _saltando:
+		return
+	# Destello blanco: el disparo
+	Sonido.efecto("golpe_fuerte", 0.6, 4.0)
+	transicion.color = Color(1, 1, 1, 1)
+	t = create_tween()
+	t.tween_property(transicion, "color", Color(0, 0, 0, 1), 0.5)
+	await t.finished
+	await dialogo.mostrar(rejilla.slice(2))
 	# Negro total: la última frase de su madre
 	if _saltando:
 		return
@@ -33,31 +49,28 @@ func _ready() -> void:
 	_ir_al_refugio()
 
 
-func _vineta(ruta: String, id_dialogo: String, disparo := false) -> void:
-	if _saltando:
+func _al_iniciar_linea(linea: Dictionary) -> void:
+	var nombre: String = linea.get("imagen", "")
+	if nombre == "":
 		return
-	var t := create_tween()
-	t.tween_property(transicion, "color:a", 1.0, 0.4)
-	await t.finished
+	var ruta := "res://arte/cinematica/%s.png" % nombre
+	if not ResourceLoader.exists(ruta):
+		push_warning("No existe la imagen de la intro: " + ruta)
+		return
+	if _tween_imagen:
+		_tween_imagen.kill()
+	_tween_imagen = create_tween()
+	if imagen.texture != null:
+		_tween_imagen.tween_property(imagen, "modulate", Color.BLACK, 0.25)  # se oscurece la anterior
+	_tween_imagen.tween_callback(_poner_imagen.bind(ruta))
+	_tween_imagen.tween_property(imagen, "modulate", Color.WHITE, 0.35)
+	_tween_imagen.parallel().tween_property(imagen, "scale", Vector2.ONE, 8.0)  # acercamiento lento
+
+
+func _poner_imagen(ruta: String) -> void:
 	imagen.texture = load(ruta)
-	imagen.scale = Vector2(1.08, 1.08)
 	imagen.pivot_offset = imagen.size / 2.0
-	var lento := create_tween()
-	lento.tween_property(imagen, "scale", Vector2.ONE, 8.0)  # acercamiento lento
-	t = create_tween()
-	t.tween_property(transicion, "color:a", 0.0, 0.6)
-	await t.finished
-	if disparo:
-		await dialogo.mostrar(Juego.dialogos[id_dialogo].slice(0, 2))
-		# Destello blanco: el disparo
-		Sonido.efecto("golpe_fuerte", 0.6, 4.0)
-		transicion.color = Color(1, 1, 1, 1)
-		t = create_tween()
-		t.tween_property(transicion, "color", Color(0, 0, 0, 1), 0.5)
-		await t.finished
-		await dialogo.mostrar(Juego.dialogos[id_dialogo].slice(2))
-	else:
-		await dialogo.mostrar(id_dialogo)
+	imagen.scale = Vector2(1.06, 1.06)
 
 
 func _saltar() -> void:

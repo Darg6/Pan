@@ -36,6 +36,11 @@ var rng := RandomNumberGenerator.new()
 func _ready() -> void:
 	rng.seed = 99
 	tiles_info = JSON.parse_string(FileAccess.get_file_as_string("res://arte/tiles/tiles.json"))
+	if "solo_tema" in OS.get_cmdline_user_args():
+		_crear_tema()  # godot --headless --path . res://herramientas/construir_proyecto.tscn -- solo_tema
+		print("Tema construido.")
+		get_tree().quit()
+		return
 	var ts_ext := _crear_tileset("exterior", ["pasto_1", "pasto_2"])
 	var ts_int := _crear_tileset("interior", [])
 	_crear_tema()
@@ -96,8 +101,14 @@ func _crear_tema() -> void:
 	var tema := Theme.new()
 	var pixelify: FontFile = load("res://arte/fuentes/PixelifySans.ttf")
 	var press: FontFile = load("res://arte/fuentes/PressStart2P-Regular.ttf")
-	tema.default_font = pixelify
+	# Letra con un poco más de aire: 1 píxel entre letras y 3 entre palabras (si no, se ven pegadas)
+	var letra := FontVariation.new()
+	letra.base_font = pixelify
+	letra.spacing_glyph = 1
+	letra.spacing_space = 3
+	tema.default_font = letra
 	tema.default_font_size = 11
+	tema.set_constant("line_spacing", "Label", 4)
 	var claro := Color("#f0e6d2")
 
 	tema.set_stylebox("panel", "PanelContainer", _textura_9("res://arte/interfaz/panel.png", 6, Vector4(8, 6, 8, 6)))

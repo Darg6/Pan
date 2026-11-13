@@ -5,6 +5,7 @@ extends PanelContainer
 ## Para avanzar: toca la pantalla, haz clic, o pulsa Espacio / Enter / E.
 
 signal termino
+signal linea_iniciada(linea: Dictionary)  ## avisa cuando empieza cada frase (la intro cambia la imagen)
 signal _avanzar
 
 const LETRAS_POR_SEGUNDO := 45.0
@@ -45,6 +46,7 @@ func esta_activa() -> bool:
 
 
 func _mostrar_linea(linea: Dictionary) -> void:
+	linea_iniciada.emit(linea)
 	var quien: String = linea.get("quien", "")
 	nombre.text = quien
 	nombre.visible = quien != ""

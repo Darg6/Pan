@@ -1,17 +1,20 @@
 {
-	"_ayuda": "Cada diálogo es una lista de líneas. 'quien' es el nombre que se muestra (vacío = narrador). 'retrato' es el nombre de un PNG en arte/retratos/ (opcional). Puedes cambiar los textos libremente.",
+	"_ayuda": "Cada diálogo es una lista de líneas. 'quien' es el nombre que se muestra (vacío = narrador). 'retrato' es el nombre de un PNG en arte/retratos/ (opcional). Puedes cambiar los textos libremente. 'imagen' (solo en la intro) cambia la ilustración a arte/cinematica/<imagen>.png cuando empieza esa línea.",
 	"intro_1": [
 		{
 			"quien": "Pan",
-			"texto": "Antes del fin, el mundo tenía ciudades, ríos limpios y cielos azules. Eso me contaban."
+			"texto": "Antes del fin, el mundo tenía ciudades, ríos limpios y cielos azules. Eso me contaban.",
+			"imagen": "01_antes"
 		},
 		{
 			"quien": "Pan",
-			"texto": "Después solo quedaron páramos, ruinas... y las criaturas que nacieron de la contaminación."
+			"texto": "Después solo quedaron páramos, ruinas... y las criaturas que nacieron de la contaminación.",
+			"imagen": "02_ruinas"
 		},
 		{
 			"quien": "Pan",
-			"texto": "Mis padres, Diego y Danitza, sobrevivieron. Me enseñaron a recolectar, a esconderme y a luchar."
+			"texto": "Mis padres, Diego y Danitza, sobrevivieron. Me enseñaron a recolectar, a esconderme y a luchar.",
+			"imagen": "03_familia"
 		},
 		{
 			"quien": "Pan",
@@ -19,7 +22,9 @@
 		},
 		{
 			"quien": "Papá",
-			"texto": "¡Corre, Pan! ¡No te sueltes!"
+			"texto": "¡Corre, Pan! ¡No te sueltes!",
+			"retrato": "papa",
+			"imagen": "04_huida"
 		}
 	],
 	"intro_2": [
@@ -29,17 +34,22 @@
 		},
 		{
 			"quien": "Mamá",
-			"texto": "Es un callejón sin salida... ¡El conducto, rápido!"
+			"texto": "Es un callejón sin salida... ¡El conducto, rápido!",
+			"retrato": "mama",
+			"imagen": "05_callejon"
 		},
 		{
 			"quien": "Papá",
-			"texto": "Entra ahí y no hagas ruido. Lleva la mochila. Pase lo que pase, no salgas."
+			"texto": "Entra ahí y no hagas ruido. Lleva la mochila. Pase lo que pase, no salgas.",
+			"retrato": "papa",
+			"imagen": "06_conducto"
 		}
 	],
 	"intro_3": [
 		{
 			"quien": "Pan",
-			"texto": "A través de la rejilla vi una silueta impecable. Un traje blanco, limpio, imposible en este mundo."
+			"texto": "A través de la rejilla vi una silueta impecable. Un traje blanco, limpio, imposible en este mundo.",
+			"imagen": "07_rejilla"
 		},
 		{
 			"quien": "???",
@@ -53,7 +63,8 @@
 	"intro_4": [
 		{
 			"quien": "Mamá",
-			"texto": "No llores, Pan. Construye."
+			"texto": "No llores, Pan. Construye.",
+			"retrato": "mama"
 		}
 	],
 	"despertar": [

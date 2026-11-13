@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://brclib3k82aw"
-path="res://.godot/imported/01_callejon.png-9fdce51061b478b8b45eacafc352bd22.ctex"
+uid="uid://dlv3pyxsr7xlx"
+path="res://.godot/imported/07_rejilla.png-3a0f4e449fc68e39bf0fcf9206db6f91.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://arte/cinematica/01_callejon.png"
-dest_files=["res://.godot/imported/01_callejon.png-9fdce51061b478b8b45eacafc352bd22.ctex"]
+source_file="res://arte/cinematica/07_rejilla.png"
+dest_files=["res://.godot/imported/07_rejilla.png-3a0f4e449fc68e39bf0fcf9206db6f91.ctex"]
 
 [params]
 
