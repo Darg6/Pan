@@ -15,6 +15,27 @@ RPG 2D top-down de captura de criaturas por turnos, en pixel art (Godot 4.3, ren
   botón de la mochila abre tu inventario. Toca la pantalla para avanzar los diálogos.
 - En combate, tocar la pantalla adelanta los mensajes.
 
+## Si algo no carga (pantalla negra o mensaje de error)
+
+Cierra Godot, borra la carpeta `.godot` dentro del proyecto (es solo caché; en Windows activa
+*Vista > Elementos ocultos* si no la ves), abre Godot de nuevo, espera a que termine la barra de
+importación y pulsa F5. Al iniciar, el juego hace un **autodiagnóstico** y te dice en pantalla qué falla.
+
+## Exportar para celular y navegador
+
+El juego está pensado para **celular (Android)** y **navegador (Web)**: todo se controla tocando.
+Ya están configurados los dos en *Proyecto > Exportar*.
+
+1. La primera vez: *Editor > Administrar plantillas de exportación > Descargar e instalar*.
+2. **Web**: en *Proyecto > Exportar* elige "Web" y pulsa *Exportar proyecto*. Se crea `exportar/web/`.
+   Sube esa carpeta a itch.io (como juego HTML) o pruébala con el botón ▶ de Web arriba a la derecha
+   del editor ("Ejecutar en el navegador").
+3. **Android**: necesitas el SDK de Android y Java (Godot te dice qué falta en *Editor > Configuración
+   del editor > Exportar > Android*). Luego elige "Android" y exporta el `.apk`.
+
+La exportación Web no usa hilos (*thread support* apagado), así funciona en itch.io y en celulares
+sin configuración especial del servidor.
+
 ## La historia que ya se puede jugar (prólogo)
 
 1. **El Recuerdo**: la intro con Diego, Danitza y Pan, la Organización, la rejilla y la promesa.

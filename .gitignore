@@ -4,3 +4,6 @@
 
 # Caché de Python de las herramientas
 __pycache__/
+
+# Juegos exportados (Web / Android)
+exportar/
