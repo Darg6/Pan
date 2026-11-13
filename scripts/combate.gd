@@ -14,7 +14,10 @@ const TEX_SOMBRA := preload("res://arte/efectos/sombra.png")
 const TEX_IMPACTO := preload("res://arte/efectos/impacto.png")
 const TEX_POLVO := preload("res://arte/efectos/polvo.png")
 const SHADER_LUCHADOR := preload("res://arte/shaders/luchador.gdshader")
-const COLOR_TIPO := { "toxico": Color("#9cf05a"), "termico": Color("#ff9a3a"), "fluido": Color("#6ac8ff"), "feral": Color("#fff2c0") }
+const COLOR_TIPO := { "toxico": Color("#9cf05a"), "termico": Color("#ff9a3a"), "fluido": Color("#6ac8ff"), "feral": Color("#fff2c0"),
+	"chatarra": Color("#d98a4a"), "energia": Color("#9ff0ff"), "terrestre": Color("#d8b070"), "sombra": Color("#a080d0"), "sonico": Color("#f0d0ff") }
+## Tipos "físicos" (golpes de cuerpo): activan las defensas de los tanques y la estática de la Bailarina.
+const TIPOS_FISICOS := ["feral", "chatarra", "terrestre"]
 
 # Posiciones de los PIES dentro del escenario de 480x270 (centro de las plataformas del fondo)
 const POS_ENEMIGO := Vector2(340, 127)
@@ -49,6 +52,12 @@ var _paso_tutorial := 0
 var _sombras := {}               # sprite -> su sombra en el suelo
 var _saltar_espera := false      # el jugador tocó la pantalla para adelantar el texto
 var _mensaje_actual := 0         # para que un mensaje viejo no pise al nuevo
+var _turno_n := 0                # cuántos turnos van (el Grito de Guerra de Rictus es cada 3)
+var _turnos_desde_cambio := 9    # para que el rival no cambie de bestia en todos los turnos
+var _ultimo_fisico := false      # el último ataque de Pan fue un golpe físico fuerte
+var _frases_dichas := {}         # frases del entrenador que ya dijo (cada una una vez)
+var _tormenta := false           # tormenta de óxido en Bastión
+var _estatica_pendiente := ""    # nombre de quien quedó paralizado por la estática (para el mensaje)
 
 
 func _ready() -> void:
@@ -60,14 +69,17 @@ func _ready() -> void:
 			Juego.agregar_carta("gato_mutado")
 			Juego.dar_objeto("carta_vinculo", 3)
 	tipo = datos.get("tipo", "salvaje")
-	Sonido.musica("combate")
-	Sonido.ambiente("viento")
+	Sonido.musica(str(datos.get("musica", "combate")))
+	_tormenta = bool(datos.get("tormenta", false))
+	Sonido.ambiente("tormenta" if _tormenta else "viento")
 	_armar_fondo(str(datos.get("fondo", "paramo")))
 	var ceniza := Ambiente.ceniza(Vector2(480, 270))
 	ceniza.position = Vector2(240, 135)
 	ceniza.z_index = 0
 	escenario.add_child(ceniza)
-	equipo_enemigo = datos.get("equipo", []).duplicate()
+	if _tormenta:
+		_armar_tormenta()
+	equipo_enemigo = datos.get("equipo", []).duplicate(true)
 
 	_preparar_barra(barra_aliado)
 	_preparar_barra(barra_enemigo)
@@ -101,9 +113,14 @@ func _ready() -> void:
 		"entrenador":
 			var nombre_e: String = datos.get("entrenador", {}).get("nombre", "Bandido")
 			await _decir("¡%s quiere pelear!" % nombre_e)
+			await _frase("inicio")
 			await _decir("%s saca a %s (Nvl %d)." % [nombre_e, enemigo["nombre_especie"], enemigo["nivel"]])
 		_:
 			await _decir("¡Una criatura salvaje apareció: %s (Nvl %d)!" % [enemigo["nombre_especie"], enemigo["nivel"]])
+	if _tormenta:
+		await _decir("¡Una tormenta de óxido azota el campo! Solo la chatarra la aguanta.")
+	if datos.get("grito_guerra", false):
+		await _decir("Cada 3 turnos, el Grito de Guerra de %s cura a sus bestias." % datos.get("entrenador", {}).get("nombre", "el comandante"))
 
 	var primera := _primera_carta_viva()
 	if primera == -1:
@@ -119,9 +136,15 @@ func _ready() -> void:
 
 
 func _sacar_enemigo(info: Dictionary, animar := true) -> void:
-	enemigo = Juego.crear_luchador(info["id"], info["nivel"])
-	enemigo["nombre_especie"] = enemigo["nombre"]
-	enemigo["nombre"] += " rival" if tipo == "entrenador" else " salvaje"
+	if info.has("hp_max"):   # una bestia que el entrenador ya había sacado (vuelve con la vida que tenía)
+		enemigo = info
+	else:
+		enemigo = Juego.crear_luchador(info["id"], info["nivel"])
+		enemigo["nombre_especie"] = enemigo["nombre"]
+		enemigo["nombre"] += " rival" if tipo == "entrenador" else " salvaje"
+	_turnos_desde_cambio = 0
+	enemigo["bajo_tierra"] = false
+	_quitar_hundido(sprite_enemigo)
 	sprite_enemigo.texture = Juego.textura_criatura(info["id"])
 	sprite_enemigo.flip_h = true  # las criaturas miran a la derecha; el enemigo mira a la izquierda
 	sprite_enemigo.scale = Vector2.ONE
@@ -167,23 +190,52 @@ func _menu_luchar() -> void:
 	_agregar_boton("Volver", _menu_principal)
 
 
-## Mochila: objetos y cartas para cambiar de criatura.
+## Mochila: objetos (curas, comida, potenciadores, granada) y cartas para cambiar de criatura.
 func _menu_mochila() -> void:
-	_limpiar_opciones()
-	mensaje.text = "Mochila"
+	var entradas: Array = []
 	if Juego.tiene_objeto("granada_aturdidora"):
-		_agregar_boton("Granada x%d" % Juego.objetos["granada_aturdidora"], func(): _turno({ "tipo": "granada" }))
+		entradas.append(["Granada x%d" % Juego.objetos["granada_aturdidora"], func(): _turno({ "tipo": "granada" })])
 	if tipo != "tutorial_captura":
-		var equipo := Juego.equipo()
-		for i in equipo.size():
-			var carta: Dictionary = equipo[i]
-			if i == indice_aliado or carta["hp"] <= 0:
-				continue
-			var nombre: String = Juego.criaturas[carta["id"]]["nombre"]
-			_agregar_boton("%s %dHP" % [nombre, carta["hp"]], func(): _turno({ "tipo": "cambio", "indice": i }))
-	if opciones.get_child_count() == 0:
-		mensaje.text = "No tienes objetos ni otras cartas sanas."
-	_agregar_boton("Volver", _menu_principal)
+		for id in Juego.OBJETOS:
+			if Juego.tipo_objeto(id) in ["cura", "comida", "potenciador"] and Juego.tiene_objeto(id):
+				entradas.append(["%s x%d" % [Juego.nombre_objeto(id), Juego.objetos[id]], func(): _turno({ "tipo": "objeto", "id": id })])
+		entradas.append(["Cartas", _menu_cartas])
+	if entradas.is_empty():
+		_limpiar_opciones()
+		mensaje.text = "No tienes objetos."
+		_agregar_boton("Volver", _menu_principal)
+		return
+	_menu_lista(entradas, "Mochila: elige un objeto.", _menu_principal)
+
+
+func _menu_cartas() -> void:
+	var entradas: Array = []
+	var equipo := Juego.equipo()
+	for i in equipo.size():
+		var carta: Dictionary = equipo[i]
+		if i == indice_aliado or carta["hp"] <= 0:
+			continue
+		var nombre: String = Juego.criaturas[carta["id"]]["nombre"]
+		entradas.append(["%s %dHP" % [nombre, carta["hp"]], func(): _turno({ "tipo": "cambio", "indice": i })])
+	if entradas.is_empty():
+		_limpiar_opciones()
+		mensaje.text = "No tienes otras cartas sanas."
+		_agregar_boton("Volver", _menu_mochila)
+		return
+	_menu_lista(entradas, "¿Qué carta sacas?", _menu_mochila)
+
+
+## Lista de botones con páginas (en el panel caben 4 botones).
+func _menu_lista(entradas: Array, titulo: String, volver: Callable, pagina := 0) -> void:
+	_limpiar_opciones()
+	mensaje.text = titulo
+	var por_pagina := 3 if entradas.size() <= 3 else 2
+	var paginas := ceili(entradas.size() / float(por_pagina))
+	for e in entradas.slice(pagina * por_pagina, (pagina + 1) * por_pagina):
+		_agregar_boton(e[0], e[1])
+	if paginas > 1:
+		_agregar_boton("Más (%d/%d)" % [pagina + 1, paginas], _menu_lista.bind(entradas, titulo, volver, (pagina + 1) % paginas))
+	_agregar_boton("Volver", volver)
 
 
 ## Cuando tu criatura cae: elegir otra (no hay Volver, y el enemigo no gana un turno gratis).
@@ -252,6 +304,10 @@ func _turno(accion: Dictionary) -> void:
 		await _decir("¡Pan y %s escapan del combate!" % aliado["nombre"])
 		_terminar("huida")
 		return
+	if accion["tipo"] == "objeto" and Juego.tipo_objeto(accion["id"]) in ["cura", "comida"] and aliado["hp"] >= aliado["hp_max"]:
+		await _decir("%s ya tiene toda su vida." % aliado["nombre"])
+		_menu_principal()
+		return
 
 	# Tutorial: el tiempo se detiene, el gato no ataca.
 	if tipo == "tutorial_captura":
@@ -264,10 +320,16 @@ func _turno(accion: Dictionary) -> void:
 		return
 
 	var accion_enemigo := _ia_enemigo()
+	_turno_n += 1
+	_turnos_desde_cambio += 1
 
 	# Iniciativa: objetos, cambio y captura tienen Prioridad +1. Si no, ataca el más rápido.
+	var prioridad_j := 0 if accion["tipo"] == "ataque" else 1
+	var prioridad_e := 0 if accion_enemigo["tipo"] == "ataque" else 1
 	var jugador_primero := true
-	if accion["tipo"] == "ataque":
+	if prioridad_j != prioridad_e:
+		jugador_primero = prioridad_j > prioridad_e
+	elif prioridad_j == 0:
 		if aliado["velocidad"] == enemigo["velocidad"]:
 			jugador_primero = randf() < 0.5
 		else:
@@ -278,13 +340,19 @@ func _turno(accion: Dictionary) -> void:
 		if terminado or aliado["hp"] <= 0 or enemigo["hp"] <= 0:
 			break  # si alguien cayó, el otro pierde su turno
 		if actor == "jugador":
+			if accion["tipo"] == "ataque" and await _paralizado_no_actua(aliado, sprite_aliado):
+				continue
 			await _accion_jugador(accion)
 		else:
+			if accion_enemigo["tipo"] == "ataque" and await _paralizado_no_actua(enemigo, sprite_enemigo):
+				continue
 			await _accion_enemigo(accion_enemigo)
 	if terminado:
 		return
+	_ultimo_fisico = accion["tipo"] == "ataque" and accion["movimiento"]["tipo"] in TIPOS_FISICOS \
+		and int(accion["movimiento"]["poder"]) * int(accion["movimiento"].get("golpes", 1)) >= 18
 
-	# Fase de estados: la infección quita 1/8 de la vida máxima.
+	# Fase de estados: infección (1/8 de la vida), parálisis, tormenta y el Grito de Guerra.
 	if aliado["hp"] > 0 and enemigo["hp"] > 0:
 		await _fase_estados()
 
@@ -304,9 +372,34 @@ func _accion_jugador(accion: Dictionary) -> void:
 			await _intentar_captura()
 		"granada":
 			await _usar_granada()
+		"objeto":
+			await _usar_objeto(accion["id"])
 
 
 func _accion_enemigo(accion: Dictionary) -> void:
+	match accion["tipo"]:
+		"cambio_enemigo":
+			var nombre_e: String = datos.get("entrenador", {}).get("nombre", "El bandido")
+			await _decir("%s retira a %s." % [nombre_e, enemigo["nombre_especie"]])
+			var t := create_tween()
+			t.tween_property(sprite_enemigo, "position:x", sprite_enemigo.position.x + 160, 0.25).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN)
+			await t.finished
+			var nueva: Dictionary = equipo_enemigo[accion["indice"]]
+			equipo_enemigo[accion["indice"]] = enemigo
+			await _sacar_enemigo(nueva)
+			await _decir("¡%s saca a %s (Nvl %d)!" % [nombre_e, enemigo["nombre_especie"], enemigo["nivel"]])
+			return
+		"cura_enemigo":
+			datos["curas"] = int(datos.get("curas", 0)) - 1
+			var nombre_e: String = datos.get("entrenador", {}).get("nombre", "El bandido")
+			var cura := maxi(1, roundi(enemigo["hp_max"] * 0.4))
+			enemigo["hp"] = mini(enemigo["hp_max"], enemigo["hp"] + cura)
+			Sonido.efecto("objeto")
+			_destello(sprite_enemigo, Color("#7bf09a"), 0.4)
+			_texto_flotante(sprite_enemigo, "+%d" % cura, Color("#7bf09a"))
+			_actualizar_hud()
+			await _decir("¡%s usa una Cura 40%% en %s!" % [nombre_e, enemigo["nombre_especie"]])
+			return
 	if accion["tipo"] == "huir":
 		await _decir("¡%s intenta escapar!" % enemigo["nombre"])
 		if randf() < 0.5:
@@ -323,6 +416,8 @@ func _accion_enemigo(accion: Dictionary) -> void:
 # ---------------------------------------------------------------------------
 
 func _modificador_tipo(tipo_ataque: String, defensor: Dictionary) -> float:
+	if tipo_ataque in defensor.get("inmune", []):
+		return 0.0
 	if tipo_ataque in defensor["debil_a"]:
 		return 2.0
 	if tipo_ataque in defensor["resiste"]:
@@ -332,7 +427,7 @@ func _modificador_tipo(tipo_ataque: String, defensor: Dictionary) -> float:
 
 func _calcular_danio(atacante: Dictionary, defensor: Dictionary, mov: Dictionary) -> int:
 	var poder := float(mov["poder"])
-	var ratio: float = atacante["ataque"] / defensor["defensa"]
+	var ratio: float = atacante["ataque"] / maxf(1.0, defensor["defensa"])
 	var mult_nivel: float = 1.0 + atacante["nivel"] * 0.2
 	var debilidad := _modificador_tipo(mov["tipo"], defensor)
 	return maxi(1, roundi(poder * ratio * mult_nivel * debilidad * randf_range(0.85, 1.0)))
@@ -340,6 +435,23 @@ func _calcular_danio(atacante: Dictionary, defensor: Dictionary, mov: Dictionary
 
 func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionary, spr_atacante: Sprite2D, spr_defensor: Sprite2D) -> void:
 	await _decir("%s usa %s." % [atacante["nombre"], mov["nombre"]], 0.15)
+	if atacante.get("bajo_tierra", false):   # sale de la arena para atacar
+		atacante["bajo_tierra"] = false
+		_salir_de_tierra(spr_atacante)
+
+	if mov.get("efecto", "") == "defensa_arriba":
+		Sonido.efecto("metal")
+		_destello(spr_atacante, Color("#d98a4a"), 0.5)
+		var t := create_tween()
+		t.tween_property(spr_atacante, "scale", Vector2(1.15, 0.9), 0.1)
+		t.tween_property(spr_atacante, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		if atacante["defensa"] >= atacante["defensa_base"] * 2.0:
+			await _decir("¡La defensa de %s ya no puede subir más!" % atacante["nombre"])
+			return
+		atacante["defensa"] = minf(atacante["defensa"] * 1.35, atacante["defensa_base"] * 2.0)
+		_texto_flotante(spr_atacante, "DEF+", Color("#ffb070"))
+		await _decir("¡%s se blinda con placas de chatarra! Su defensa subió." % atacante["nombre"])
+		return
 
 	if mov.get("efecto", "") == "evasion_arriba":
 		await _animar_evasion(spr_atacante)
@@ -350,7 +462,23 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 
 	var golpes := int(mov.get("golpes", 1))
 	var precision := float(mov.get("precision", 1.0))
+	if _tormenta and atacante.get("tipo", "") != "chatarra":
+		precision *= 0.85   # el polvo de óxido no deja ver
 	var debilidad := _modificador_tipo(mov["tipo"], defensor)
+	if debilidad == 0.0:
+		await _acometer(spr_atacante, spr_defensor)
+		_regresar(spr_atacante)
+		_texto_flotante(spr_defensor, "Inmune", Color(1, 1, 1, 0.8))
+		await _decir("No afecta a %s..." % defensor["nombre"])
+		return
+	if defensor.get("bajo_tierra", false):
+		await _acometer(spr_atacante, spr_defensor)
+		_regresar(spr_atacante)
+		defensor["bajo_tierra"] = false
+		_salir_de_tierra(spr_defensor)
+		_texto_flotante(spr_defensor, "Fallo", Color(1, 1, 1, 0.7))
+		await _decir("¡%s está bajo la arena! El ataque no lo alcanza." % defensor["nombre"])
+		return
 	var color_golpe: Color = COLOR_TIPO.get(mov["tipo"], Color.WHITE)
 	var aciertos := 0
 	await _acometer(spr_atacante, spr_defensor)
@@ -363,6 +491,12 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 			_esquivar(spr_defensor)
 			Sonido.efecto("lanzar", 1.4, -4.0)
 			_texto_flotante(spr_defensor, "Fallo", Color(1, 1, 1, 0.7))
+			# Bailarina Eléctrica: al esquivar un golpe de cuerpo, la estática puede paralizar al atacante
+			if defensor.get("pasiva", "") == "estatica" and mov["tipo"] in TIPOS_FISICOS and atacante["paralizado"] <= 0 and randf() < 0.35:
+				atacante["paralizado"] = 3
+				_destello(spr_atacante, COLOR_TIPO["energia"], 0.4)
+				_actualizar_hud()
+				_estatica_pendiente = atacante["nombre"]
 			continue
 		var danio := _calcular_danio(atacante, defensor, mov)
 		defensor["hp"] = maxi(0, defensor["hp"] - danio)
@@ -376,17 +510,41 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 		await _decir("¡%d de %d golpes acertaron!" % [aciertos, golpes])
 	elif aciertos == 0:
 		await _decir("¡%s esquivó el ataque!" % defensor["nombre"])
+	if _estatica_pendiente != "":
+		await _decir("¡La estática de %s paraliza a %s!" % [defensor["nombre"], _estatica_pendiente])
+		_estatica_pendiente = ""
 	if aciertos == 0:
 		return
 	if debilidad > 1.0:
 		await _decir("¡Es súper efectivo!")
 	elif debilidad < 1.0:
 		await _decir("No es muy efectivo...")
-	if mov.get("efecto", "") == "infectar" and defensor["hp"] > 0 and not defensor["infectado"]:
-		defensor["infectado"] = true
+	if atacante == enemigo and tipo == "entrenador" and (debilidad > 1.0 or aliado["hp"] < aliado["hp_max"] * 0.4):
+		await _frase("golpe")
+	var efecto: String = mov.get("efecto", "")
+	if defensor["hp"] <= 0:
+		return
+	if efecto == "infectar" and not defensor["infectado"]:
+		if defensor.get("pasiva", "") == "sin_infeccion":
+			await _decir("%s es de metal: la infección no le hace nada." % defensor["nombre"])
+		else:
+			defensor["infectado"] = true
+			_actualizar_hud()
+			_destello(spr_defensor, COLOR_TIPO["toxico"], 0.4)
+			await _decir("¡%s quedó infectado!" % defensor["nombre"])
+	elif efecto == "paralizar" and defensor["paralizado"] <= 0:
+		defensor["paralizado"] = 3
 		_actualizar_hud()
-		_destello(spr_defensor, COLOR_TIPO["toxico"], 0.4)
-		await _decir("¡%s quedó infectado!" % defensor["nombre"])
+		_destello(spr_defensor, COLOR_TIPO["energia"], 0.4)
+		await _decir("¡%s quedó paralizado!" % defensor["nombre"])
+	elif efecto == "defensa_abajo" and defensor["defensa"] > defensor["defensa_base"] * 0.45:
+		defensor["defensa"] = maxf(defensor["defensa"] * 0.75, defensor["defensa_base"] * 0.4)
+		_texto_flotante(spr_defensor, "DEF-", Color("#ff9a7a"))
+		await _decir("¡Los nanobots se comen la defensa de %s!" % defensor["nombre"])
+	elif efecto == "bajo_tierra":
+		atacante["bajo_tierra"] = true
+		_meter_en_tierra(spr_atacante)
+		await _decir("¡%s se esconde bajo la arena!" % atacante["nombre"])
 
 
 func _fase_estados() -> void:
@@ -399,6 +557,20 @@ func _fase_estados() -> void:
 			_destello(pareja[1], COLOR_TIPO["toxico"], 0.4)
 			_actualizar_hud()
 			await _decir("%s sufre por la infección." % luchador["nombre"])
+		if _tormenta and luchador["hp"] > 0 and luchador.get("tipo", "") != "chatarra":
+			var raspon := maxi(1, luchador["hp_max"] / 16)
+			luchador["hp"] = maxi(0, luchador["hp"] - raspon)
+			_texto_flotante(pareja[1], str(raspon), Color("#e09050"))
+			_actualizar_hud()
+			await _decir("El óxido raspa a %s." % luchador["nombre"])
+		if luchador["paralizado"] > 0:
+			luchador["paralizado"] -= 1
+			if luchador["paralizado"] == 0 and luchador["hp"] > 0:
+				_actualizar_hud()
+				await _decir("%s ya no está paralizado." % luchador["nombre"])
+	# Grito de Guerra (Rictus): cada 3 turnos sus bestias recuperan un poco de vida
+	if datos.get("grito_guerra", false) and _turno_n % 3 == 0 and enemigo["hp"] > 0:
+		await _grito_de_guerra()
 
 
 ## Devuelve true si el combate terminó o si hay que elegir otra carta.
@@ -408,12 +580,30 @@ func _revisar_caidos() -> bool:
 		await _decir("¡%s fue derrotado!" % enemigo["nombre"])
 		if tipo == "entrenador" and not equipo_enemigo.is_empty():
 			var nombre_e: String = datos.get("entrenador", {}).get("nombre", "El bandido")
+			_sacudir_entrenador()
+			await _frase("pierde")
 			await _sacar_enemigo(equipo_enemigo.pop_front())
 			await _decir("%s saca a %s (Nvl %d)." % [nombre_e, enemigo["nombre_especie"], enemigo["nivel"]])
+			if equipo_enemigo.is_empty():
+				await _frase("ultima")
 			return false
 		if tipo == "entrenador":
-			await _decir("¡%s se quedó sin bestias!" % datos.get("entrenador", {}).get("nombre", "El bandido"))
+			var nombre_e: String = datos.get("entrenador", {}).get("nombre", "El bandido")
+			_sacudir_entrenador()
+			await _decir("¡%s se quedó sin bestias!" % nombre_e)
+			await _frase("derrota")
+			var botin: Dictionary = datos.get("botin", {})
+			if not botin.is_empty():
+				Juego.monedas += int(botin.get("monedas", 0))
+				Juego.chatarra += int(botin.get("reliquias", 0))
+				await _decir("%s huye y suelta su botín: %d monedas y %d Reliquias del Viejo Mundo." % [
+					nombre_e, int(botin.get("monedas", 0)), int(botin.get("reliquias", 0))])
 		else:
+			var parte: Dictionary = Juego.criaturas[enemigo["id"]].get("parte", {})
+			if not parte.is_empty() and randf() < 0.7:
+				Juego.partes[parte["id"]] = int(Juego.partes.get(parte["id"], 0)) + 1
+				Sonido.efecto("objeto")
+				await _decir("Pan recoge: %s. (Se vende en las tiendas.)" % parte["nombre"])
 			await _decir("(Para capturar una criatura, debilítala sin derrotarla.)")
 		_terminar("victoria")
 		return true
@@ -453,6 +643,10 @@ func _sacar_carta(i: int) -> void:
 	var carta: Dictionary = Juego.mochila[i]
 	indice_aliado = i
 	aliado = Juego.crear_luchador(carta["id"], Juego.nivel_carta(carta), carta["hp"])
+	if Juego.bonus_ataque > 0.0:   # las fuerzas que te dieron las ciudades liberadas
+		aliado["ataque"] *= 1.0 + Juego.bonus_ataque
+		aliado["ataque_base"] = aliado["ataque"]
+	_quitar_hundido(sprite_aliado)
 	sprite_aliado.texture = Juego.textura_criatura(carta["id"])
 	sprite_aliado.flip_h = false
 	_ajustar_reposo(sprite_aliado, carta["id"])
@@ -588,21 +782,210 @@ func _ia_enemigo() -> Dictionary:
 		var efecto: String = mov.get("efecto", "")
 		var poder_total := int(mov["poder"]) * int(mov.get("golpes", 1))
 		if efecto == "infectar":
-			peso = 40.0 + (50.0 if not aliado.get("infectado", false) else 0.0)
+			var sirve: bool = not aliado.get("infectado", false) and aliado.get("pasiva", "") != "sin_infeccion"
+			peso = 40.0 + (50.0 if sirve else 0.0)
+		elif efecto == "paralizar":
+			peso = 85.0 if aliado.get("paralizado", 0) <= 0 else 15.0
+		elif efecto == "defensa_abajo":
+			peso = 75.0 if aliado.get("defensa", 1.0) > aliado.get("defensa_base", 1.0) * 0.6 else 20.0
+		elif efecto == "bajo_tierra":
+			peso = 65.0 if not enemigo.get("bajo_tierra", false) else 10.0
+		elif efecto == "defensa_arriba":
+			# Arquetipo tanque: si Pan acaba de pegarle fuerte, se blinda
+			peso = 15.0
+			if enemigo["defensa"] < enemigo["defensa_base"] * 1.9:
+				peso = 80.0 if _ultimo_fisico else (45.0 if vida > 0.6 else 25.0)
 		elif efecto == "evasion_arriba":
 			peso = 20.0
 			if enemigo["ia"] == "evasivo" and vida < 0.5 and enemigo["evasion"] < 0.6:
 				peso = 85.0
 		elif poder_total == mas_fuerte and vida_rival < 0.3:
 			peso = 100.0  # modo "rematar"
+		elif _modificador_tipo(mov["tipo"], aliado) > 1.0:
+			peso = 78.0   # sabe que es súper efectivo
+		elif _modificador_tipo(mov["tipo"], aliado) == 0.0:
+			peso = 5.0
 		opciones_ia.append([peso + randf() * 5.0, { "tipo": "ataque", "movimiento": mov }])
 
 	# Arquetipo evasivo (Bestia Blanca): en la zona roja intenta huir (solo si es salvaje).
 	if enemigo["ia"] == "evasivo" and vida < 0.25 and tipo == "salvaje":
 		opciones_ia.append([95.0 + randf() * 5.0, { "tipo": "huir" }])
 
+	if tipo == "entrenador":
+		# Los humanos SÍ usan objetos: una cura cuando su bestia está en rojo.
+		if int(datos.get("curas", 0)) > 0 and vida < 0.3:
+			opciones_ia.append([88.0, { "tipo": "cura_enemigo" }])
+		# IA táctica: si tu criatura le hace daño súper efectivo, cambia a una que lo aguante.
+		var tactico: bool = datos.get("comandante", false) or (datos.get("tactico", false) and randf() < 0.7)
+		if tactico and _turnos_desde_cambio >= 2 and _pan_tiene_ventaja(enemigo):
+			for i in equipo_enemigo.size():
+				var cand: Dictionary = equipo_enemigo[i]
+				var info_c: Dictionary = cand if cand.has("hp_max") else Juego.criaturas[cand["id"]]
+				if (not cand.has("hp") or cand["hp"] > 0) and not _pan_tiene_ventaja(info_c):
+					if not cand.has("hp_max"):
+						var l := Juego.crear_luchador(cand["id"], cand["nivel"])
+						l["nombre_especie"] = l["nombre"]
+						l["nombre"] += " rival"
+						equipo_enemigo[i] = l
+					opciones_ia.append([92.0, { "tipo": "cambio_enemigo", "indice": i }])
+					break
+
 	opciones_ia.sort_custom(func(a, b): return a[0] > b[0])
 	return opciones_ia[0][1]
+
+
+## ¿La criatura de Pan tiene un ataque súper efectivo contra esta bestia?
+func _pan_tiene_ventaja(objetivo: Dictionary) -> bool:
+	if aliado.is_empty():
+		return false
+	for mov in aliado["movimientos"]:
+		if int(mov["poder"]) > 0 and mov["tipo"] in objetivo.get("debil_a", []):
+			return true
+	return false
+
+
+## Parálisis: la mitad de las veces no puede moverse.
+func _paralizado_no_actua(l: Dictionary, s: Sprite2D) -> bool:
+	if l["paralizado"] <= 0 or randf() >= 0.5:
+		return false
+	_destello(s, COLOR_TIPO["energia"], 0.3)
+	Sonido.efecto("fallo", 1.3)
+	await _decir("¡%s está paralizado y no puede moverse!" % l["nombre"])
+	return true
+
+
+## Curas, comida y potenciadores (siempre en la criatura que está peleando).
+func _usar_objeto(id: String) -> void:
+	var info: Dictionary = Juego.OBJETOS[id]
+	Juego.usar_objeto(id)
+	await _decir("Pan usa %s en %s." % [info["nombre"], aliado["nombre"]], 0.2)
+	var o := await _lanzar(TEX_CARTA, sprite_aliado.position + Vector2(0, -24), 0.3)
+	o.queue_free()
+	Sonido.efecto("objeto")
+	if info["tipo"] == "potenciador":
+		var antes: float = aliado["ataque"]
+		aliado["ataque"] = minf(aliado["ataque"] * (1.0 + float(info["valor"])), aliado["ataque_base"] * 2.2)
+		_destello(sprite_aliado, Color("#ff5a3a"), 0.8)
+		_chispa(sprite_aliado.position + Vector2(0, -24), Color("#ff6a4a"), 1.5)
+		_texto_flotante(sprite_aliado, "ATK+", Color("#ff8a6a"))
+		_actualizar_hud()
+		if aliado["ataque"] <= antes:
+			await _decir("El ataque de %s ya está al máximo." % aliado["nombre"])
+		else:
+			await _decir("¡Un aura roja envuelve a %s! Su ataque subió." % aliado["nombre"])
+		return
+	var cura := maxi(1, roundi(aliado["hp_max"] * float(info["valor"])))
+	var antes_hp: int = aliado["hp"]
+	aliado["hp"] = mini(aliado["hp_max"], aliado["hp"] + cura)
+	_destello(sprite_aliado, Color("#7bf09a"), 0.5)
+	_texto_flotante(sprite_aliado, "+%d" % (aliado["hp"] - antes_hp), Color("#7bf09a"))
+	_actualizar_hud()
+	_guardar_aliado()
+	await _decir("%s recupera %d de vida." % [aliado["nombre"], aliado["hp"] - antes_hp])
+
+
+## Rictus grita y sus bestias recuperan un 15% de vida (también las que esperan).
+func _grito_de_guerra() -> void:
+	var nombre_e: String = datos.get("entrenador", {}).get("nombre", "El comandante")
+	Sonido.efecto("alerta", 0.7)
+	_sacudir_pantalla(5.0)
+	var t := create_tween()
+	t.tween_property(sprite_entrenador, "scale", Vector2(1.2, 1.2), 0.1)
+	t.tween_property(sprite_entrenador, "scale", Vector2.ONE, 0.2)
+	await _decir("¡%s lanza su GRITO DE GUERRA!" % nombre_e)
+	var cura := maxi(1, roundi(enemigo["hp_max"] * 0.15))
+	enemigo["hp"] = mini(enemigo["hp_max"], enemigo["hp"] + cura)
+	for b in equipo_enemigo:
+		if b.has("hp_max") and b["hp"] > 0:
+			b["hp"] = mini(b["hp_max"], b["hp"] + roundi(b["hp_max"] * 0.15))
+	_destello(sprite_enemigo, Color("#ff7a3a"), 0.5)
+	_texto_flotante(sprite_enemigo, "+%d" % cura, Color("#7bf09a"))
+	_actualizar_hud()
+	await _decir("Sus bestias recuperan vida.")
+
+
+## Frases del entrenador (se burla, se enoja...). Cada una se dice una sola vez por combate.
+func _frase(clave: String) -> void:
+	var frases: Dictionary = datos.get("frases", {})
+	if not frases.has(clave) or _frases_dichas.has(clave):
+		return
+	_frases_dichas[clave] = true
+	var nombre_e: String = datos.get("entrenador", {}).get("nombre", "")
+	var lista = frases[clave]
+	if lista is String:
+		lista = [lista]
+	for linea in lista:
+		if clave == "golpe":   # se ríe: da saltitos
+			var t := create_tween()
+			for i in 3:
+				t.tween_property(sprite_entrenador, "position:y", sprite_entrenador.get_meta("base").y - 4, 0.07)
+				t.tween_property(sprite_entrenador, "position:y", sprite_entrenador.get_meta("base").y, 0.07)
+		await _decir("%s: \"%s\"" % [nombre_e, linea], 1.2)
+
+
+## El entrenador se enoja cuando pierde una bestia.
+func _sacudir_entrenador() -> void:
+	if not sprite_entrenador.visible:
+		return
+	var base: Vector2 = sprite_entrenador.get_meta("base")
+	var t := create_tween()
+	for i in 5:
+		t.tween_property(sprite_entrenador, "position:x", base.x + (3 if i % 2 == 0 else -3), 0.04)
+	t.tween_property(sprite_entrenador, "position:x", base.x, 0.04)
+
+
+func _estados_cortos(l: Dictionary) -> String:
+	var lista: Array = []
+	if l.get("infectado", false):
+		lista.append("INF")
+	if l.get("paralizado", 0) > 0:
+		lista.append("PAR")
+	if l.get("ataque", 0.0) > l.get("ataque_base", 1e9) + 0.01:
+		lista.append("ATK+")
+	if l.get("defensa", 0.0) > l.get("defensa_base", 1e9) + 0.01:
+		lista.append("DEF+")
+	elif l.get("defensa", 1e9) < l.get("defensa_base", 0.0) - 0.01:
+		lista.append("DEF-")
+	return "" if lista.is_empty() else "  " + " ".join(PackedStringArray(lista))
+
+
+## El Gusano Devorador se mete bajo la arena: se ve hundido y medio transparente.
+func _meter_en_tierra(s: Sprite2D) -> void:
+	_polvo(s.get_meta("base"))
+	var t := create_tween().set_parallel()
+	t.tween_property(s, "offset:y", s.offset.y + 18, 0.2)
+	t.tween_property(s, "modulate:a", 0.45, 0.2)
+	s.set_meta("hundido", true)
+
+
+## Al cambiar de criatura, el sprite vuelve a su altura normal.
+func _quitar_hundido(s: Sprite2D) -> void:
+	if s.get_meta("hundido", false):
+		s.set_meta("hundido", false)
+		s.offset.y -= 18
+	s.modulate.a = 1.0
+
+
+func _salir_de_tierra(s: Sprite2D) -> void:
+	if not s.get_meta("hundido", false):
+		return
+	s.set_meta("hundido", false)
+	_polvo(s.get_meta("base"))
+	var t := create_tween().set_parallel()
+	t.tween_property(s, "offset:y", s.offset.y - 18, 0.15)
+	t.tween_property(s, "modulate:a", 1.0, 0.15)
+
+
+## Tormenta de óxido: luz naranja y ráfagas de polvo que cruzan el campo.
+func _armar_tormenta() -> void:
+	var tinte := ColorRect.new()
+	tinte.color = Color(0.85, 0.42, 0.18, 0.18)
+	tinte.size = Vector2(480, 270)
+	tinte.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	escenario.add_child(tinte)
+	var polvo := Ambiente.tormenta(Vector2(480, 270))
+	polvo.z_index = 5
+	escenario.add_child(polvo)
 
 
 # ---------------------------------------------------------------------------
@@ -647,13 +1030,13 @@ func _input(event: InputEvent) -> void:
 
 func _actualizar_hud() -> void:
 	if not aliado.is_empty():
-		nombre_aliado.text = "%s Nv%d%s" % [aliado["nombre"], aliado["nivel"], "  INF" if aliado["infectado"] else ""]
+		nombre_aliado.text = "%s Nv%d%s" % [aliado["nombre"], aliado["nivel"], _estados_cortos(aliado)]
 		_poner_barra(barra_aliado, aliado)
 		vida_aliado.text = "HP %d/%d" % [aliado["hp"], aliado["hp_max"]]
 	if not enemigo.is_empty():
 		nombre_enemigo.text = "%s Nv%d" % [enemigo["nombre_especie"], enemigo["nivel"]]
 		_poner_barra(barra_enemigo, enemigo)  # el enemigo no muestra número, solo la barra
-		estado_enemigo.text = "INFECTADO" if enemigo["infectado"] else ""
+		estado_enemigo.text = _estados_cortos(enemigo).strip_edges()
 
 
 func _preparar_barra(barra: ProgressBar) -> void:

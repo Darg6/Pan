@@ -14,8 +14,10 @@ extends Node2D
 @export var nivel_maximo := 2
 ## Probabilidad de encuentro en cada paso sobre pasto (0.12 = 12%)
 @export_range(0.0, 1.0) var probabilidad := 0.12
-## Fondo del combate: "paramo", "pastizal" o "chatarra" (arte/fondos/<fondo>_*.png)
+## Fondo del combate: "paramo", "pastizal", "chatarra", "dunas" o "bastion" (arte/fondos/<fondo>_*.png)
 @export var fondo := "pastizal"
+## Criaturas que salen durante una tormenta de óxido (si está vacío, las de siempre)
+@export var criaturas_tormenta: Array[String] = []
 
 
 func _ready() -> void:
@@ -28,10 +30,12 @@ func contiene(punto_global: Vector2) -> bool:
 
 
 func elegir_encuentro() -> Dictionary:
+	var lista := criaturas_tormenta if Juego.tormenta and not criaturas_tormenta.is_empty() else criaturas
 	return {
 		"tipo": "salvaje",
 		"fondo": fondo,
-		"equipo": [{ "id": criaturas.pick_random(), "nivel": randi_range(nivel_minimo, nivel_maximo) }],
+		"tormenta": Juego.tormenta,
+		"equipo": [{ "id": lista.pick_random(), "nivel": randi_range(nivel_minimo, nivel_maximo) }],
 	}
 
 

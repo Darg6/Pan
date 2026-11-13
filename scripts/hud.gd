@@ -16,6 +16,8 @@ signal accion_pulsada
 
 var _avisos: Array = []
 var _mostrando_aviso := false
+var panel_tienda: PanelContainer   # se crea por código (scripts/tienda_ui.gd)
+var _tormenta: Node = null
 
 
 func _ready() -> void:
@@ -24,6 +26,11 @@ func _ready() -> void:
 	boton_mochila.pressed.connect(Sonido.efecto.bind("boton"))
 	panel_mochila.cerrado.connect(func(): set_controles(true))
 	aviso.visible = false
+	panel_tienda = PanelContainer.new()
+	panel_tienda.name = "PanelTienda"
+	panel_tienda.set_script(load("res://scripts/tienda_ui.gd"))
+	add_child(panel_tienda)
+	move_child(panel_tienda, transicion.get_index())   # debajo del fundido
 	actualizar()
 
 
@@ -58,6 +65,31 @@ func set_controles(activos: bool) -> void:
 func abrir_mochila() -> void:
 	set_controles(false)
 	panel_mochila.abrir()
+
+
+## true si hay una ventana abierta (Pan no se mueve).
+func menu_abierto() -> bool:
+	return panel_mochila.visible or (panel_tienda != null and panel_tienda.visible)
+
+
+func abrir_tienda(nombre: String) -> void:
+	set_controles(false)
+	panel_tienda.abrir(nombre)
+	await panel_tienda.cerrado
+
+
+## Tormenta de óxido en pantalla: luz naranja que tapa un poco la vista.
+func set_tormenta(activa: bool) -> void:
+	if _tormenta == null:
+		var r := ColorRect.new()
+		r.name = "Tormenta"
+		r.set_anchors_preset(Control.PRESET_FULL_RECT)
+		r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		r.color = Color(0.82, 0.4, 0.16, 0.0)
+		add_child(r)
+		move_child(r, 0)
+		_tormenta = r
+	create_tween().tween_property(_tormenta, "color:a", 0.3 if activa else 0.0, 1.2)
 
 
 func decir(id_o_lineas) -> void:

@@ -489,6 +489,8 @@ def generar_tiles_exterior():
     lista.append(("escotilla", tile_escotilla(rng), True))
     lista.append(("escotilla_sellada", tile_escotilla(rng, True), True))
     lista.append(("tierra_oscura", tile_tierra(rng, [TIERRA[2], TIERRA[4], TIERRA[1], TIERRA[0], c("5a3f2c")]), False))
+    import arte_bastion   # Ciudad 1: dunas, chatarral, placas, puertas de contenedor... (al final: no mueve los viejos)
+    lista += arte_bastion.tiles(rng)
     return armar_atlas(lista, "tiles/exterior.png", TILES_EXT)
 
 def armar_atlas(lista, ruta, registro, columnas=8):
@@ -2652,6 +2654,8 @@ def generar_interfaz():
 
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
+    import arte_bastion   # arte de la Ciudad 1 (Bastión de Óxido): herramientas/arte_bastion.py
+    FONDOS_COMBATE.update({"dunas": arte_bastion.fondo_dunas, "bastion": arte_bastion.fondo_bastion})
     generar_tiles_exterior()
     generar_tiles_interior()
     generar_objetos()
@@ -2665,6 +2669,7 @@ if __name__ == "__main__":
     generar_cinematica()
     generar_conceptos()
     generar_interfaz()
+    arte_bastion.generar()
     with open(os.path.join(ARTE, "tiles", "tiles.json"), "w", encoding="utf-8") as f:
         json.dump({"exterior": TILES_EXT, "interior": TILES_INT}, f, indent=1, ensure_ascii=False)
     print("Listo:", len(TILES_EXT), "tiles exteriores,", len(TILES_INT), "interiores")

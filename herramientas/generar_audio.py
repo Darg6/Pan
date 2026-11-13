@@ -314,6 +314,136 @@ def sfx():
     guardar(x, "sfx/alerta", 0.45)
 
 
+# ---------------------------------------------------------------------------
+# CIUDAD 1: BASTIÓN DE ÓXIDO
+# (usan su propio generador aleatorio para no cambiar los sonidos de arriba)
+# ---------------------------------------------------------------------------
+rng_b = np.random.default_rng(1101)
+
+
+def ruido_b(seg):
+    return rng_b.uniform(-1, 1, int(seg * SR))
+
+
+def golpe_metal(seg=0.35, f=420):
+    """Un golpe sobre metal oxidado (para el ritmo de la ciudad)."""
+    t = t_de(seg)
+    x = sum(np.sin(2 * np.pi * f * k * t) * np.exp(-t * (14 + k * 6)) / k for k in (1, 2.76, 5.4))
+    return x + pasabajos(ruido_b(seg), 3000) * np.exp(-t * 40) * 0.4
+
+
+def musica_bastion():
+    """Bastión de Óxido: ritmo cansado de fábrica (la trituradora) y una melodía triste en Mi menor."""
+    negra = 60 / 92
+    corchea = negra / 2
+    progresion = [[52, 55, 59], [48, 52, 55], [50, 54, 57], [47, 51, 54]]  # Em C D B
+    compas = negra * 4
+    largo = compas * 2 * len(progresion)
+    pista = np.zeros(int(largo * SR) + SR * 2)
+    for i, ac in enumerate(progresion):
+        inicio = i * compas * 2
+        poner(pista, pad(ac, compas * 2.2, 600), inicio, 0.22)
+        for k in range(8):  # bajo pesado en negras
+            b = triangulo(nota(ac[0] - 12), negra * 0.9)
+            poner(pista, pasabajos(b, 350) * env(len(b), 0.005, 0.15, 0.4, 0.2), inicio + k * negra, 0.55)
+        for k in range(16):  # la trituradora: golpes de metal
+            if k % 4 in (0, 3):
+                poner(pista, pasabajos(golpe_metal(0.3, 300 if k % 4 == 0 else 460), 2500), inicio + k * corchea, 0.22)
+            poner(pista, platillo(0.04), inicio + k * corchea, 0.08)
+    lead = [64, 67, 71, 69, 67, 66, 64, None, 60, 64, 67, 66, 62, 63, 66, None]
+    for j, m in enumerate(lead):
+        if m is not None:
+            d = negra * 1.9
+            vib = 1 + 0.005 * np.sin(2 * np.pi * 4.5 * t_de(d))
+            tono = triangulo(nota(m + 12), d) * 0.7 + cuadrada(nota(m + 12), d, 0.25) * 0.3
+            poner(pista, pasabajos(tono, 1800) * env(len(tono), 0.06, 0.2, 0.55, 0.5) * vib, j * negra * 2, 0.15)
+    pista = eco(pista, corchea * 3, 0.25, 0.25)
+    guardar(bucle_suave(pista[: int(largo * SR) + SR], 0.5), "musica/bastion", 0.55)
+
+
+def musica_jefe():
+    """Combate contra un comandante: más rápido y pesado que el combate normal (Re menor, 164 bpm)."""
+    negra = 60 / 164
+    corchea = negra / 2
+    semi = negra / 4
+    progresion = [50, 46, 48, 45, 50, 46, 43, 45]  # Dm Bb C A Dm Bb G A
+    compas = negra * 4
+    largo = compas * len(progresion)
+    pista = np.zeros(int(largo * SR) + SR)
+    for i, raiz in enumerate(progresion):
+        inicio = i * compas
+        for k in range(8):  # bajo galopante
+            m = raiz - 12 + (7 if k % 4 == 3 else 0)
+            b = cuadrada(nota(m), corchea * 0.85, 0.5) + 0.5 * triangulo(nota(m - 12), corchea * 0.85)
+            poner(pista, pasabajos(b, 800) * env(len(b), 0.002, 0.04, 0.7, 0.03), inicio + k * corchea, 0.5)
+        tercera = 3 if raiz in (50, 43) else (4 if raiz in (46, 48) else 4)
+        for k in range(16):
+            m = raiz + 12 + [0, tercera, 7, 12][k % 4]
+            a = cuadrada(nota(m), semi * 0.8, 0.125)
+            poner(pista, a * env(len(a), 0.002, 0.03, 0.4, 0.02), inicio + k * semi, 0.1)
+        for k in range(4):
+            poner(pista, bombo(), inicio + k * negra, 0.9)
+            if k % 2:
+                poner(pista, bombo(), inicio + k * negra + corchea * 1.5, 0.4)
+                poner(pista, caja(), inicio + k * negra, 0.55)
+                poner(pista, golpe_metal(0.2, 520), inicio + k * negra, 0.15)
+            poner(pista, platillo(), inicio + k * negra + corchea, 0.25)
+    melodia = [74, 77, 76, 74, 73, 69, 70, 73, 74, 81, 79, 77, 76, 74, 73, 76]
+    for j, m in enumerate(melodia):
+        d = negra * 1.9
+        tono = cuadrada(nota(m), d, 0.5) * (1 + 0.004 * np.sin(2 * np.pi * 6 * t_de(d)))
+        poner(pista, pasabajos(tono, 2600) * env(len(tono), 0.01, 0.1, 0.6, 0.15), j * negra * 2, 0.17)
+    guardar(pista[: int(largo * SR)], "musica/jefe", 0.62)
+
+
+def ambiente_ciudad():
+    """Bastión: viento suave, la trituradora a lo lejos y algún golpe de metal."""
+    seg = 12
+    t = t_de(seg)
+    viento = pasabajos(ruido_b(seg), 450) * (0.6 + 0.3 * np.sin(2 * np.pi * t / 6.0))
+    motor = pasabajos(np.sin(2 * np.pi * 38 * t) + 0.5 * cuadrada(19, seg, 0.3), 200)
+    motor *= 0.7 + 0.3 * (np.sin(2 * np.pi * t * 1.5) > 0)
+    x = viento + motor * 0.35
+    for inicio, f in ((1.1, 380), (4.7, 520), (8.2, 300), (10.1, 460)):
+        poner(x, pasabajos(golpe_metal(0.4, f), 1500), inicio, 0.25)
+    guardar(bucle_suave(x, 1.5), "ambiente/ciudad", 0.45)
+
+
+def ambiente_tormenta():
+    """Tormenta de óxido: viento fuerte con arena que golpea el metal."""
+    seg = 12
+    t = t_de(seg)
+    base = pasabajos(ruido_b(seg), 900)
+    rafagas = 0.7 + 0.3 * np.sin(2 * np.pi * t / 3.3) * np.sin(2 * np.pi * t / 1.7 + 2)
+    silbido = pasabajos(ruido_b(seg), 2200) - pasabajos(ruido_b(seg), 1300)
+    arena = ruido_b(seg) - pasabajos(ruido_b(seg), 4000)
+    arena *= (rng_b.uniform(0, 1, len(arena)) > 0.6) * 0.25
+    x = base * rafagas + silbido * 0.5 * rafagas + arena
+    guardar(bucle_suave(x, 2.0), "ambiente/tormenta", 0.55)
+
+
+def sfx_aplausos():
+    """Una multitud aplaudiendo y celebrando (dura unos 2.6 segundos)."""
+    seg = 2.6
+    x = np.zeros(int(seg * SR))
+    for _ in range(260):  # cada aplauso es un chasquido de ruido filtrado
+        d = 0.05
+        c = ruido_b(d)
+        c = (c - pasabajos(c, rng_b.uniform(700, 1400))) * np.exp(-t_de(d) * rng_b.uniform(70, 110))
+        poner(x, c, rng_b.uniform(0, seg - d), rng_b.uniform(0.4, 1.0))
+    murmullo = pasabajos(ruido_b(seg), 600) * 0.15
+    x = (x + murmullo) * env(len(x), 0.15, 0.2, 0.9, 0.7)
+    guardar(x, "sfx/aplausos", 0.6)
+
+
+def bastion():
+    musica_bastion()
+    musica_jefe()
+    ambiente_ciudad()
+    ambiente_tormenta()
+    sfx_aplausos()
+
+
 if __name__ == "__main__":
     musica_recuerdo()
     musica_paramo()
@@ -321,4 +451,5 @@ if __name__ == "__main__":
     ambiente_viento()
     ambiente_bunker()
     sfx()
+    bastion()
     print("Audio listo en", AUDIO)

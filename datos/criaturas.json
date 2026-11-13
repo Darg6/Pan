@@ -1,5 +1,5 @@
 {
-	"_ayuda": "Para agregar una criatura, copia un bloque dentro de 'criaturas', cambia su id (ej. 'oso_de_escoria') y sus valores. Tipos de ataque (escribelos sin tilde): feral, toxico, termico, fluido, chatarra, energia, sombra, terrestre, sonico. 'ia' puede ser 'agresivo' o 'evasivo'. La imagen de cada criatura está en arte/criaturas/<id>.png (64x64, mirando a la derecha). 'precision' (opcional) va de 0 a 1.",
+	"_ayuda": "Para agregar una criatura, copia un bloque dentro de 'criaturas', cambia su id (ej. 'oso_de_escoria') y sus valores. Tipos (escribelos sin tilde): feral, toxico, termico, fluido, chatarra, energia, sombra, terrestre, sonico. 'debil_a' recibe x2, 'resiste' recibe x0.5, 'inmune' recibe x0. 'ia' puede ser 'agresivo', 'evasivo' o 'tanque'. 'valor' es lo que pagan por la carta en el Mercado de Bestias y 'parte' lo que suelta al derrotarla. Efectos de movimientos: infectar, evasion_arriba, defensa_arriba, defensa_abajo, paralizar, bajo_tierra. La imagen de cada criatura está en arte/criaturas/<id>.png (64x64, mirando a la derecha). 'precision' (opcional) va de 0 a 1.",
 	"carta_inicial": "",
 	"criaturas": {
 		"bestia_blanca": {
@@ -49,7 +49,14 @@
 						}
 					]
 				}
-			]
+			],
+			"valor": 60,
+			"parte": {
+				"id": "piel_blanca",
+				"nombre": "Piel Blanca",
+				"precio": 20
+			},
+			"inmune": []
 		},
 		"gato_mutado": {
 			"nombre": "Gato Mutado",
@@ -107,7 +114,14 @@
 						}
 					]
 				}
-			]
+			],
+			"valor": 25,
+			"parte": {
+				"id": "garra_infectada",
+				"nombre": "Garra Infectada",
+				"precio": 10
+			},
+			"inmune": []
 		},
 		"aves_negras": {
 			"nombre": "Aves Negras",
@@ -155,7 +169,14 @@
 						}
 					]
 				}
-			]
+			],
+			"valor": 30,
+			"parte": {
+				"id": "plumas_negras",
+				"nombre": "Plumas Negras",
+				"precio": 8
+			},
+			"inmune": []
 		},
 		"oso_de_escoria": {
 			"nombre": "Oso de Escoria",
@@ -196,6 +217,248 @@
 							"tipo": "feral",
 							"golpes": 1,
 							"precision": 0.5
+						}
+					]
+				}
+			],
+			"valor": 35,
+			"parte": {
+				"id": "placa_escoria",
+				"nombre": "Placa de Escoria",
+				"precio": 12
+			},
+			"inmune": []
+		},
+		"titan_de_chatarra": {
+			"nombre": "Titán de Chatarra",
+			"descripcion": "Ensamblaje masivo de metal oxidado con un núcleo que zumba. Defensa física extrema; la electricidad le fríe el núcleo y el agua lo oxida.",
+			"tipo": "chatarra",
+			"debil_a": [
+				"energia",
+				"fluido"
+			],
+			"resiste": [
+				"feral",
+				"sombra"
+			],
+			"inmune": [
+				"sonico"
+			],
+			"pasiva": "sin_infeccion",
+			"hp": 105,
+			"ataque": 46,
+			"defensa": 72,
+			"velocidad": 15,
+			"evasion": 0.0,
+			"facilidad_captura": 0.35,
+			"ia": "tanque",
+			"valor": 0,
+			"color": "#7a3a1e",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Puño de Chatarra",
+							"poder": 20,
+							"tipo": "chatarra"
+						},
+						{
+							"desde_nivel": 3,
+							"nombre": "Martillo de Chatarra",
+							"poder": 30,
+							"tipo": "chatarra"
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Blindaje",
+							"poder": 0,
+							"tipo": "chatarra",
+							"efecto": "defensa_arriba"
+						}
+					]
+				}
+			]
+		},
+		"enjambre_mecanico": {
+			"nombre": "Enjambre Mecánico",
+			"descripcion": "Una nube de nanobots oxidados que vive en el vertedero. Se come las defensas del rival. Débil a la electricidad.",
+			"tipo": "chatarra",
+			"debil_a": [
+				"energia",
+				"fluido"
+			],
+			"resiste": [
+				"feral",
+				"sombra"
+			],
+			"inmune": [
+				"sonico"
+			],
+			"pasiva": "sin_infeccion",
+			"hp": 60,
+			"ataque": 44,
+			"defensa": 48,
+			"velocidad": 74,
+			"evasion": 0.15,
+			"facilidad_captura": 0.7,
+			"ia": "agresivo",
+			"valor": 40,
+			"parte": {
+				"id": "microchips",
+				"nombre": "Microchips",
+				"precio": 14
+			},
+			"color": "#56606b",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Mordisco de Nanobots",
+							"poder": 6,
+							"tipo": "chatarra",
+							"golpes": 3
+						},
+						{
+							"desde_nivel": 3,
+							"nombre": "Plaga de Nanobots",
+							"poder": 9,
+							"tipo": "chatarra",
+							"golpes": 3
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Corrosión",
+							"poder": 8,
+							"tipo": "chatarra",
+							"efecto": "defensa_abajo"
+						}
+					]
+				}
+			]
+		},
+		"bailarina_electrica": {
+			"nombre": "Bailarina Eléctrica",
+			"descripcion": "Humanoide ágil nacida entre las torres de alta tensión. Genera estática al esquivar y paraliza al toque. Débil a la tierra.",
+			"tipo": "energia",
+			"debil_a": [
+				"terrestre",
+				"chatarra"
+			],
+			"resiste": [
+				"sonico",
+				"energia"
+			],
+			"inmune": [],
+			"pasiva": "estatica",
+			"hp": 58,
+			"ataque": 56,
+			"defensa": 34,
+			"velocidad": 90,
+			"evasion": 0.2,
+			"facilidad_captura": 0.55,
+			"ia": "evasivo",
+			"valor": 60,
+			"parte": {
+				"id": "filamento_estatico",
+				"nombre": "Filamento Estático",
+				"precio": 18
+			},
+			"color": "#7fd6e6",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Chispa",
+							"poder": 20,
+							"tipo": "energia"
+						},
+						{
+							"desde_nivel": 3,
+							"nombre": "Descarga Danzante",
+							"poder": 30,
+							"tipo": "energia"
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Paso Estático",
+							"poder": 10,
+							"tipo": "energia",
+							"efecto": "paralizar",
+							"precision": 0.85
+						}
+					]
+				}
+			]
+		},
+		"gusano_devorador": {
+			"nombre": "Gusano Devorador",
+			"descripcion": "Gusano gigante de las dunas de óxido. Ataca desde debajo de la arena y esquiva lo que viene de arriba. La electricidad no le hace nada.",
+			"tipo": "terrestre",
+			"debil_a": [
+				"fluido",
+				"sonico"
+			],
+			"resiste": [
+				"chatarra",
+				"feral"
+			],
+			"inmune": [
+				"energia"
+			],
+			"hp": 88,
+			"ataque": 52,
+			"defensa": 50,
+			"velocidad": 40,
+			"evasion": 0.0,
+			"facilidad_captura": 0.65,
+			"ia": "agresivo",
+			"valor": 45,
+			"parte": {
+				"id": "diente_gusano",
+				"nombre": "Diente de Gusano",
+				"precio": 15
+			},
+			"color": "#c98a4a",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Mordisco de Arena",
+							"poder": 20,
+							"tipo": "terrestre"
+						},
+						{
+							"desde_nivel": 3,
+							"nombre": "Fauces del Desierto",
+							"poder": 30,
+							"tipo": "terrestre"
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Excavar",
+							"poder": 14,
+							"tipo": "terrestre",
+							"efecto": "bajo_tierra"
 						}
 					]
 				}
