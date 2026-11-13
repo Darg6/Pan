@@ -123,11 +123,75 @@ func _mostrar_error(texto: String) -> void:
 	etiqueta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	etiqueta.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	etiqueta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	etiqueta.add_theme_font_size_override("font_size", 8)  # chica: aunque el tema falle, cabe todo
 	etiqueta.text = "Algo falló (el juego no se colgó):\n\n" + texto \
 		+ "\n\nVersión de Godot: %s. Este proyecto necesita Godot 4.3 o más nuevo." % Engine.get_version_info()["string"] \
 		+ "\nCopia este mensaje y la pestaña Salida (Output) de Godot y mándamelo."
 	_capa_error.add_child(etiqueta)
 	add_child(_capa_error)
+
+
+# ---------------------------------------------------------------------------
+# Autodiagnóstico al iniciar: revisa que el tema, los tilesets y los mapas carguen bien.
+# Si algo falla, lo muestra en pantalla (y en la pestaña Salida) en vez de dejar todo negro.
+# ---------------------------------------------------------------------------
+const MAPAS := ["res://escenas/mapas/refugio_cero.tscn", "res://escenas/mapas/superficie.tscn"]
+
+func _autodiagnostico() -> void:
+	var problemas: Array[String] = []
+	var tema := load("res://arte/tema.tres") as Theme
+	if tema == null:
+		problemas.append("No carga arte/tema.tres (botones y letra pixel).")
+	elif not tema.is_type_variation(&"BotonRedondo", &"Button") or tema.default_font == null:
+		problemas.append("arte/tema.tres es una versión vieja o está incompleto.")
+	for ruta in ["res://arte/tiles/interior.tres", "res://arte/tiles/exterior.tres"]:
+		var ts := load(ruta) as TileSet
+		if ts == null or ts.get_source_count() == 0:
+			problemas.append("No carga el tileset " + ruta)
+		else:
+			var fuente := ts.get_source(ts.get_source_id(0)) as TileSetAtlasSource
+			if fuente == null or fuente.texture == null:
+				problemas.append("El tileset %s no encuentra su imagen PNG." % ruta)
+	for ruta in ["res://scripts/mapa.gd", "res://scripts/historia.gd", "res://scripts/hud.gd", "res://scripts/pan.gd",
+			"res://scripts/combate.gd", "res://scripts/intro.gd", "res://scripts/caja_dialogo.gd", "res://scripts/interactuable.gd"]:
+		var sc := load(ruta) as GDScript
+		if sc == null or not sc.can_instantiate():
+			problemas.append("El script %s tiene un error." % ruta)
+	for ruta in MAPAS:
+		var escena := load(ruta) as PackedScene
+		if escena == null:
+			problemas.append("No carga el mapa " + ruta)
+			continue
+		var mapa := escena.instantiate()
+		var suelo := mapa.get_node_or_null("Suelo") as TileMapLayer
+		if suelo == null or suelo.tile_set == null or suelo.get_used_cells().is_empty():
+			problemas.append("El mapa %s no tiene su suelo (TileMapLayer) bien cargado." % ruta)
+		for nodo in ["HUD", "Entidades/Pan", "Entradas"]:
+			if not mapa.has_node(nodo):
+				problemas.append("Al mapa %s le falta el nodo %s." % [ruta, nodo])
+		mapa.free()
+	if problemas.is_empty():
+		print("Autodiagnóstico: todo bien.")
+		return
+	var distintos := _archivos_distintos()
+	var texto := "\n".join(problemas)
+	if not distintos.is_empty():
+		texto += "\n\nEstos archivos son distintos a los de GitHub (quizás Godot guardó encima una versión vieja):\n" \
+			+ "\n".join(distintos.slice(0, 8)) + ("\n..." if distintos.size() > 8 else "")
+		texto += "\n\nArreglo: cierra Godot. En GitHub Desktop, en la pestaña Changes, clic derecho > Discard all changes. Abre Godot otra vez."
+	_mostrar_error(texto)
+
+
+## Compara los archivos con datos/huellas.json (md5 de cada archivo tal como está en GitHub).
+func _archivos_distintos() -> Array[String]:
+	var lista: Array[String] = []
+	var huellas := _leer_json("res://datos/huellas.json")
+	for ruta in huellas:
+		if not FileAccess.file_exists(ruta):
+			lista.append(ruta.trim_prefix("res://") + " (falta)")
+		elif FileAccess.get_md5(ruta) != huellas[ruta]:
+			lista.append(ruta.trim_prefix("res://"))
+	return lista
 
 
 func _version_suficiente() -> bool:
@@ -139,6 +203,8 @@ func _ready() -> void:
 	randomize()
 	if not _version_suficiente():
 		_mostrar_error.call_deferred("Tu Godot es muy viejo para este proyecto: los mapas usan TileMapLayer, que existe desde Godot 4.3.\nDescarga Godot 4.3 o más nuevo desde godotengine.org.")
+	else:
+		_autodiagnostico.call_deferred()
 	criaturas = _leer_json(RUTA_CRIATURAS).get("criaturas", {})
 	dialogos = _leer_json(RUTA_DIALOGOS)
 	var inicial: String = _leer_json(RUTA_CRIATURAS).get("carta_inicial", "")
