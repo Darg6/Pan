@@ -68,7 +68,7 @@ text = "Misión principal: Llega a Bastión de Óxido y encuentra al Comandante 
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="Transicion" type="ColorRect" parent="."]
+[node name="Transicion" type="ColorRect" parent="." groups=["fundido"]]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

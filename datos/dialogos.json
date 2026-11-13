@@ -2,44 +2,44 @@
 	"_ayuda": "Cada diálogo es una lista de líneas. 'quien' es el nombre que se muestra (vacío = narrador). 'retrato' es el nombre de un PNG en arte/retratos/ (opcional). Puedes cambiar los textos libremente.",
 	"intro_1": [
 		{
-			"quien": "",
-			"texto": "Antes del fin, el mundo tenía ciudades, ríos limpios y cielos azules."
+			"quien": "Pan",
+			"texto": "Antes del fin, el mundo tenía ciudades, ríos limpios y cielos azules. Eso me contaban."
 		},
 		{
-			"quien": "",
+			"quien": "Pan",
 			"texto": "Después solo quedaron páramos, ruinas... y las criaturas que nacieron de la contaminación."
 		},
 		{
-			"quien": "",
-			"texto": "Diego y Danitza sobrevivieron. Le enseñaron a su hijo a recolectar, a esconderse y a luchar."
+			"quien": "Pan",
+			"texto": "Mis padres, Diego y Danitza, sobrevivieron. Me enseñaron a recolectar, a esconderme y a luchar."
 		},
 		{
-			"quien": "",
+			"quien": "Pan",
 			"texto": "Soñaban con reconstruir la humanidad. Con una ciudad donde nadie tuviera que esconderse."
 		},
 		{
-			"quien": "Diego",
+			"quien": "Papá",
 			"texto": "¡Corre, Pan! ¡No te sueltes!"
 		}
 	],
 	"intro_2": [
 		{
-			"quien": "",
-			"texto": "Un hombre los seguía. Dijo que solo buscaba comida."
+			"quien": "Pan",
+			"texto": "Un hombre nos seguía. Dijo que solo buscaba comida."
 		},
 		{
-			"quien": "Danitza",
-			"texto": "Es un callejón sin salida... Diego, ¡el conducto!"
+			"quien": "Mamá",
+			"texto": "Es un callejón sin salida... ¡El conducto, rápido!"
 		},
 		{
-			"quien": "Diego",
+			"quien": "Papá",
 			"texto": "Entra ahí y no hagas ruido. Lleva la mochila. Pase lo que pase, no salgas."
 		}
 	],
 	"intro_3": [
 		{
-			"quien": "",
-			"texto": "A través de la rejilla, Pan vio una silueta impecable. Un traje blanco, limpio, imposible en este mundo."
+			"quien": "Pan",
+			"texto": "A través de la rejilla vi una silueta impecable. Un traje blanco, limpio, imposible en este mundo."
 		},
 		{
 			"quien": "???",
@@ -52,7 +52,7 @@
 	],
 	"intro_4": [
 		{
-			"quien": "Danitza",
+			"quien": "Mamá",
 			"texto": "No llores, Pan. Construye."
 		}
 	],
@@ -79,7 +79,7 @@
 	"mochila": [
 		{
 			"quien": "",
-			"texto": "Pan recoge la Mochila Táctica de cuero de su padre."
+			"texto": "Pan recoge la Mochila Táctica de cuero de papá."
 		},
 		{
 			"quien": "Pan",
@@ -109,7 +109,7 @@
 	"collar": [
 		{
 			"quien": "",
-			"texto": "El collar de Danitza: un gato de metal con una perla morada en el vientre."
+			"texto": "El collar de mamá: un gato de metal con una perla morada en el vientre."
 		},
 		{
 			"quien": "",

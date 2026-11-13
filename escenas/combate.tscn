@@ -157,7 +157,7 @@ theme_override_constants/h_separation = 4
 theme_override_constants/v_separation = 4
 columns = 2
 
-[node name="Transicion" type="ColorRect" parent="."]
+[node name="Transicion" type="ColorRect" parent="." groups=["fundido"]]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
