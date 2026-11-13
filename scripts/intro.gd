@@ -54,7 +54,8 @@ func _al_iniciar_linea(linea: Dictionary) -> void:
 	if nombre == "":
 		return
 	var ruta := "res://arte/cinematica/%s.png" % nombre
-	if not ResourceLoader.exists(ruta):
+	var tex := Juego.textura(ruta)
+	if tex == null:
 		push_warning("No existe la imagen de la intro: " + ruta)
 		return
 	if _tween_imagen:
@@ -62,13 +63,13 @@ func _al_iniciar_linea(linea: Dictionary) -> void:
 	_tween_imagen = create_tween()
 	if imagen.texture != null:
 		_tween_imagen.tween_property(imagen, "modulate", Color.BLACK, 0.25)  # se oscurece la anterior
-	_tween_imagen.tween_callback(_poner_imagen.bind(ruta))
+	_tween_imagen.tween_callback(_poner_imagen.bind(tex))
 	_tween_imagen.tween_property(imagen, "modulate", Color.WHITE, 0.35)
 	_tween_imagen.parallel().tween_property(imagen, "scale", Vector2.ONE, 8.0)  # acercamiento lento
 
 
-func _poner_imagen(ruta: String) -> void:
-	imagen.texture = load(ruta)
+func _poner_imagen(tex: Texture2D) -> void:
+	imagen.texture = tex
 	imagen.pivot_offset = imagen.size / 2.0
 	imagen.scale = Vector2(1.06, 1.06)
 

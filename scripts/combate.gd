@@ -80,7 +80,7 @@ func _ready() -> void:
 
 	if tipo == "entrenador":
 		var e: Dictionary = datos.get("entrenador", {})
-		sprite_entrenador.texture = load(e.get("sprite", "res://arte/personajes/recluta_combate.png"))
+		sprite_entrenador.texture = Juego.textura(e.get("sprite", "res://arte/personajes/recluta_combate.png"))
 		sprite_entrenador.visible = true
 	else:
 		sprite_entrenador.visible = false
