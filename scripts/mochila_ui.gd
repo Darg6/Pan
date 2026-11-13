@@ -82,7 +82,11 @@ func _refrescar(aviso := "") -> void:
 			var nombre: String = Juego.criaturas[carta["id"]]["nombre"]
 			var rota: bool = carta["hp"] <= 0
 			var llena: bool = carta["hp"] >= Juego.hp_max_carta(carta)
+			if Juego.tipo_objeto(_usando) == "antidoto":
+				llena = not carta.get("infectada", false)   # el antídoto solo sirve si está infectada
 			var estado := "rota" if rota else ("%d/%d HP" % [carta["hp"], Juego.hp_max_carta(carta)])
+			if carta.get("infectada", false) and not rota:
+				estado += ", infectada"
 			_boton("%s  (%s)" % [nombre, estado], _usar_en.bind(i), rota or llena)
 		_boton("Cancelar", _elegir_objeto.bind(""))
 		return
@@ -109,7 +113,7 @@ func _refrescar(aviso := "") -> void:
 		etiqueta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		etiqueta.text = "%s  x%d/%d" % [Juego.nombre_objeto(id), cantidad, Juego.max_objeto(id)]
 		fila.add_child(etiqueta)
-		if Juego.tipo_objeto(id) in ["cura", "comida"]:
+		if Juego.tipo_objeto(id) in ["cura", "comida", "antidoto"]:
 			var b := Button.new()
 			b.text = "Usar"
 			b.focus_mode = Control.FOCUS_NONE
@@ -214,6 +218,8 @@ func _crear_fila(carta: Dictionary, en_equipo: bool) -> Control:
 	if nivel < Juego.NIVEL_MAXIMO:
 		siguiente = "  Cartas %d/%d para Nvl %d" % [carta["cantidad"], Juego.cartas_para_nivel(nivel + 1), nivel + 1]
 	var estado := "CARTA ROTA (duerme para repararla)" if rota else "HP %d/%d" % [carta["hp"], hp_max]
+	if carta.get("infectada", false) and not rota:
+		estado += "  INFECTADA"
 	var nombres: Array = []
 	for mov in Juego.movimientos(carta["id"], nivel):
 		nombres.append(mov["nombre"])

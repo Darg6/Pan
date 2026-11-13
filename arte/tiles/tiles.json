@@ -289,6 +289,26 @@
    1,
    7,
    true
+  ],
+  "ceniza_1": [
+   2,
+   7,
+   false
+  ],
+  "ceniza_2": [
+   3,
+   7,
+   false
+  ],
+  "baranda": [
+   4,
+   7,
+   true
+  ],
+  "asfalto_roto": [
+   5,
+   7,
+   false
   ]
  },
  "interior": {
@@ -361,6 +381,198 @@
    5,
    1,
    false
+  ]
+ },
+ "subterraneo": {
+  "roca": [
+   0,
+   0,
+   true
+  ],
+  "pared": [
+   1,
+   0,
+   true
+  ],
+  "pared_tubo": [
+   2,
+   0,
+   true
+  ],
+  "azulejo": [
+   3,
+   0,
+   true
+  ],
+  "azulejo_letrero": [
+   4,
+   0,
+   true
+  ],
+  "azulejo_grafiti": [
+   5,
+   0,
+   true
+  ],
+  "anden_1": [
+   6,
+   0,
+   false
+  ],
+  "anden_2": [
+   7,
+   0,
+   false
+  ],
+  "anden_borde": [
+   0,
+   1,
+   false
+  ],
+  "via": [
+   1,
+   1,
+   false
+  ],
+  "lodo_1": [
+   2,
+   1,
+   true
+  ],
+  "lodo_2": [
+   3,
+   1,
+   true
+  ],
+  "orilla": [
+   4,
+   1,
+   true
+  ],
+  "pasarela_h": [
+   5,
+   1,
+   false
+  ],
+  "pasarela_v": [
+   6,
+   1,
+   false
+  ],
+  "pasarela_rota": [
+   7,
+   1,
+   true
+  ],
+  "hongos_1": [
+   0,
+   2,
+   false
+  ],
+  "hongos_2": [
+   1,
+   2,
+   false
+  ],
+  "musgo": [
+   2,
+   2,
+   false
+  ],
+  "rejilla": [
+   3,
+   2,
+   false
+  ],
+  "charco": [
+   4,
+   2,
+   false
+  ],
+  "tubo_h": [
+   5,
+   2,
+   true
+  ],
+  "tubo_v": [
+   6,
+   2,
+   true
+  ],
+  "lab_piso": [
+   7,
+   2,
+   false
+  ],
+  "lab_linea": [
+   0,
+   3,
+   false
+  ],
+  "lab_pared": [
+   1,
+   3,
+   true
+  ],
+  "cristal": [
+   2,
+   3,
+   true
+  ],
+  "gas_1": [
+   3,
+   3,
+   false
+  ],
+  "gas_2": [
+   4,
+   3,
+   false
+  ],
+  "oscuro_1": [
+   5,
+   3,
+   false
+  ],
+  "oscuro_2": [
+   6,
+   3,
+   false
+  ],
+  "escalera": [
+   7,
+   3,
+   false
+  ],
+  "cajas": [
+   0,
+   4,
+   true
+  ],
+  "barril_verde": [
+   1,
+   4,
+   true
+  ],
+  "colchon": [
+   2,
+   4,
+   false
+  ],
+  "fogon": [
+   3,
+   4,
+   true
+  ],
+  "hongo_grande": [
+   4,
+   4,
+   true
+  ],
+  "valla_lab": [
+   5,
+   4,
+   true
   ]
  }
 }

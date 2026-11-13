@@ -58,6 +58,8 @@ var _ultimo_fisico := false      # el último ataque de Pan fue un golpe físico
 var _frases_dichas := {}         # frases del entrenador que ya dijo (cada una una vez)
 var _tormenta := false           # tormenta de óxido en Bastión
 var _estatica_pendiente := ""    # nombre de quien quedó paralizado por la estática (para el mensaje)
+var _campo_radioactivo := false  # Vesper llena la arena de gas: tus cartas pierden un poco de vida cada turno
+var _gas: ColorRect               # el verde del gas en pantalla
 
 
 func _ready() -> void:
@@ -79,6 +81,9 @@ func _ready() -> void:
 	escenario.add_child(ceniza)
 	if _tormenta:
 		_armar_tormenta()
+	_campo_radioactivo = bool(datos.get("campo_radioactivo", false))
+	if _campo_radioactivo:
+		_armar_gas()
 	equipo_enemigo = datos.get("equipo", []).duplicate(true)
 
 	_preparar_barra(barra_aliado)
@@ -121,6 +126,13 @@ func _ready() -> void:
 		await _decir("¡Una tormenta de óxido azota el campo! Solo la chatarra la aguanta.")
 	if datos.get("grito_guerra", false):
 		await _decir("Cada 3 turnos, el Grito de Guerra de %s cura a sus bestias." % datos.get("entrenador", {}).get("nombre", "el comandante"))
+	if _campo_radioactivo:
+		Sonido.efecto("burbuja", 0.8)
+		await _decir("¡%s llena la arena de gas! CAMPO RADIOACTIVO: tu carta en el campo pierde un poco de vida cada turno." % datos.get("entrenador", {}).get("nombre", "La comandante"))
+		await _decir("Consejo: cambiar de carta es más rápido que atacar. Rota tus cartas para repartir el daño.")
+	if datos.has("intervencion"):
+		await _decir("Cuidado: %s puede atacar a tu carta desde lejos cada %d turnos (Intervención Directa)." % [
+			datos.get("entrenador", {}).get("nombre", "El bandido"), _cada_intervencion()])
 
 	var primera := _primera_carta_viva()
 	if primera == -1:
@@ -132,23 +144,35 @@ func _ready() -> void:
 		await _decir("Tu %s (Velocidad %d) es más rápido que el %s (Velocidad %d): atacarás primero." % [
 			aliado["nombre"], aliado["velocidad"], enemigo["nombre_especie"], enemigo["velocidad"]])
 		await _decir("Consejo: Arañazo Infeccioso deja 'Infectado'. La infección quita vida al final de cada turno.")
+	if aliado["infectado"]:
+		await _decir("%s sigue infectado desde antes. (Un Antídoto lo cura.)" % aliado["nombre"])
+	# Cazadores Furtivos: salen de la nada y atacan antes de que Pan pueda hacer nada
+	if datos.get("emboscada", false):
+		await _decir("¡EMBOSCADA! %s ataca antes de que Pan reaccione." % enemigo["nombre"])
+		await _accion_enemigo(_ia_enemigo())
+		if await _revisar_caidos():
+			return
 	_menu_principal()
 
 
 func _sacar_enemigo(info: Dictionary, animar := true) -> void:
 	if info.has("hp_max"):   # una bestia que el entrenador ya había sacado (vuelve con la vida que tenía)
 		enemigo = info
+		enemigo["enlodado"] = false   # al salir del campo se limpió el lodo
+		enemigo["velocidad"] = enemigo["velocidad_base"]
 	else:
 		enemigo = Juego.crear_luchador(info["id"], info["nivel"])
 		enemigo["nombre_especie"] = enemigo["nombre"]
 		enemigo["nombre"] += " rival" if tipo == "entrenador" else " salvaje"
 	_turnos_desde_cambio = 0
 	enemigo["bajo_tierra"] = false
+	if enemigo.get("pasiva", "") == "camuflaje":
+		enemigo["camuflado"] = 1
 	_quitar_hundido(sprite_enemigo)
 	sprite_enemigo.texture = Juego.textura_criatura(info["id"])
 	sprite_enemigo.flip_h = true  # las criaturas miran a la derecha; el enemigo mira a la izquierda
 	sprite_enemigo.scale = Vector2.ONE
-	sprite_enemigo.modulate = Color.WHITE
+	sprite_enemigo.modulate = Color(1, 1, 1, 0.35) if enemigo.get("camuflado", 0) > 0 else Color.WHITE
 	sprite_enemigo.visible = true
 	_ajustar_reposo(sprite_enemigo, info["id"])
 	_actualizar_hud()
@@ -197,7 +221,7 @@ func _menu_mochila() -> void:
 		entradas.append(["Granada x%d" % Juego.objetos["granada_aturdidora"], func(): _turno({ "tipo": "granada" })])
 	if tipo != "tutorial_captura":
 		for id in Juego.OBJETOS:
-			if Juego.tipo_objeto(id) in ["cura", "comida", "potenciador"] and Juego.tiene_objeto(id):
+			if Juego.tipo_objeto(id) in ["cura", "comida", "potenciador", "antidoto"] and Juego.tiene_objeto(id):
 				entradas.append(["%s x%d" % [Juego.nombre_objeto(id), Juego.objetos[id]], func(): _turno({ "tipo": "objeto", "id": id })])
 		entradas.append(["Cartas", _menu_cartas])
 	if entradas.is_empty():
@@ -308,6 +332,10 @@ func _turno(accion: Dictionary) -> void:
 		await _decir("%s ya tiene toda su vida." % aliado["nombre"])
 		_menu_principal()
 		return
+	if accion["tipo"] == "objeto" and Juego.tipo_objeto(accion["id"]) == "antidoto" and not _tiene_estado_curable(aliado):
+		await _decir("%s no tiene ningún estado que curar." % aliado["nombre"])
+		_menu_principal()
+		return
 
 	# Tutorial: el tiempo se detiene, el gato no ataca.
 	if tipo == "tutorial_captura":
@@ -340,11 +368,11 @@ func _turno(accion: Dictionary) -> void:
 		if terminado or aliado["hp"] <= 0 or enemigo["hp"] <= 0:
 			break  # si alguien cayó, el otro pierde su turno
 		if actor == "jugador":
-			if accion["tipo"] == "ataque" and await _paralizado_no_actua(aliado, sprite_aliado):
+			if accion["tipo"] == "ataque" and await _no_puede_actuar(aliado, sprite_aliado):
 				continue
 			await _accion_jugador(accion)
 		else:
-			if accion_enemigo["tipo"] == "ataque" and await _paralizado_no_actua(enemigo, sprite_enemigo):
+			if accion_enemigo["tipo"] == "ataque" and await _no_puede_actuar(enemigo, sprite_enemigo):
 				continue
 			await _accion_enemigo(accion_enemigo)
 	if terminado:
@@ -400,6 +428,17 @@ func _accion_enemigo(accion: Dictionary) -> void:
 			_actualizar_hud()
 			await _decir("¡%s usa una Cura 40%% en %s!" % [nombre_e, enemigo["nombre_especie"]])
 			return
+		"potenciador_enemigo":
+			datos["potenciadores"] = int(datos.get("potenciadores", 0)) - 1
+			var nombre_e: String = datos.get("entrenador", {}).get("nombre", "El bandido")
+			enemigo["ataque"] = minf(enemigo["ataque"] * 1.3, enemigo["ataque_base"] * 2.0)
+			Sonido.efecto("objeto", 0.8)
+			_destello(sprite_enemigo, Color("#ff5a3a"), 0.6)
+			_chispa(sprite_enemigo.position + Vector2(0, -24), Color("#ff6a4a"), 1.5)
+			_texto_flotante(sprite_enemigo, "ATK+", Color("#ff8a6a"))
+			_actualizar_hud()
+			await _decir("¡%s le inyecta un Potenciador a %s! Su ataque subió." % [nombre_e, enemigo["nombre_especie"]])
+			return
 	if accion["tipo"] == "huir":
 		await _decir("¡%s intenta escapar!" % enemigo["nombre"])
 		if randf() < 0.5:
@@ -438,8 +477,9 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 	if atacante.get("bajo_tierra", false):   # sale de la arena para atacar
 		atacante["bajo_tierra"] = false
 		_salir_de_tierra(spr_atacante)
+	var efecto: String = mov.get("efecto", "")
 
-	if mov.get("efecto", "") == "defensa_arriba":
+	if efecto == "defensa_arriba":
 		Sonido.efecto("metal")
 		_destello(spr_atacante, Color("#d98a4a"), 0.5)
 		var t := create_tween()
@@ -453,7 +493,7 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 		await _decir("¡%s se blinda con placas de chatarra! Su defensa subió." % atacante["nombre"])
 		return
 
-	if mov.get("efecto", "") == "evasion_arriba":
+	if efecto == "evasion_arriba":
 		await _animar_evasion(spr_atacante)
 		atacante["evasion"] = minf(atacante["evasion"] + 0.15, 0.7)
 		_texto_flotante(spr_atacante, "EVA+", Color("#9fe8ff"))
@@ -464,6 +504,8 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 	var precision := float(mov.get("precision", 1.0))
 	if _tormenta and atacante.get("tipo", "") != "chatarra":
 		precision *= 0.85   # el polvo de óxido no deja ver
+	if atacante.get("cegado", 0) > 0:
+		precision *= 0.6    # el humo no deja ver
 	var debilidad := _modificador_tipo(mov["tipo"], defensor)
 	if debilidad == 0.0:
 		await _acometer(spr_atacante, spr_defensor)
@@ -479,8 +521,35 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 		_texto_flotante(spr_defensor, "Fallo", Color(1, 1, 1, 0.7))
 		await _decir("¡%s está bajo la arena! El ataque no lo alcanza." % defensor["nombre"])
 		return
+	# Cazador Camuflado: el primer turno es invisible. El calor o una ráfaga de golpes lo descubren.
+	if defensor.get("camuflado", 0) > 0:
+		if mov["tipo"] == "termico" or golpes > 1:
+			defensor["camuflado"] = 0
+			spr_defensor.modulate.a = 1.0
+			_actualizar_hud()
+			await _decir("¡El %s revela a %s!" % ["calor" if mov["tipo"] == "termico" else "ataque en ráfaga", defensor["nombre"]])
+		else:
+			await _acometer(spr_atacante, spr_defensor)
+			_regresar(spr_atacante)
+			_texto_flotante(spr_defensor, "Fallo", Color(1, 1, 1, 0.7))
+			await _decir("¡%s está camuflado! El ataque no lo encuentra." % defensor["nombre"])
+			return
+
+	# Movimientos de estado (sin daño)
+	if int(mov["poder"]) <= 0:
+		await _acometer(spr_atacante, spr_defensor)
+		_regresar(spr_atacante)
+		if randf() < defensor["evasion"] or randf() > precision:
+			_esquivar(spr_defensor)
+			await _decir("¡%s lo esquivó!" % defensor["nombre"])
+			return
+		await _aplicar_efecto(efecto, atacante, defensor, spr_atacante, spr_defensor)
+		return
+
+	var membrana: bool = defensor.get("pasiva", "") == "membrana" and mov["tipo"] in TIPOS_FISICOS
 	var color_golpe: Color = COLOR_TIPO.get(mov["tipo"], Color.WHITE)
 	var aciertos := 0
+	var danio_total := 0
 	await _acometer(spr_atacante, spr_defensor)
 	for g in golpes:
 		if defensor["hp"] <= 0:
@@ -499,8 +568,13 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 				_estatica_pendiente = atacante["nombre"]
 			continue
 		var danio := _calcular_danio(atacante, defensor, mov)
+		if membrana:
+			danio = maxi(1, danio / 2)   # la gelatina absorbe los golpes físicos
+		if golpes > 1 and defensor.get("pasiva", "") == "abrumado":
+			danio *= 2                   # los Humanoides se abruman con las ráfagas
 		defensor["hp"] = maxi(0, defensor["hp"] - danio)
 		aciertos += 1
+		danio_total += danio
 		_texto_flotante(spr_defensor, str(danio), COLOR_DEBILIDAD if debilidad > 1.0 else Color.WHITE, debilidad > 1.0)
 		_actualizar_hud()
 		await _impacto(spr_defensor, color_golpe, debilidad > 1.0)
@@ -519,32 +593,123 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 		await _decir("¡Es súper efectivo!")
 	elif debilidad < 1.0:
 		await _decir("No es muy efectivo...")
+	if golpes > 1 and defensor.get("pasiva", "") == "abrumado":
+		await _decir("¡Tantos golpes abruman a %s!" % defensor["nombre"])
 	if atacante == enemigo and tipo == "entrenador" and (debilidad > 1.0 or aliado["hp"] < aliado["hp_max"] * 0.4):
 		await _frase("golpe")
-	var efecto: String = mov.get("efecto", "")
+	# Burbuja Tóxica: si la golpeas con el cuerpo, revienta y te salpica ácido paralizante
+	if membrana:
+		await _reventar_membrana(atacante, defensor, spr_atacante, spr_defensor)
+	# Drenar: el atacante se cura con la mitad del daño que hizo
+	if efecto == "drenar" and atacante["hp"] > 0 and atacante["hp"] < atacante["hp_max"]:
+		var cura := mini(atacante["hp_max"] - atacante["hp"], maxi(1, danio_total / 2))
+		atacante["hp"] += cura
+		_destello(spr_atacante, Color("#7bf09a"), 0.5)
+		_texto_flotante(spr_atacante, "+%d" % cura, Color("#7bf09a"))
+		_actualizar_hud()
+		await _decir("¡%s absorbe %d de vida de %s!" % [atacante["nombre"], cura, defensor["nombre"]])
 	if defensor["hp"] <= 0:
+		# Guardián de Flora: si debilita a su rival, se cura por completo
+		if atacante.get("pasiva", "") == "simbiosis" and atacante["hp"] > 0 and atacante["hp"] < atacante["hp_max"]:
+			atacante["hp"] = atacante["hp_max"]
+			Sonido.efecto("aparecer", 0.7)
+			_destello(spr_atacante, Color("#7bf09a"), 0.8)
+			_texto_flotante(spr_atacante, "100%", Color("#7bf09a"), true)
+			_actualizar_hud()
+			await _decir("¡SIMBIOSIS! %s absorbe la vida de %s y se cura por completo." % [atacante["nombre"], defensor["nombre"]])
 		return
-	if efecto == "infectar" and not defensor["infectado"]:
-		if defensor.get("pasiva", "") == "sin_infeccion":
-			await _decir("%s es de metal: la infección no le hace nada." % defensor["nombre"])
-		else:
+	if efecto != "" and efecto != "drenar":
+		await _aplicar_efecto(efecto, atacante, defensor, spr_atacante, spr_defensor)
+
+
+## Efectos de los movimientos (después del daño, o solos si el movimiento no hace daño).
+func _aplicar_efecto(efecto: String, atacante: Dictionary, defensor: Dictionary, spr_atacante: Sprite2D, spr_defensor: Sprite2D) -> void:
+	match efecto:
+		"infectar":
+			if defensor["infectado"]:
+				return
+			if defensor.get("pasiva", "") == "sin_infeccion":
+				await _decir("%s es de metal: la infección no le hace nada." % defensor["nombre"])
+				return
 			defensor["infectado"] = true
 			_actualizar_hud()
 			_destello(spr_defensor, COLOR_TIPO["toxico"], 0.4)
 			await _decir("¡%s quedó infectado!" % defensor["nombre"])
-	elif efecto == "paralizar" and defensor["paralizado"] <= 0:
-		defensor["paralizado"] = 3
-		_actualizar_hud()
-		_destello(spr_defensor, COLOR_TIPO["energia"], 0.4)
-		await _decir("¡%s quedó paralizado!" % defensor["nombre"])
-	elif efecto == "defensa_abajo" and defensor["defensa"] > defensor["defensa_base"] * 0.45:
-		defensor["defensa"] = maxf(defensor["defensa"] * 0.75, defensor["defensa_base"] * 0.4)
-		_texto_flotante(spr_defensor, "DEF-", Color("#ff9a7a"))
-		await _decir("¡Los nanobots se comen la defensa de %s!" % defensor["nombre"])
-	elif efecto == "bajo_tierra":
-		atacante["bajo_tierra"] = true
-		_meter_en_tierra(spr_atacante)
-		await _decir("¡%s se esconde bajo la arena!" % atacante["nombre"])
+		"quemar":
+			if defensor["quemado"] or defensor.get("tipo", "") == "termico":
+				return
+			defensor["quemado"] = true
+			_actualizar_hud()
+			_destello(spr_defensor, COLOR_TIPO["termico"], 0.4)
+			await _decir("¡%s sufre una quemadura!" % defensor["nombre"])
+		"paralizar":
+			if defensor["paralizado"] > 0:
+				return
+			defensor["paralizado"] = 3
+			_actualizar_hud()
+			_destello(spr_defensor, COLOR_TIPO["energia"], 0.4)
+			await _decir("¡%s quedó paralizado!" % defensor["nombre"])
+		"defensa_abajo":
+			if defensor["defensa"] <= defensor["defensa_base"] * 0.45:
+				return
+			defensor["defensa"] = maxf(defensor["defensa"] * 0.75, defensor["defensa_base"] * 0.4)
+			_texto_flotante(spr_defensor, "DEF-", Color("#ff9a7a"))
+			await _decir("¡La defensa de %s bajó!" % defensor["nombre"])
+		"bajo_tierra":
+			atacante["bajo_tierra"] = true
+			_meter_en_tierra(spr_atacante)
+			await _decir("¡%s se esconde bajo la arena!" % atacante["nombre"])
+		"cegar":
+			_humo(spr_defensor)
+			if defensor["cegado"] > 0:
+				await _decir("%s ya no ve casi nada." % defensor["nombre"])
+				return
+			defensor["cegado"] = 3
+			_texto_flotante(spr_defensor, "PREC-", Color("#c8c0b8"))
+			_actualizar_hud()
+			await _decir("¡Una nube de humo ciega a %s! Va a fallar más sus ataques." % defensor["nombre"])
+		"lodo":
+			Sonido.efecto("burbuja", 0.7)
+			_destello(spr_defensor, Color("#7a6a3a"), 0.6)
+			if defensor["enlodado"]:
+				await _decir("%s ya está atrapado en el lodo." % defensor["nombre"])
+				return
+			defensor["enlodado"] = true
+			defensor["velocidad"] = 0.0
+			_texto_flotante(spr_defensor, "VEL 0", Color("#c8a060"))
+			_actualizar_hud()
+			await _decir("¡%s queda atrapado en el lodo! Su Velocidad bajó a CERO. (Sácalo del campo para limpiarlo.)" % defensor["nombre"])
+		"anular":
+			var quito := false
+			if defensor["ataque"] > defensor["ataque_base"] + 0.01:
+				defensor["ataque"] = defensor["ataque_base"]; quito = true
+			if defensor["defensa"] > defensor["defensa_base"] + 0.01:
+				defensor["defensa"] = defensor["defensa_base"]; quito = true
+			if defensor["evasion"] > defensor.get("evasion_base", defensor["evasion"]) + 0.001:
+				defensor["evasion"] = defensor["evasion_base"]; quito = true
+			if quito:
+				_destello(spr_defensor, COLOR_TIPO["sombra"], 0.6)
+				_texto_flotante(spr_defensor, "ANULADO", Color("#c0a0f0"))
+				_actualizar_hud()
+				await _decir("¡Los hilos de sombra anulan los potenciadores de %s!" % defensor["nombre"])
+
+
+## La Burbuja Tóxica revienta cuando la golpean con el cuerpo: el ácido paraliza al atacante.
+## Contra la Dra. Vesper siempre pasa; en estado salvaje, la mitad de las veces.
+func _reventar_membrana(atacante: Dictionary, defensor: Dictionary, spr_atacante: Sprite2D, spr_defensor: Sprite2D) -> void:
+	var siempre: bool = tipo == "entrenador" and (datos.get("comandante", false) or defensor == enemigo)
+	if atacante["hp"] <= 0 or atacante.get("pasiva", "") == "membrana":
+		return
+	if not siempre and randf() >= 0.5:
+		await _decir("La gelatina de %s absorbe parte del golpe." % defensor["nombre"])
+		return
+	Sonido.efecto("burbuja")
+	_chispa(spr_defensor.position + Vector2(0, -24), COLOR_TIPO["toxico"], 2.0)
+	_destello(spr_atacante, COLOR_TIPO["toxico"], 0.5)
+	atacante["paralizado"] = maxi(atacante["paralizado"], 1)
+	atacante["aturdido"] = true
+	_actualizar_hud()
+	await _decir("¡%s revienta y salpica ácido! %s queda paralizado y pierde su próximo turno." % [defensor["nombre"], atacante["nombre"]])
 
 
 func _fase_estados() -> void:
@@ -557,6 +722,13 @@ func _fase_estados() -> void:
 			_destello(pareja[1], COLOR_TIPO["toxico"], 0.4)
 			_actualizar_hud()
 			await _decir("%s sufre por la infección." % luchador["nombre"])
+		if luchador["quemado"] and luchador["hp"] > 0:
+			var danio := maxi(1, luchador["hp_max"] / 12)
+			luchador["hp"] = maxi(0, luchador["hp"] - danio)
+			_texto_flotante(pareja[1], str(danio), Color("#ff9a3a"))
+			_destello(pareja[1], COLOR_TIPO["termico"], 0.4)
+			_actualizar_hud()
+			await _decir("%s sufre por la quemadura." % luchador["nombre"])
 		if _tormenta and luchador["hp"] > 0 and luchador.get("tipo", "") != "chatarra":
 			var raspon := maxi(1, luchador["hp_max"] / 16)
 			luchador["hp"] = maxi(0, luchador["hp"] - raspon)
@@ -568,9 +740,58 @@ func _fase_estados() -> void:
 			if luchador["paralizado"] == 0 and luchador["hp"] > 0:
 				_actualizar_hud()
 				await _decir("%s ya no está paralizado." % luchador["nombre"])
+		if luchador["cegado"] > 0:
+			luchador["cegado"] -= 1
+			if luchador["cegado"] == 0 and luchador["hp"] > 0:
+				_actualizar_hud()
+				await _decir("El humo se disipa: %s ya ve bien." % luchador["nombre"])
+		if luchador["camuflado"] > 0:
+			luchador["camuflado"] -= 1
+			if luchador["camuflado"] == 0 and luchador["hp"] > 0:
+				var t := create_tween()
+				t.tween_property(pareja[1], "modulate:a", 1.0, 0.3)
+				_actualizar_hud()
+				await _decir("¡%s sale de su camuflaje!" % luchador["nombre"])
+	# Campo Radioactivo (Vesper): el gas daña a la carta de Pan que está en el campo
+	if _campo_radioactivo and aliado["hp"] > 0:
+		var gas := maxi(1, aliado["hp_max"] / 16)
+		aliado["hp"] = maxi(0, aliado["hp"] - gas)
+		_texto_flotante(sprite_aliado, str(gas), Color("#b6f06a"))
+		_destello(sprite_aliado, COLOR_TIPO["toxico"], 0.3)
+		_actualizar_hud()
+		await _decir("El gas radioactivo quema a %s." % aliado["nombre"])
+	# Intervención Directa: el bandido ignora a su bestia y ataca a tu carta desde lejos
+	if datos.has("intervencion") and _turno_n % _cada_intervencion() == 0 and aliado["hp"] > 0 and enemigo["hp"] > 0:
+		await _intervencion_directa()
 	# Grito de Guerra (Rictus): cada 3 turnos sus bestias recuperan un poco de vida
 	if datos.get("grito_guerra", false) and _turno_n % 3 == 0 and enemigo["hp"] > 0:
 		await _grito_de_guerra()
+
+
+func _cada_intervencion() -> int:
+	return maxi(2, int(datos.get("intervencion_cada", 3)))
+
+
+## El bandido lanza un molotov (quemadura) o un frasco de veneno (infección) a la carta de Pan.
+func _intervencion_directa() -> void:
+	var nombre_e: String = datos.get("entrenador", {}).get("nombre", "El bandido")
+	var molotov: bool = datos.get("intervencion", "molotov") == "molotov"
+	var t := create_tween()
+	t.tween_property(sprite_entrenador, "position:x", sprite_entrenador.get_meta("base").x - 8, 0.08)
+	t.tween_property(sprite_entrenador, "position:x", sprite_entrenador.get_meta("base").x, 0.12)
+	await _decir("¡INTERVENCIÓN DIRECTA! %s ignora a su bestia y lanza %s contra %s." % [
+		nombre_e, "un cóctel molotov" if molotov else "un frasco de veneno", aliado["nombre"]])
+	var proyectil := await _lanzar(Juego.textura("res://arte/objetos/%s.png" % ("molotov" if molotov else "frasco_veneno")), sprite_aliado.position + Vector2(0, -20), 0.45, sprite_entrenador.position + Vector2(-6, -30))
+	proyectil.queue_free()
+	Sonido.efecto("golpe_fuerte", 0.8)
+	_chispa(sprite_aliado.position + Vector2(0, -20), COLOR_TIPO["termico"] if molotov else COLOR_TIPO["toxico"], 2.0)
+	_sacudir_pantalla(4.0)
+	var danio := maxi(1, aliado["hp_max"] / 12)
+	aliado["hp"] = maxi(0, aliado["hp"] - danio)
+	_texto_flotante(sprite_aliado, str(danio), Color.WHITE)
+	_actualizar_hud()
+	if aliado["hp"] > 0:
+		await _aplicar_efecto("quemar" if molotov else "infectar", enemigo, aliado, sprite_enemigo, sprite_aliado)
 
 
 ## Devuelve true si el combate terminó o si hay que elegir otra carta.
@@ -633,8 +854,9 @@ func _primera_carta_viva() -> int:
 
 
 func _guardar_aliado() -> void:
-	if indice_aliado >= 0 and not aliado.is_empty():
+	if indice_aliado >= 0 and indice_aliado < Juego.mochila.size() and not aliado.is_empty():
 		Juego.mochila[indice_aliado]["hp"] = aliado["hp"]
+		Juego.mochila[indice_aliado]["infectada"] = aliado["infectado"] and aliado["hp"] > 0
 
 
 ## Pan lanza la carta al aire y la criatura se materializa.
@@ -643,6 +865,9 @@ func _sacar_carta(i: int) -> void:
 	var carta: Dictionary = Juego.mochila[i]
 	indice_aliado = i
 	aliado = Juego.crear_luchador(carta["id"], Juego.nivel_carta(carta), carta["hp"])
+	aliado["infectado"] = bool(carta.get("infectada", false))   # la infección sigue después del combate
+	if aliado["pasiva"] == "camuflaje":
+		aliado["camuflado"] = 1
 	if Juego.bonus_ataque > 0.0:   # las fuerzas que te dieron las ciudades liberadas
 		aliado["ataque"] *= 1.0 + Juego.bonus_ataque
 		aliado["ataque_base"] = aliado["ataque"]
@@ -660,7 +885,7 @@ func _sacar_carta(i: int) -> void:
 	Sonido.efecto("aparecer")
 	_chispa(POS_ALIADO + Vector2(0, -24), Color("#9fe8ff"), 1.5)
 	sprite_aliado.visible = true
-	sprite_aliado.modulate = Color.WHITE
+	sprite_aliado.modulate = Color(1, 1, 1, 0.35) if aliado["camuflado"] > 0 else Color.WHITE
 	sprite_aliado.scale = Vector2(0.3, 1.6)
 	_destello(sprite_aliado, Color("#9fe8ff"), 0.35)
 	var t := create_tween()
@@ -675,10 +900,10 @@ func _sacar_carta(i: int) -> void:
 # Objetos
 # ---------------------------------------------------------------------------
 
-func _lanzar(textura: Texture2D, destino: Vector2, duracion := 0.4) -> Sprite2D:
+func _lanzar(textura: Texture2D, destino: Vector2, duracion := 0.4, desde := Vector2.INF) -> Sprite2D:
 	var s := Sprite2D.new()
 	s.texture = textura
-	s.position = sprite_pan.position + Vector2(8, -30)
+	s.position = sprite_pan.position + Vector2(8, -30) if desde == Vector2.INF else desde
 	escenario.add_child(s)
 	Sonido.efecto("lanzar")
 	var inicio := s.position
@@ -790,6 +1015,20 @@ func _ia_enemigo() -> Dictionary:
 			peso = 75.0 if aliado.get("defensa", 1.0) > aliado.get("defensa_base", 1.0) * 0.6 else 20.0
 		elif efecto == "bajo_tierra":
 			peso = 65.0 if not enemigo.get("bajo_tierra", false) else 10.0
+		elif efecto == "cegar":
+			peso = 72.0 if aliado.get("cegado", 0) <= 0 else 8.0
+		elif efecto == "lodo":
+			# Sirena de Fango: si tu carta es más rápida, la atrapa en el lodo para atacar siempre primero
+			peso = 88.0 if not aliado.get("enlodado", false) and aliado.get("velocidad", 0.0) >= enemigo["velocidad"] else 6.0
+		elif efecto == "anular":
+			var potenciado: bool = aliado.get("ataque", 0.0) > aliado.get("ataque_base", 1e9) + 0.01 \
+				or aliado.get("defensa", 0.0) > aliado.get("defensa_base", 1e9) + 0.01 \
+				or aliado.get("evasion", 0.0) > aliado.get("evasion_base", 1e9) + 0.001
+			peso = 92.0 if potenciado else 30.0
+		elif efecto == "drenar":
+			peso = 70.0 + (20.0 if vida < 0.6 else 0.0) + (10.0 if vida_rival < 0.3 else 0.0)
+		elif efecto == "quemar" and not aliado.get("quemado", false) and _modificador_tipo(mov["tipo"], aliado) > 0.0:
+			peso = 80.0
 		elif efecto == "defensa_arriba":
 			# Arquetipo tanque: si Pan acaba de pegarle fuerte, se blinda
 			peso = 15.0
@@ -815,6 +1054,9 @@ func _ia_enemigo() -> Dictionary:
 		# Los humanos SÍ usan objetos: una cura cuando su bestia está en rojo.
 		if int(datos.get("curas", 0)) > 0 and vida < 0.3:
 			opciones_ia.append([88.0, { "tipo": "cura_enemigo" }])
+		# ...y potenciadores de ataque cuando su bestia está sana (los guardias de la Organización)
+		if int(datos.get("potenciadores", 0)) > 0 and vida > 0.5 and enemigo["ataque"] <= enemigo["ataque_base"] + 0.01:
+			opciones_ia.append([74.0 + randf() * 6.0, { "tipo": "potenciador_enemigo" }])
 		# IA táctica: si tu criatura le hace daño súper efectivo, cambia a una que lo aguante.
 		var tactico: bool = datos.get("comandante", false) or (datos.get("tactico", false) and randf() < 0.7)
 		if tactico and _turnos_desde_cambio >= 2 and _pan_tiene_ventaja(enemigo):
@@ -844,8 +1086,14 @@ func _pan_tiene_ventaja(objetivo: Dictionary) -> bool:
 	return false
 
 
-## Parálisis: la mitad de las veces no puede moverse.
-func _paralizado_no_actua(l: Dictionary, s: Sprite2D) -> bool:
+## Aturdido (ácido de la Burbuja): pierde esta acción sí o sí. Parálisis: la mitad de las veces no puede moverse.
+func _no_puede_actuar(l: Dictionary, s: Sprite2D) -> bool:
+	if l.get("aturdido", false):
+		l["aturdido"] = false
+		_destello(s, COLOR_TIPO["toxico"], 0.3)
+		Sonido.efecto("fallo", 1.2)
+		await _decir("¡%s sigue cubierto de ácido y pierde el turno!" % l["nombre"])
+		return true
 	if l["paralizado"] <= 0 or randf() >= 0.5:
 		return false
 	_destello(s, COLOR_TIPO["energia"], 0.3)
@@ -862,6 +1110,18 @@ func _usar_objeto(id: String) -> void:
 	var o := await _lanzar(TEX_CARTA, sprite_aliado.position + Vector2(0, -24), 0.3)
 	o.queue_free()
 	Sonido.efecto("objeto")
+	if info["tipo"] == "antidoto":
+		aliado["infectado"] = false
+		aliado["quemado"] = false
+		aliado["paralizado"] = 0
+		aliado["cegado"] = 0
+		aliado["aturdido"] = false
+		_destello(sprite_aliado, Color("#9ff0ff"), 0.6)
+		_texto_flotante(sprite_aliado, "SANO", Color("#9ff0ff"))
+		_actualizar_hud()
+		_guardar_aliado()
+		await _decir("El Antídoto limpia los estados alterados de %s." % aliado["nombre"])
+		return
 	if info["tipo"] == "potenciador":
 		var antes: float = aliado["ataque"]
 		aliado["ataque"] = minf(aliado["ataque"] * (1.0 + float(info["valor"])), aliado["ataque_base"] * 2.2)
@@ -938,8 +1198,16 @@ func _estados_cortos(l: Dictionary) -> String:
 	var lista: Array = []
 	if l.get("infectado", false):
 		lista.append("INF")
+	if l.get("quemado", false):
+		lista.append("QUE")
 	if l.get("paralizado", 0) > 0:
 		lista.append("PAR")
+	if l.get("cegado", 0) > 0:
+		lista.append("CEG")
+	if l.get("enlodado", false):
+		lista.append("LODO")
+	if l.get("camuflado", 0) > 0:
+		lista.append("OCULTO")
 	if l.get("ataque", 0.0) > l.get("ataque_base", 1e9) + 0.01:
 		lista.append("ATK+")
 	if l.get("defensa", 0.0) > l.get("defensa_base", 1e9) + 0.01:
@@ -947,6 +1215,40 @@ func _estados_cortos(l: Dictionary) -> String:
 	elif l.get("defensa", 1e9) < l.get("defensa_base", 0.0) - 0.01:
 		lista.append("DEF-")
 	return "" if lista.is_empty() else "  " + " ".join(PackedStringArray(lista))
+
+
+func _tiene_estado_curable(l: Dictionary) -> bool:
+	return l.get("infectado", false) or l.get("quemado", false) or l.get("paralizado", 0) > 0 \
+		or l.get("cegado", 0) > 0 or l.get("aturdido", false)
+
+
+## Nube de humo gris que tapa al que quedó cegado.
+func _humo(s: Sprite2D) -> void:
+	var h := Ambiente.humo(s.get_meta("base") + Vector2(0, -20))
+	h.amount = 18
+	h.z_index = 4
+	escenario.add_child(h)
+	var t := h.create_tween()
+	t.tween_interval(1.6)
+	t.tween_property(h, "emitting", false, 0.0)
+	t.tween_interval(2.4)
+	t.tween_callback(h.queue_free)
+
+
+## Campo Radioactivo (Vesper): luz verde que late y burbujas de gas que suben.
+func _armar_gas() -> void:
+	_gas = ColorRect.new()
+	_gas.color = Color(0.45, 0.95, 0.3, 0.12)
+	_gas.size = Vector2(480, 270)
+	_gas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	escenario.add_child(_gas)
+	var t := create_tween().set_loops()
+	t.tween_property(_gas, "color:a", 0.2, 1.4).set_trans(Tween.TRANS_SINE)
+	t.tween_property(_gas, "color:a", 0.08, 1.4).set_trans(Tween.TRANS_SINE)
+	var burbujas := Ambiente.burbujas(Vector2(480, 120))
+	burbujas.position = Vector2(240, 250)
+	burbujas.z_index = 5
+	escenario.add_child(burbujas)
 
 
 ## El Gusano Devorador se mete bajo la arena: se ve hundido y medio transparente.

@@ -17,7 +17,7 @@ extends Node2D
 ## Fondo del combate: "paramo", "pastizal", "chatarra", "dunas" o "bastion" (arte/fondos/<fondo>_*.png)
 @export var fondo := "pastizal"
 ## Criaturas que salen durante una tormenta de óxido (si está vacío, las de siempre)
-@export var criaturas_tormenta: Array[String] = []
+@export var criaturas_tormenta: Array = []
 
 
 func _ready() -> void:
@@ -30,7 +30,7 @@ func contiene(punto_global: Vector2) -> bool:
 
 
 func elegir_encuentro() -> Dictionary:
-	var lista := criaturas_tormenta if Juego.tormenta and not criaturas_tormenta.is_empty() else criaturas
+	var lista: Array = criaturas_tormenta if Juego.tormenta and not criaturas_tormenta.is_empty() else criaturas
 	return {
 		"tipo": "salvaje",
 		"fondo": fondo,

@@ -444,6 +444,163 @@ def bastion():
     sfx_aplausos()
 
 
+# ---------------------------------------------------------------------------
+# CIUDAD 2: EL SUMIDERO (túneles del metro, agua envenenada, la Dra. Vesper)
+# ---------------------------------------------------------------------------
+rng_s = np.random.default_rng(2202)
+
+
+def ruido_s(seg):
+    return rng_s.uniform(-1, 1, int(seg * SR))
+
+
+def gota(f=1300, seg=0.25):
+    """Una gota que cae en un charco (pling con un poquito de tono que sube)."""
+    t = t_de(seg)
+    fr = f * (1 + 0.6 * np.exp(-t * 30))
+    return np.sin(2 * np.pi * np.cumsum(fr) / SR) * np.exp(-t * 22)
+
+
+def burbuja_sonido(seg=0.18, f=260):
+    """Burbuja que revienta en el lodo (tono que sube rápido)."""
+    t = t_de(seg)
+    fr = f * (1 + 2.5 * t / seg)
+    return np.sin(2 * np.pi * np.cumsum(fr) / SR) * np.sin(np.pi * t / seg) ** 2
+
+
+def musica_sumidero():
+    """El Sumidero: lenta y húmeda. Arpegios en Do# menor frigio, bajo profundo y gotas (72 bpm)."""
+    negra = 60 / 72
+    progresion = [[49, 52, 56], [50, 53, 57], [49, 52, 56], [45, 49, 52], [47, 50, 54], [50, 53, 57]]  # C#m D C#m A Bm D
+    compas = negra * 4
+    largo = compas * len(progresion) * 2
+    pista = np.zeros(int(largo * SR) + SR * 2)
+    for i, ac in enumerate(progresion * 2):
+        inicio = i * compas
+        poner(pista, pad(ac, compas * 1.3, 500), inicio, 0.2)
+        b = seno(nota(ac[0] - 24), compas * 0.95) + 0.3 * triangulo(nota(ac[0] - 12), compas * 0.95)
+        poner(pista, pasabajos(b, 220) * env(len(b), 0.3, 0.4, 0.6, 0.6), inicio, 0.5)
+        for k in range(8):  # arpegio de campanitas (como agua que gotea)
+            m = ac[[0, 1, 2, 1, 2, 0, 1, 2][k]] + 24
+            n = triangulo(nota(m), negra * 0.6) + 0.3 * seno(nota(m) * 3, negra * 0.6)
+            poner(pista, n * campana(len(n), 6), inicio + k * negra / 2, 0.07 if k % 2 else 0.1)
+    for inicio in np.arange(0.4, largo - 1, 2.3):  # gotas sueltas
+        poner(pista, gota(rng_s.uniform(1100, 1900)), inicio + rng_s.uniform(0, 0.8), 0.12)
+    melodia = [None, 68, 69, 68, 64, None, 61, 62, None, 64, 66, 64, 62, 61, None, None,
+               None, 73, 74, 73, 69, None, 68, 66, None, 64, 62, 61, 62, 64, 61, None]
+    for j, m in enumerate(melodia):
+        if m is not None:
+            d = negra * 1.4
+            vib = 1 + 0.006 * np.sin(2 * np.pi * 5 * t_de(d))
+            tono = seno(nota(m), d) * 0.6 + triangulo(nota(m), d) * 0.4
+            poner(pista, pasabajos(tono * vib, 1500) * env(len(tono), 0.08, 0.2, 0.5, 0.5), j * negra * 1.5, 0.16)
+    pista = eco(pista, negra * 0.75, 0.35, 0.35)
+    guardar(bucle_suave(pista[: int(largo * SR) + SR], 0.8), "musica/sumidero", 0.55)
+
+
+def musica_vesper():
+    """Combate contra la Dra. Vesper: inquietante y frío. Tritono, compás que tropieza y burbujas (148 bpm)."""
+    negra = 60 / 148
+    corchea = negra / 2
+    semi = negra / 4
+    progresion = [45, 45, 51, 50, 45, 45, 48, 44]  # Am Am Eb(tritono) D Am Am C G#
+    compas = negra * 4
+    largo = compas * len(progresion)
+    pista = np.zeros(int(largo * SR) + SR)
+    for i, raiz in enumerate(progresion):
+        inicio = i * compas
+        for k in range(8):  # bajo con un golpe "cojo" (3+3+2)
+            if k in (0, 3, 6):
+                b = cuadrada(nota(raiz - 12), corchea * (2.7 if k < 6 else 1.8), 0.3)
+                poner(pista, pasabajos(b, 700) * env(len(b), 0.002, 0.05, 0.6, 0.05), inicio + k * corchea, 0.5)
+        for k in range(16):  # arpegio frío de laboratorio
+            m = raiz + 24 + [0, 3, 6, 10][k % 4]
+            a = triangulo(nota(m), semi * 0.8) + 0.3 * cuadrada(nota(m), semi * 0.8, 0.125)
+            poner(pista, a * env(len(a), 0.002, 0.03, 0.3, 0.02), inicio + k * semi, 0.09)
+        for k in range(8):
+            if k in (0, 3, 6):
+                poner(pista, bombo(), inicio + k * corchea, 0.85)
+            if k in (2, 6):
+                poner(pista, caja(), inicio + k * corchea, 0.45)
+            poner(pista, platillo(0.03), inicio + k * corchea, 0.15)
+        poner(pista, burbuja_sonido(0.2, rng_s.uniform(200, 320)), inicio + corchea * 5, 0.25)
+    melodia = [69, 72, 75, 74, 69, None, 68, 69, 72, 75, 78, 77, 75, 74, 72, 68]
+    for j, m in enumerate(melodia):
+        if m is not None:
+            d = negra * 1.8
+            vib = 1 + 0.01 * np.sin(2 * np.pi * 7 * t_de(d))
+            tono = cuadrada(nota(m), d, 0.25) * 0.5 + seno(nota(m) * 1.01, d) * 0.5
+            poner(pista, pasabajos(tono * vib, 2200) * env(len(tono), 0.02, 0.1, 0.55, 0.2), j * negra * 2, 0.16)
+    guardar(pista[: int(largo * SR)], "musica/vesper", 0.62)
+
+
+def ambiente_subterraneo():
+    """Túneles del metro: zumbido grave, lodo que burbujea, gotas y un tren fantasma muy lejos."""
+    seg = 14
+    t = t_de(seg)
+    eco_tunel = pasabajos(ruido_s(seg), 180) * (0.7 + 0.3 * np.sin(2 * np.pi * t / 9.0))
+    zumbido = 0.5 * np.sin(2 * np.pi * 55 * t) + 0.25 * np.sin(2 * np.pi * 82.5 * t)
+    zumbido *= 0.6 + 0.4 * np.sin(2 * np.pi * t / 5.0) ** 2
+    x = eco_tunel + zumbido * 0.15
+    for inicio in np.arange(0.3, seg - 0.5, 0.9):
+        if rng_s.uniform() < 0.6:
+            poner(x, gota(rng_s.uniform(900, 1800)), inicio + rng_s.uniform(0, 0.5), rng_s.uniform(0.08, 0.2))
+    for inicio in np.arange(0.5, seg - 0.5, 0.7):
+        if rng_s.uniform() < 0.5:
+            poner(x, burbuja_sonido(rng_s.uniform(0.1, 0.22), rng_s.uniform(120, 260)), inicio, 0.12)
+    x = eco(x, 0.21, 0.3, 0.3)
+    guardar(bucle_suave(x, 1.5), "ambiente/subterraneo", 0.5)
+
+
+def sfx_sumidero():
+    # tos (dos golpes de aire áspero)
+    x = np.zeros(int(0.6 * SR))
+    for i, f in enumerate((900, 700)):
+        c = pasabajos(ruido_s(0.18), f * 2) - pasabajos(ruido_s(0.18), f * 0.5)
+        c += 0.3 * cuadrada(140 - i * 20, 0.18, 0.3)
+        poner(x, c * env(int(0.18 * SR), 0.005, 0.04, 0.5, 0.1), i * 0.24, 0.8 - i * 0.2)
+    guardar(x, "sfx/tos", 0.5)
+    # gota de ácido que sisea al caer
+    g = np.zeros(int(0.5 * SR))
+    poner(g, gota(1500, 0.2), 0, 0.8)
+    siseo = (ruido_s(0.4) - pasabajos(ruido_s(0.4), 3000)) * np.exp(-t_de(0.4) * 8)
+    poner(g, siseo, 0.05, 0.35)
+    guardar(g, "sfx/goteo", 0.5)
+    # burbuja de lodo
+    x = np.zeros(int(0.4 * SR))
+    poner(x, burbuja_sonido(0.16, 220), 0, 1.0)
+    poner(x, burbuja_sonido(0.12, 300), 0.15, 0.6)
+    guardar(x, "sfx/burbuja", 0.5)
+    # humo / gas que sale (un "pfff")
+    t = t_de(0.7)
+    h = (pasabajos(ruido_s(0.7), 2500) - pasabajos(ruido_s(0.7), 400)) * np.exp(-t * 4) * np.minimum(1, t * 30)
+    guardar(h, "sfx/humo", 0.5)
+    # puerta del laboratorio (neumática: siseo + golpe suave)
+    t = t_de(0.6)
+    p = (ruido_s(0.6) - pasabajos(ruido_s(0.6), 2000)) * np.exp(-t * 6) * 0.6
+    poner(p, bombo(0.2) * 0.6, 0.35)
+    poner(p, seno(220, 0.25) * np.exp(-t_de(0.25) * 18) * 0.3, 0.35)
+    guardar(p, "sfx/puerta", 0.5)
+    # curar (destellos que suben)
+    x = np.zeros(int(0.6 * SR))
+    for i, m in enumerate([76, 81, 85, 88]):
+        n = seno(nota(m), 0.3) + 0.3 * seno(nota(m) * 2, 0.3)
+        poner(x, n * campana(len(n), 9), i * 0.07, 0.4)
+    guardar(eco(x, 0.09, 0.3, 0.3), "sfx/curar", 0.5)
+    # quemar (fuego que prende)
+    t = t_de(0.6)
+    q = pasabajos(ruido_s(0.6), 1800) * (np.minimum(1, t * 12) * np.exp(-t * 3))
+    q += (rng_s.uniform(0, 1, len(q)) > 0.995) * rng_s.uniform(-1, 1, len(q)) * 0.8  # chispas
+    guardar(q, "sfx/quemar", 0.55)
+
+
+def sumidero():
+    musica_sumidero()
+    musica_vesper()
+    ambiente_subterraneo()
+    sfx_sumidero()
+
+
 if __name__ == "__main__":
     musica_recuerdo()
     musica_paramo()
@@ -452,4 +609,5 @@ if __name__ == "__main__":
     ambiente_bunker()
     sfx()
     bastion()
+    sumidero()
     print("Audio listo en", AUDIO)

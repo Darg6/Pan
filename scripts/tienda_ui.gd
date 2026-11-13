@@ -5,13 +5,16 @@ extends PanelContainer
 
 signal cerrado
 
-## Lo que se vende en esta tienda (en este orden).
+## Lo que se vende en una tienda común (en este orden). Cada ciudad puede tener su propio surtido.
 const SURTIDO := ["cura_40", "cura_50", "cura_80", "potenciador_20", "potenciador_70", "racion", "carta_vinculo"]
+## El Sumidero vende los primeros objetos para curar estados alterados (GDD) y la máscara de gas.
+const SURTIDO_SUMIDERO := ["antidoto", "mascara_filtro", "cura_40", "cura_50", "potenciador_20", "racion", "carta_vinculo"]
 const ICONOS := {
 	"cura_40": "res://arte/objetos/cura_40.png", "cura_50": "res://arte/objetos/cura_50.png",
 	"cura_80": "res://arte/objetos/cura_80.png", "potenciador_20": "res://arte/objetos/potenciador_20.png",
 	"potenciador_70": "res://arte/objetos/potenciador_70.png", "racion": "res://arte/objetos/racion.png",
-	"carta_vinculo": "res://arte/objetos/cartas.png",
+	"carta_vinculo": "res://arte/objetos/cartas.png", "antidoto": "res://arte/objetos/antidoto.png",
+	"mascara_filtro": "res://arte/objetos/mascara_filtro.png",
 }
 
 var _titulo: Label
@@ -21,6 +24,7 @@ var _scroll: ScrollContainer
 var _mensaje: Label
 var _pestana := "comprar"
 var _botones_pestana := {}
+var _surtido: Array = SURTIDO
 
 
 func _ready() -> void:
@@ -87,7 +91,8 @@ func _ready() -> void:
 	abajo.add_child(salir)
 
 
-func abrir(nombre: String) -> void:
+func abrir(nombre: String, surtido: Array = SURTIDO) -> void:
+	_surtido = surtido
 	_titulo.text = nombre.to_upper()
 	_mensaje.text = "Precios fijos. La mochila tiene bolsillos limitados."
 	visible = true
@@ -114,7 +119,7 @@ func _refrescar() -> void:
 		hijo.queue_free()
 	match _pestana:
 		"comprar":
-			for id in SURTIDO:
+			for id in _surtido:
 				_fila_compra(id)
 		"vender":
 			_filas_venta()
