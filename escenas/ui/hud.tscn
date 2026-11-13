@@ -74,6 +74,15 @@ layout_mode = 2
 horizontal_alignment = 1
 autowrap_mode = 3
 
+[node name="Transicion" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
 [node name="CajaDialogo" parent="." instance=ExtResource("3_caja")]
 
 [node name="PanelMochila" type="PanelContainer" parent="."]
@@ -90,12 +99,3 @@ offset_bottom = 122.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("4_mochila")
-
-[node name="Transicion" type="ColorRect" parent="."]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0, 0, 1)

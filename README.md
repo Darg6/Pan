@@ -13,6 +13,7 @@ RPG 2D top-down de captura de criaturas por turnos, en pixel art (Godot 4.3, ren
   tocar objetos y avanzar los diálogos.
 - Celular: toca y arrastra en la mitad izquierda para mover. El botón **A** interactúa y el
   botón de la mochila abre tu inventario. Toca la pantalla para avanzar los diálogos.
+- En combate, tocar la pantalla adelanta los mensajes.
 
 ## La historia que ya se puede jugar (prólogo)
 
@@ -50,11 +51,13 @@ Para probar sin repetir la intro, pon `SALTAR_PROLOGO = true` en `scripts/juego.
 | `scripts/`           | Código. `juego.gd` = estado (mochila, cartas, flags); `historia.gd` = la historia |
 | `datos/`             | `dialogos.json` y `criaturas.json` |
 | `arte/tiles/`        | Texturas de los mapas (16x16 por tile) |
-| `arte/criaturas/`    | Criaturas para el combate (64x64) |
+| `arte/criaturas/`    | Criaturas para el combate (64x64, mirando a la derecha, patas en la fila 60) |
 | `arte/personajes/`   | Pan y los personajes en el mapa y en combate |
 | `arte/retratos/`     | Caras que salen en los diálogos |
 | `arte/cinematica/`   | Imágenes de la intro |
 | `arte/fondos/`       | Fondos de combate |
+| `arte/efectos/`      | Sombra, chispa de golpe y polvo del combate |
+| `arte/shaders/`      | Shader de los luchadores (destello al recibir golpes y respiración) |
 | `arte/interfaz/`     | Paneles, botones y joystick |
 | `arte/objetos/`      | Mochila, cartas, collar, etc. |
 | `arte/fuentes/`      | Letras pixel |
