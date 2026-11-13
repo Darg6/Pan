@@ -1,0 +1,276 @@
+{
+ "exterior": {
+  "tierra_1": [
+   0,
+   0,
+   false
+  ],
+  "tierra_2": [
+   1,
+   0,
+   false
+  ],
+  "tierra_3": [
+   2,
+   0,
+   false
+  ],
+  "asfalto_1": [
+   3,
+   0,
+   false
+  ],
+  "asfalto_2": [
+   4,
+   0,
+   false
+  ],
+  "asfalto_grieta": [
+   5,
+   0,
+   false
+  ],
+  "asfalto_linea": [
+   6,
+   0,
+   false
+  ],
+  "concreto": [
+   7,
+   0,
+   false
+  ],
+  "pasto_1": [
+   0,
+   1,
+   false
+  ],
+  "pasto_2": [
+   1,
+   1,
+   false
+  ],
+  "arena_1": [
+   2,
+   1,
+   false
+  ],
+  "arena_2": [
+   3,
+   1,
+   false
+  ],
+  "charco_toxico": [
+   4,
+   1,
+   true
+  ],
+  "vacio": [
+   5,
+   1,
+   true
+  ],
+  "acantilado": [
+   6,
+   1,
+   true
+  ],
+  "borde_acantilado": [
+   7,
+   1,
+   true
+  ],
+  "borde_norte": [
+   0,
+   2,
+   true
+  ],
+  "muro_top": [
+   1,
+   2,
+   true
+  ],
+  "muro": [
+   2,
+   2,
+   true
+  ],
+  "barril": [
+   3,
+   2,
+   true
+  ],
+  "barril_toxico": [
+   4,
+   2,
+   true
+  ],
+  "chatarra": [
+   5,
+   2,
+   true
+  ],
+  "neumaticos": [
+   6,
+   2,
+   true
+  ],
+  "arbol_muerto": [
+   7,
+   2,
+   true
+  ],
+  "cartel": [
+   0,
+   3,
+   true
+  ],
+  "fogata": [
+   1,
+   3,
+   true
+  ],
+  "cama_carton": [
+   2,
+   3,
+   false
+  ],
+  "viga": [
+   3,
+   3,
+   true
+  ],
+  "valla": [
+   4,
+   3,
+   true
+  ],
+  "auto_izq": [
+   5,
+   3,
+   true
+  ],
+  "auto_der": [
+   6,
+   3,
+   true
+  ],
+  "contenedor_rojo_top": [
+   7,
+   3,
+   true
+  ],
+  "contenedor_rojo": [
+   0,
+   4,
+   true
+  ],
+  "contenedor_azul_top": [
+   1,
+   4,
+   true
+  ],
+  "contenedor_azul": [
+   2,
+   4,
+   true
+  ],
+  "porton_izq": [
+   3,
+   4,
+   true
+  ],
+  "porton_der": [
+   4,
+   4,
+   true
+  ],
+  "escotilla": [
+   5,
+   4,
+   true
+  ],
+  "escotilla_sellada": [
+   6,
+   4,
+   true
+  ],
+  "tierra_oscura": [
+   7,
+   4,
+   false
+  ]
+ },
+ "interior": {
+  "piso_1": [
+   0,
+   0,
+   false
+  ],
+  "piso_2": [
+   1,
+   0,
+   false
+  ],
+  "pared_top": [
+   2,
+   0,
+   true
+  ],
+  "pared": [
+   3,
+   0,
+   true
+  ],
+  "cama_top": [
+   4,
+   0,
+   true
+  ],
+  "cama_bot": [
+   5,
+   0,
+   true
+  ],
+  "mesa_izq": [
+   6,
+   0,
+   true
+  ],
+  "mesa_der": [
+   7,
+   0,
+   true
+  ],
+  "casillero": [
+   0,
+   1,
+   true
+  ],
+  "generador": [
+   1,
+   1,
+   true
+  ],
+  "estante": [
+   2,
+   1,
+   true
+  ],
+  "escalera": [
+   3,
+   1,
+   true
+  ],
+  "caja": [
+   4,
+   1,
+   true
+  ],
+  "alfombra": [
+   5,
+   1,
+   false
+  ]
+ }
+}

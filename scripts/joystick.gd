@@ -3,25 +3,28 @@ extends Control
 ## y arrastra el dedo. En PC funciona igual arrastrando con el mouse.
 ## Otros scripts leen la variable `direccion` (un Vector2 de largo 0 a 1).
 
-@export var radio := 90.0
-@export var radio_palanca := 38.0
-@export var zona_muerta := 0.15
+const BASE := preload("res://arte/interfaz/joystick_base.png")
+const PALANCA := preload("res://arte/interfaz/joystick_palanca.png")
+
+@export var radio := 22.0
+@export var zona_muerta := 0.2
 
 var direccion := Vector2.ZERO
 
 var _dedo := -1
-var _base := Vector2.ZERO       # centro del joystick (coordenadas locales)
-var _palanca := Vector2.ZERO    # desplazamiento de la palanca desde la base
+var _base := Vector2.ZERO
+var _palanca := Vector2.ZERO
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	resized.connect(_volver_a_reposo)
+	visibility_changed.connect(func(): if not visible: _soltar())
 	_volver_a_reposo()
 
 
 func _volver_a_reposo() -> void:
-	_base = Vector2(radio + 50, size.y - radio - 50)
+	_base = Vector2(40, size.y - 40)
 	_palanca = Vector2.ZERO
 	queue_redraw()
 
@@ -57,7 +60,6 @@ func _mover_palanca(posicion_pantalla: Vector2) -> void:
 
 
 func _draw() -> void:
-	var activo := _dedo != -1
-	draw_circle(_base, radio, Color(1, 1, 1, 0.18 if activo else 0.1))
-	draw_arc(_base, radio, 0, TAU, 48, Color(1, 1, 1, 0.5 if activo else 0.3), 3.0)
-	draw_circle(_base + _palanca, radio_palanca, Color(1, 1, 1, 0.55 if activo else 0.35))
+	var alfa := 1.0 if _dedo != -1 else 0.6
+	draw_texture(BASE, (_base - BASE.get_size() / 2.0).round(), Color(1, 1, 1, alfa))
+	draw_texture(PALANCA, (_base + _palanca - PALANCA.get_size() / 2.0).round(), Color(1, 1, 1, alfa))
