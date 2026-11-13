@@ -139,6 +139,12 @@ const MAPAS := ["res://escenas/mapas/refugio_cero.tscn", "res://escenas/mapas/su
 
 func _autodiagnostico() -> void:
 	var problemas: Array[String] = []
+	# ¿Godot importó las imágenes y letras? (si no, nada de lo demás puede cargar)
+	var sin_importar: Array[String] = []
+	for ruta in ["res://arte/interfaz/boton.png", "res://arte/interfaz/panel.png", "res://arte/tiles/interior.png",
+			"res://arte/tiles/exterior.png", "res://arte/interfaz/exclamacion.png", "res://arte/fuentes/PixelifySans.ttf"]:
+		if load(ruta) == null:
+			sin_importar.append(ruta.trim_prefix("res://"))
 	var tema := load("res://arte/tema.tres") as Theme
 	if tema == null:
 		problemas.append("No carga arte/tema.tres (botones y letra pixel).")
@@ -170,11 +176,17 @@ func _autodiagnostico() -> void:
 			if not mapa.has_node(nodo):
 				problemas.append("Al mapa %s le falta el nodo %s." % [ruta, nodo])
 		mapa.free()
-	if problemas.is_empty():
+	if problemas.is_empty() and sin_importar.is_empty():
 		print("Autodiagnóstico: todo bien.")
 		return
 	var distintos := _archivos_distintos()
 	var texto := "\n".join(problemas)
+	if not sin_importar.is_empty():
+		texto = "Godot no importó estas imágenes/letras: " + ", ".join(sin_importar) \
+			+ "\nPor eso no cargan el tema, los tilesets ni los mapas.\n\n" \
+			+ "ARREGLO: cierra Godot. Abre la carpeta del proyecto en el Explorador de Windows y borra la carpeta \".godot\" " \
+			+ "(es solo caché; si no la ves, activa Vista > Elementos ocultos). Abre Godot otra vez, espera a que termine " \
+			+ "la barra de importación y pulsa F5.\n\n" + texto
 	if not distintos.is_empty():
 		texto += "\n\nEstos archivos son distintos a los de GitHub (quizás Godot guardó encima una versión vieja):\n" \
 			+ "\n".join(distintos.slice(0, 8)) + ("\n..." if distintos.size() > 8 else "")
