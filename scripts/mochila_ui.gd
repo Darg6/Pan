@@ -36,12 +36,18 @@ func _ready() -> void:
 	_lista.add_theme_constant_override("separation", 4)
 	scroll.add_child(_lista)
 
-	var cerrar := Button.new()
-	cerrar.text = "Cerrar"
-	cerrar.custom_minimum_size = Vector2(0, 22)
-	cerrar.focus_mode = Control.FOCUS_NONE
-	cerrar.pressed.connect(cerrar_mochila)
-	caja.add_child(cerrar)
+	var abajo := HBoxContainer.new()
+	abajo.add_theme_constant_override("separation", 4)
+	caja.add_child(abajo)
+	for b in [["Guardar", _guardar], ["Menú principal", _ir_al_menu], ["Cerrar", cerrar_mochila]]:
+		var boton := Button.new()
+		boton.text = b[0]
+		boton.custom_minimum_size = Vector2(0, 22)
+		boton.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		boton.focus_mode = Control.FOCUS_NONE
+		boton.pressed.connect(b[1])
+		boton.pressed.connect(Sonido.efecto.bind("boton"))
+		abajo.add_child(boton)
 
 
 func abrir() -> void:
@@ -122,6 +128,27 @@ func _refrescar(aviso := "") -> void:
 		for id in Juego.misiones:
 			var m: Dictionary = Juego.misiones[id]
 			_texto(("[Hecha] " if m["estado"] == "completa" else "[  ] ") + m["titulo"])
+
+
+func _guardar() -> void:
+	_usando = ""
+	if Juego.guardar():
+		Sonido.efecto("objeto")
+		_refrescar("Partida guardada. Puedes seguir desde aquí con \"Continuar\" en el menú.")
+	else:
+		_refrescar("Ahora no se puede guardar. Termina lo que estás haciendo e inténtalo otra vez.")
+
+
+## Guarda y vuelve al menú principal.
+func _ir_al_menu() -> void:
+	Juego.guardar()
+	visible = false
+	var fundido: ColorRect = get_parent().get_node_or_null("Transicion")
+	if fundido:
+		var t := create_tween()
+		t.tween_property(fundido, "color:a", 1.0, 0.4)
+		await t.finished
+	Juego.cambiar_escena(Juego.MENU)
 
 
 func _elegir_objeto(id: String) -> void:

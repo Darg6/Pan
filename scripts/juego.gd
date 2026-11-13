@@ -11,6 +11,16 @@ const AUMENTO_STATS_POR_NIVEL := 0.15  # +15% de stats por nivel (GDD)
 ## Pon esto en true para saltarte el prólogo mientras pruebas (empiezas en la superficie con un Gato).
 const SALTAR_PROLOGO := false
 
+## EL NOMBRE DEL JUEGO: cámbialo aquí y se actualiza en el menú principal y en la pantalla de título.
+const NOMBRE_JUEGO := "PAN"
+const SUBTITULO_JUEGO := "Las Seis Ciudades"   # provisional
+
+## Partida guardada (en Android y en el navegador también funciona: user:// es la memoria del juego)
+const RUTA_GUARDADO := "user://partida.json"
+const RUTA_RESPALDO := "user://partida_respaldo.json"
+const VERSION_GUARDADO := 1
+const MENU := "res://escenas/menu.tscn"
+
 ## Objetos de la mochila. "precio" es lo que cuesta en las tiendas de las ciudades (0 = no se vende)
 ## y "max" es cuánto cabe en los bolsillos de la mochila (Regla B del GDD: la mochila tiene límite).
 const OBJETOS := {
@@ -70,6 +80,8 @@ var encuentro := {}              # lo que la escena de combate debe preparar
 var resultado_combate := {}      # lo que pasó en el último combate (para la historia)
 var mensajes_pendientes: Array = []
 var cambiando_escena := false     # true mientras se carga otra escena
+var tiempo_jugado := 0.0          # segundos de juego (se guarda con la partida)
+var guardar_pronto := false       # la historia pide guardar apenas termine el evento (ej. al dormir)
 
 
 ## Cambia de escena. Si algo falla, muestra el error en pantalla (nunca deja la pantalla en negro).
@@ -101,6 +113,9 @@ var _capa_error: CanvasLayer = null
 
 
 func _process(delta: float) -> void:
+	var escena_actual := get_tree().current_scene
+	if escena_actual != null and escena_actual.scene_file_path != MENU:
+		tiempo_jugado += delta
 	# 1) ¿El cambio de escena terminó?
 	if _escena_pedida != "":
 		var actual := get_tree().current_scene
@@ -248,9 +263,7 @@ func _ready() -> void:
 		_autodiagnostico.call_deferred()
 	criaturas = _leer_json(RUTA_CRIATURAS).get("criaturas", {})
 	dialogos = _leer_json(RUTA_DIALOGOS)
-	var inicial: String = _leer_json(RUTA_CRIATURAS).get("carta_inicial", "")
-	if inicial != "":
-		agregar_carta(inicial)
+	nueva_partida()
 
 
 func _leer_json(ruta: String) -> Dictionary:
@@ -610,3 +623,169 @@ func empezar_mision(id: String, titulo: String) -> void:
 func completar_mision(id: String) -> void:
 	if misiones.has(id):
 		misiones[id]["estado"] = "completa"
+
+
+
+# ---------------------------------------------------------------------------
+# Partida: empezar de cero, guardar y cargar
+# ---------------------------------------------------------------------------
+
+## Deja todo como al principio del juego (mochila vacía, sin banderas...).
+func nueva_partida() -> void:
+	mochila = []
+	objetos = { "carta_vinculo": 0, "granada_aturdidora": 0 }
+	monedas = 0
+	chatarra = 0
+	partes = {}
+	bonus_ataque = 0.0
+	misiones = {}
+	tormenta = false
+	tiempo_clima = 0.0
+	flags = {}
+	mision = ""
+	entrada = ""
+	posicion_pan = null
+	mapa_actual = ""
+	lugar_descanso = { "mapa": "res://escenas/mapas/refugio_cero.tscn", "entrada": "Cama" }
+	pasos_sin_encuentro = 0
+	encuentro = {}
+	resultado_combate = {}
+	mensajes_pendientes = []
+	tiempo_jugado = 0.0
+	guardar_pronto = false
+	var inicial: String = _leer_json(RUTA_CRIATURAS).get("carta_inicial", "")
+	if inicial != "":
+		agregar_carta(inicial)
+
+
+func hay_partida_guardada() -> bool:
+	return not _leer_guardado(RUTA_GUARDADO).is_empty() or not _leer_guardado(RUTA_RESPALDO).is_empty()
+
+
+func borrar_partida() -> void:
+	for ruta in [RUTA_GUARDADO, RUTA_RESPALDO]:
+		if FileAccess.file_exists(ruta):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta))
+
+
+## Guarda la partida. Solo funciona en un mapa y cuando no está pasando ningún evento.
+## Devuelve true si se guardó.
+func guardar() -> bool:
+	var escena := get_tree().current_scene
+	if cambiando_escena or escena == null or not escena.has_method("puede_guardar") or not escena.puede_guardar():
+		return false
+	var pos: Vector2 = escena.pan.global_position
+	var datos := {
+		"version": VERSION_GUARDADO,
+		"fecha": Time.get_datetime_string_from_system(false, true),
+		"tiempo_jugado": tiempo_jugado,
+		"mapa": escena.scene_file_path,
+		"nombre_mapa": escena.nombre_mapa,
+		"posicion": [pos.x, pos.y],
+		"mochila": mochila,
+		"objetos": objetos,
+		"monedas": monedas,
+		"chatarra": chatarra,
+		"partes": partes,
+		"bonus_ataque": bonus_ataque,
+		"misiones": misiones,
+		"flags": flags,
+		"mision": mision,
+		"lugar_descanso": lugar_descanso,
+		"tormenta": tormenta,
+		"tiempo_clima": tiempo_clima,
+		"pasos_sin_encuentro": pasos_sin_encuentro,
+	}
+	# La partida anterior queda de respaldo, por si el guardado nuevo se corta a la mitad.
+	var anterior := FileAccess.get_file_as_string(RUTA_GUARDADO) if FileAccess.file_exists(RUTA_GUARDADO) else ""
+	if anterior != "":
+		_escribir(RUTA_RESPALDO, anterior)
+	return _escribir(RUTA_GUARDADO, JSON.stringify(datos, "\t"))
+
+
+func _escribir(ruta: String, texto: String) -> bool:
+	var archivo := FileAccess.open(ruta, FileAccess.WRITE)
+	if archivo == null:
+		push_warning("No se pudo guardar en %s (error %d)" % [ruta, FileAccess.get_open_error()])
+		return false
+	archivo.store_string(texto)
+	archivo.close()
+	return true
+
+
+func _leer_guardado(ruta: String) -> Dictionary:
+	if not FileAccess.file_exists(ruta):
+		return {}
+	var datos = JSON.parse_string(FileAccess.get_file_as_string(ruta))
+	if typeof(datos) != TYPE_DICTIONARY or not datos.has("mapa") or not datos.has("mochila"):
+		return {}
+	return datos
+
+
+## Lo que muestra el menú en "Continuar": lugar, cartas, monedas y tiempo jugado.
+func resumen_partida() -> Dictionary:
+	var datos := _leer_guardado(RUTA_GUARDADO)
+	if datos.is_empty():
+		datos = _leer_guardado(RUTA_RESPALDO)
+	if datos.is_empty():
+		return {}
+	var lugares := { "refugio_cero": "Refugio Cero", "superficie": "La Superficie", "bastion_oxido": "Bastión de Óxido" }
+	var nombre: String = datos.get("nombre_mapa", "")
+	var minutos := int(float(datos.get("tiempo_jugado", 0.0)) / 60.0)
+	return {
+		"lugar": lugares.get(nombre, nombre.capitalize()),
+		"cartas": (datos["mochila"] as Array).size(),
+		"monedas": int(datos.get("monedas", 0)),
+		"tiempo": "%d h %02d min" % [minutos / 60, minutos % 60] if minutos >= 60 else "%d min" % minutos,
+	}
+
+
+## Carga la partida guardada y lleva a Pan al lugar donde guardó.
+func cargar() -> bool:
+	var datos := _leer_guardado(RUTA_GUARDADO)
+	if datos.is_empty():
+		datos = _leer_guardado(RUTA_RESPALDO)
+	if datos.is_empty():
+		return false
+	nueva_partida()
+	mochila = []
+	for c in datos["mochila"]:
+		if c is Dictionary and criaturas.has(c.get("id", "")):
+			mochila.append({ "id": c["id"], "cantidad": maxi(1, int(c.get("cantidad", 1))), "hp": int(c.get("hp", 0)) })
+	objetos = { "carta_vinculo": 0, "granada_aturdidora": 0 }
+	var guardados: Dictionary = datos.get("objetos", {})
+	for id in guardados:
+		objetos[id] = int(guardados[id])
+	monedas = int(datos.get("monedas", 0))
+	chatarra = int(datos.get("chatarra", 0))
+	partes = {}
+	var p: Dictionary = datos.get("partes", {})
+	for id in p:
+		partes[id] = int(p[id])
+	bonus_ataque = float(datos.get("bonus_ataque", 0.0))
+	misiones = datos.get("misiones", {})
+	flags = datos.get("flags", {})
+	mision = str(datos.get("mision", ""))
+	var descanso = datos.get("lugar_descanso", {})
+	if descanso is Dictionary and ResourceLoader.exists(str(descanso.get("mapa", ""))):
+		lugar_descanso = descanso
+	tormenta = bool(datos.get("tormenta", false))
+	tiempo_clima = float(datos.get("tiempo_clima", 0.0))
+	pasos_sin_encuentro = int(datos.get("pasos_sin_encuentro", 0))
+	tiempo_jugado = float(datos.get("tiempo_jugado", 0.0))
+	var ruta: String = datos.get("mapa", "")
+	var pos = datos.get("posicion", null)
+	if ResourceLoader.exists(ruta) and pos is Array and pos.size() == 2:
+		entrada = ""
+		posicion_pan = Vector2(float(pos[0]), float(pos[1]))
+		cambiar_escena(ruta)
+	else:   # el mapa ya no existe: aparece donde descansó por última vez
+		ir_a_mapa(lugar_descanso["mapa"], lugar_descanso["entrada"])
+	return true
+
+
+## Si cierras o minimizas el juego en medio de la exploración, se guarda solo.
+func _notification(what: int) -> void:
+	if what in [NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST]:
+		if is_inside_tree():
+			guardar()

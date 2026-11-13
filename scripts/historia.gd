@@ -356,6 +356,7 @@ func _dormir(id_dialogo: String) -> void:
 	await mapa.get_tree().create_timer(0.6).timeout
 	await mapa.hud.fundido(false, 0.6)
 	await decir(id_dialogo)
+	Juego.guardar_pronto = true
 
 
 
@@ -645,6 +646,7 @@ func _celebracion() -> void:
 	await mapa.hud.fundido(false, 0.6)
 	await decir("bastion_libre")
 	poner_mision("Bastión es libre. Próximo destino: El Sumidero (llegará en una próxima versión).")
+	Juego.guardar_pronto = true
 
 
 func _armar_multitud(centro: Vector2) -> Array:
