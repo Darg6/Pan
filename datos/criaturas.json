@@ -1,0 +1,94 @@
+{
+	"_ayuda": "Para agregar una criatura, copia un bloque dentro de 'criaturas', cambia su id (ej. 'oso_de_escoria') y sus valores. Tipos de ataque (escribelos sin tilde): feral, toxico, termico, fluido, chatarra, energia, sombra, terrestre, sonico. 'ia' puede ser 'agresivo' o 'evasivo'. 'forma' puede ser 'humanoide', 'gato' o 'bandada'.",
+	"carta_inicial": "gato_mutado",
+	"criaturas": {
+		"bestia_blanca": {
+			"nombre": "Bestia Blanca",
+			"descripcion": "Humanoide de piel, pelo y ojos blancos. Extremadamente rápido y escurridizo, pero frágil.",
+			"tipo": "feral",
+			"debil_a": ["toxico", "termico"],
+			"resiste": [],
+			"hp": 55,
+			"ataque": 38,
+			"defensa": 30,
+			"velocidad": 95,
+			"evasion": 0.35,
+			"facilidad_captura": 0.9,
+			"ia": "evasivo",
+			"forma": "humanoide",
+			"color": "#f2f2f2",
+			"movimientos": [
+				{
+					"versiones": [
+						{ "desde_nivel": 1, "nombre": "Golpe Veloz", "poder": 14, "tipo": "feral", "golpes": 1 },
+						{ "desde_nivel": 3, "nombre": "Ráfaga Blanca", "poder": 22, "tipo": "feral", "golpes": 1 }
+					]
+				},
+				{
+					"versiones": [
+						{ "desde_nivel": 1, "nombre": "Acelerar", "poder": 0, "tipo": "feral", "efecto": "evasion_arriba" }
+					]
+				}
+			]
+		},
+		"gato_mutado": {
+			"nombre": "Gato Mutado",
+			"descripcion": "Felino ágil que ataca con arañazos. Su arañazo deja 'Infectar', un daño continuo.",
+			"tipo": "feral",
+			"debil_a": ["termico", "fluido"],
+			"resiste": [],
+			"hp": 90,
+			"ataque": 50,
+			"defensa": 45,
+			"velocidad": 70,
+			"evasion": 0.08,
+			"facilidad_captura": 0.75,
+			"ia": "agresivo",
+			"forma": "gato",
+			"color": "#8e6bbf",
+			"movimientos": [
+				{
+					"versiones": [
+						{ "desde_nivel": 1, "nombre": "Arañazo", "poder": 12, "tipo": "toxico", "golpes": 1, "efecto": "infectar" },
+						{ "desde_nivel": 4, "nombre": "Desgarre Infeccioso", "poder": 24, "tipo": "toxico", "golpes": 1, "efecto": "infectar" }
+					]
+				},
+				{
+					"versiones": [
+						{ "desde_nivel": 1, "nombre": "Mordida Feroz", "poder": 22, "tipo": "feral", "golpes": 1 },
+						{ "desde_nivel": 3, "nombre": "Mordida Salvaje", "poder": 32, "tipo": "feral", "golpes": 1 }
+					]
+				}
+			]
+		},
+		"aves_negras": {
+			"nombre": "Aves Negras",
+			"descripcion": "Una bandada de 5 aves que ocupa una sola carta. Atacan 5 veces seguidas en un mismo turno.",
+			"tipo": "feral",
+			"debil_a": ["termico"],
+			"resiste": [],
+			"hp": 75,
+			"ataque": 45,
+			"defensa": 38,
+			"velocidad": 80,
+			"evasion": 0.12,
+			"facilidad_captura": 0.7,
+			"ia": "agresivo",
+			"forma": "bandada",
+			"color": "#26232b",
+			"movimientos": [
+				{
+					"versiones": [
+						{ "desde_nivel": 1, "nombre": "Picotazo en Bandada", "poder": 5, "tipo": "feral", "golpes": 5 },
+						{ "desde_nivel": 3, "nombre": "Tormenta de Picos", "poder": 8, "tipo": "feral", "golpes": 5 }
+					]
+				},
+				{
+					"versiones": [
+						{ "desde_nivel": 1, "nombre": "Picada", "poder": 20, "tipo": "feral", "golpes": 1 }
+					]
+				}
+			]
+		}
+	}
+}
