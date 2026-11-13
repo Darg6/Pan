@@ -1196,10 +1196,311 @@ def generar_combate_humanos():
     guardar(pan_combate(), "personajes/pan_combate.png")
     guardar(recluta_combate(), "personajes/recluta_combate.png")
 
+# ---------------------------------------------------------------- retratos HD (96x96) de Pan y sus padres
+def acl(col, f):
+    return tuple(max(0, min(255, int(v * f))) for v in col[:3]) + (255,)
+
+def mezcla(a, b, t):
+    return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3)) + (255,)
+
+# ------------------------------------------------------------------ retrato HD (96x96)
+HD = 96
+
+def borde_cara(y, quijada=1.0, menton=42, ancho=27):
+    """x del borde izquierdo de la cara en la fila y (oval)."""
+    if y < 24:
+        return None
+    if y < 30:          # parte alta de la frente, redondeada
+        t = (30 - y) / 6
+        return int(ancho + t * t * 6)
+    if y <= 56:
+        return ancho
+    if y <= 74:         # mandíbula que se cierra hacia el mentón
+        t = (y - 56) / 18
+        return int(ancho + (menton - ancho) * (t ** (1.3 * quijada)))
+    if y <= 76:
+        return menton + (y - 74) * 2
+    return None
+
+def cara_hd(d, piel, quijada=1.0, menton=42, ancho=27):
+    s1 = acl(piel, 0.86); s2 = acl(piel, 0.72); s3 = acl(piel, 0.6); l1 = acl(piel, 1.07)
+    # cuello con sombra bajo el mentón
+    d.rectangle((36, 68, 47, 86), s1)
+    d.polygon([(36, 68), (47, 72), (47, 80), (36, 76)], s2)
+    for y in range(24, 77):
+        x = borde_cara(y, quijada, menton, ancho)
+        if x is None or x > 47:
+            continue
+        d.line((x, y, 47, y), piel)
+        d.point((x, y), s2); d.point((x + 1, y), s1)
+    # oreja
+    d.polygon([(22, 41), (25, 38), (28, 40), (28, 56), (25, 57), (23, 53)], piel)
+    d.line((24, 43, 24, 52), s2); d.line((25, 42, 26, 41), s1)
+    # sombra suave bajo el pómulo
+    d.polygon([(ancho + 2, 55), (35, 57), (33, 63), (ancho + 3, 64)], s1)
+    d.line((ancho + 3, 54, 35, 56), s1)
+    # sombra bajo la mandíbula
+    for y in range(64, 76):
+        x = borde_cara(y, quijada, menton, ancho)
+        if x is not None and x <= 47:
+            d.line((x, y, min(47, x + 2), y), s2)
+    # luz en la frente y el pómulo
+    d.line((38, 28, 47, 28), l1); d.line((40, 29, 47, 29), l1)
+    d.line((33, 55, 36, 54), l1)
+    return s1, s2, s3
+
+def nariz_hd(d, piel, recta=True):
+    s1 = acl(piel, 0.86); s2 = acl(piel, 0.7); l1 = acl(piel, 1.1)
+    d.line((45, 46, 45, 59), s1)             # costado del tabique
+    d.line((47, 47, 47, 58), l1)             # luz en el tabique
+    d.polygon([(42, 61), (44, 59), (47, 60), (47, 63), (43, 63)], s1)   # base de la nariz
+    d.line((43, 62, 45, 62), s2); d.point((44, 61), acl(piel, 0.55))   # fosa
+    d.point((47, 61), l1)
+
+def boca_hd(d, piel, labio=None, forma="seria", y=67):
+    labio = labio or acl(piel, 0.82)
+    linea = acl(labio, 0.55)
+    d.line((40, y, 47, y), linea)
+    d.line((42, y - 1, 47, y - 1), labio)                   # labio de arriba
+    d.line((41, y + 1, 47, y + 1), labio); d.line((43, y + 2, 47, y + 2), labio)   # labio de abajo
+    d.line((44, y + 2, 47, y + 2), acl(labio, 1.15))        # brillo del labio
+    d.line((44, y + 4, 47, y + 4), acl(piel, 0.86))         # sombra bajo el labio
+    if forma == "sonrisa":
+        d.point((39, y - 1), linea)
+    elif forma == "seria":
+        d.point((39, y + 1), linea)
+
+def ojo_hd(d, iris, estilo="normal", y=47, delineado=False, piel=None):
+    """Ojo izquierdo del dibujo (el derecho sale del espejo)."""
+    blanco = c("f0ebe6"); sombra_b = c("cfc6c2"); linea = c("141018")
+    if estilo == "felino":
+        pts = [(30, y + 1), (33, y - 2), (38, y - 3), (43, y - 2), (44, y + 1), (40, y + 3), (34, y + 3)]
+    elif estilo == "grande":
+        pts = [(29, y + 1), (32, y - 3), (38, y - 4), (43, y - 2), (44, y + 1), (41, y + 4), (34, y + 4)]
+    else:   # relajado
+        pts = [(30, y + 1), (33, y - 1), (38, y - 2), (43, y - 1), (44, y + 1), (40, y + 3), (34, y + 3)]
+    d.polygon(pts, blanco)
+    d.line((pts[1][0], pts[1][1] + 1, pts[3][0], pts[3][1] + 1), sombra_b)   # sombra del párpado sobre el blanco
+    # iris
+    cx, cy = 37, y
+    r = 4 if estilo == "grande" else 3
+    d.ellipse((cx - r, cy - r, cx + r, cy + r), iris)
+    d.ellipse((cx - r, cy - r, cx + r, cy - r + 2), acl(iris, 0.6))    # parte de arriba más oscura
+    d.point((cx, cy + r - 1), acl(iris, 1.5)); d.point((cx + 1, cy + r - 1), acl(iris, 1.3))
+    if estilo == "felino":
+        d.line((cx, cy - r + 1, cx, cy + r - 1), acl(iris, 0.15))        # pupila rasgada
+    else:
+        d.ellipse((cx - 1, cy - 1, cx + 1, cy + 1), acl(iris, 0.2))
+    d.rectangle((cx - 2, cy - 2, cx - 1, cy - 1), c("ffffff"))         # brillo
+    d.point((cx + 2, cy + 1), c("ffffff"))
+    # recortar lo que sale del ojo (el iris no puede pasar los párpados)
+    # párpado de arriba (línea gruesa) y de abajo (fina)
+    d.line(pts[0:5], linea, 1)
+    d.line((pts[0][0], pts[0][1], pts[1][0], pts[1][1] - 1), linea)
+    d.line((pts[1][0], pts[1][1] - 1, pts[3][0], pts[3][1] - 1), linea)
+    if delineado:   # delineado negro marcado con "ala" hacia afuera
+        d.line((pts[1][0], pts[1][1] - 2, pts[3][0], pts[3][1] - 2), linea)
+        d.line((pts[0][0], pts[0][1], pts[0][0] - 3, pts[0][1] - 3), linea)
+        d.line((pts[0][0] + 1, pts[0][1], pts[0][0] - 2, pts[0][1] - 3), linea)
+        d.line((pts[4][0], pts[4][1], pts[6][0], pts[6][1]), linea)
+    else:
+        d.line((pts[6][0], pts[6][1], pts[5][0], pts[5][1]), acl(piel, 0.7) if piel else linea)
+    if estilo == "relajado" and piel:
+        d.line((pts[1][0], pts[1][1] - 3, pts[3][0], pts[3][1] - 3), acl(piel, 0.82))   # pliegue del párpado
+    return pts
+
+def recortar_ojo(img, pts, piel_fuera):
+    """Borra lo que el iris dibujó fuera de la forma del ojo (lo pinta de piel)."""
+    mask = Image.new("L", img.size, 0)
+    ImageDraw.Draw(mask).polygon(pts, 255)
+    ImageDraw.Draw(mask).line(pts[0:5], 255)
+    px = img.load(); m = mask.load()
+    x0 = min(p[0] for p in pts) - 5; x1 = max(p[0] for p in pts) + 5
+    y0 = min(p[1] for p in pts) - 6; y1 = max(p[1] for p in pts) + 6
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            if not m[x, y] and px[x, y][:3] != piel_fuera[:3] and px[x, y][3] and dentro_iris(px[x, y]):
+                px[x, y] = piel_fuera
+
+_IRIS = set()
+def dentro_iris(p):
+    return p[:3] in _IRIS
+
+def ceja_hd(d, col, y=39, grosor=2, forma="recta"):
+    if forma == "recta":
+        for k in range(grosor):
+            d.line((30, y + k, 43, y - 1 + k), col)
+        d.line((30, y + grosor, 33, y + grosor), col)
+    elif forma == "fina":
+        d.line((30, y + 1, 36, y - 1), col); d.line((36, y - 1, 43, y - 1), col)
+    elif forma == "seria":
+        for k in range(grosor):
+            d.line((30, y - 1 + k, 43, y + 1 + k), col)
+
+def ropa_hd(d, color, color2, cuello="redondo"):
+    d.polygon([(0, 96), (2, 90), (10, 85), (24, 82), (36, 81), (47, 84), (47, 96)], color)
+    d.line((2, 90, 10, 85), acl(color, 1.6)); d.line((10, 85, 24, 82), acl(color, 1.35))
+    d.line((22, 86, 26, 96), color2)                                  # pliegue
+    if cuello == "redondo":
+        d.line((34, 81, 41, 86), color2); d.line((41, 86, 47, 87), color2)
+
+def luz_dramatica(img):
+    """Luz suave desde la izquierda: la mitad derecha del personaje queda en sombra (con tramado)."""
+    px = img.load()
+    for y in range(img.height):
+        for x in range(img.width):
+            p = px[x, y]
+            if p[3] == 0:
+                continue
+            if x < 34:
+                f = 1.06
+            elif x < 56:
+                f = 1.0
+            elif x < 64:
+                f = 0.93
+            else:
+                f = 0.85
+            px[x, y] = acl(p, f)
+    return img
+
+def contorno_hd(img, col=c("120e14")):
+    w, h = img.size
+    src = img.copy(); s = src.load(); out = img.load()
+    for y in range(h):
+        for x in range(w):
+            if s[x, y][3]:
+                continue
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < w and 0 <= ny < h and s[nx, ny][3]:
+                    out[x, y] = mezcla(s[nx, ny], col, 0.75)
+                    break
+    return img
+
+def retrato_hd(fondo, fondo2, mitad, despues=None, piel=None, iris=None):
+    fig = nuevo(HD, HD); d = ImageDraw.Draw(fig)
+    pts = mitad(d)
+    if iris is not None and pts is not None:
+        _IRIS.clear()
+        for f in (1.0, 0.6, 1.5, 1.3, 0.15, 0.2):
+            _IRIS.add(acl(iris, f)[:3])
+        _IRIS.add((255, 255, 255))
+    espejar(fig)
+    d = ImageDraw.Draw(fig)
+    if despues:
+        despues(d)
+    luz_dramatica(fig)
+    contorno_hd(fig)
+    img = nuevo(HD, HD)
+    gradiente(img, (0, 0, HD, HD), [fondo, fondo2])
+    img.alpha_composite(fig)
+    return img
+
+# ------------------------------------------------------------------ PAN
+PAN_P = c("dfb592"); PAN_PEL = c("0e0e14"); PAN_AZ = c("22305a"); PAN_AZ2 = c("34488a"); PAN_V = c("2fd07a")
+def pan_hd():
+    def m(d):
+        ropa_hd(d, c("1c1c22"), c("0e0e12"))
+        d.line((14, 85, 20, 96), MOCH); d.line((15, 85, 21, 96), MOCH2)      # tirante de la mochila
+        cara_hd(d, PAN_P, quijada=1.1, menton=41, ancho=28)
+        ojo_hd(d, PAN_V, "felino", piel=PAN_P)
+        ceja_hd(d, c("16141c"), y=40, grosor=2, forma="seria")
+        nariz_hd(d, PAN_P)
+        boca_hd(d, PAN_P, forma="seria")
+        # pelo negro azabache, lacio, flequillo largo y texturizado (cae sobre frente y nuca)
+        P(d, [(20, 60), (18, 40), (19, 28), (24, 18), (31, 11), (40, 7), (47, 6), (47, 30), (44, 28), (40, 31), (36, 28), (32, 36), (29, 32), (27, 44), (24, 62)], PAN_PEL)
+        P(d, [(29, 26), (36, 26), (33, 44)], PAN_PEL)                    # mechones del flequillo que caen sobre los ojos
+        P(d, [(35, 26), (43, 26), (40, 41)], PAN_PEL)
+        P(d, [(42, 26), (47, 26), (47, 37)], PAN_PEL)
+        P(d, [(19, 30), (14, 38), (18, 37), (15, 46), (19, 44)], PAN_PEL)  # puntas sueltas al lado
+        P(d, [(20, 56), (24, 60), (26, 76), (22, 72)], PAN_PEL)          # nuca larga
+        for (x0, y0, x1, y1) in ((24, 20, 34, 12), (22, 28, 30, 16), (34, 14, 44, 9), (31, 28, 33, 38), (38, 28, 39, 36)):
+            d.line((x0, y0, x1, y1), PAN_AZ)                           # reflejos azul marino
+        d.line((26, 18, 32, 13), PAN_AZ2); d.line((36, 11, 40, 9), PAN_AZ2)
+        for x in (22, 26, 30):
+            d.line((x, 34, x - 2, 50), c("1c1c26"))                   # textura de mechones
+    def despues(d):
+        P(d, [(47, 26), (55, 27), (50, 42)], PAN_PEL)                  # mechón asimétrico entre los ojos
+        P(d, [(58, 8), (70, 12), (64, 14)], PAN_PEL)                   # pelo desordenado
+        d.line((49, 30, 51, 38), PAN_AZ)
+        # aro de mariposa (oreja izquierda de Pan = derecha del dibujo)
+        ox, oy = 71, 60
+        d.line((ox, 57, ox, oy - 1), c("d8b850"))                         # gancho
+        P(d, [(ox, oy), (ox - 3, oy - 1), (ox - 3, oy + 2), (ox, oy + 1)], ORO)   # alas de la mariposa
+        P(d, [(ox, oy), (ox + 3, oy - 1), (ox + 3, oy + 2), (ox, oy + 1)], ORO)
+        d.point((ox - 2, oy), c("fff2b0")); d.point((ox, oy), c("6a5010")); d.point((ox, oy + 1), c("6a5010"))
+        # collar plateado con el dije de gato y la perla morada
+        d.line((38, 81, 48, 90), c("c8c8d4")); d.line((58, 81, 48, 90), c("c8c8d4"))
+        P(d, [(45, 90), (46, 88), (47, 90), (49, 90), (50, 88), (51, 90), (51, 95), (45, 95)], c("b8b8c8"))   # gato
+        d.rectangle((47, 92, 49, 94), c("a050e8")); d.point((47, 92), c("e0b8ff"))   # perla
+        d.point((46, 91), c("1a1a22")); d.point((50, 91), c("1a1a22"))              # ojitos del gato
+    return retrato_hd(c("4a4e58"), c("23252c"), m, despues)
+
+# ------------------------------------------------------------------ DIEGO
+DI_P = c("c08c62"); DI_PEL = c("0c0c10"); DI_COB = c("8a5a2e")
+def diego_hd():
+    def m(d):
+        ropa_hd(d, c("1e1e24"), c("101014"))
+        cara_hd(d, DI_P, quijada=0.8, menton=40, ancho=26)
+        ojo_hd(d, c("1a1210"), "relajado", piel=DI_P)
+        ceja_hd(d, c("0c0c10"), y=39, grosor=3, forma="recta")
+        nariz_hd(d, DI_P)
+        boca_hd(d, DI_P, forma="seria")
+        # pelo lacio abundante peinado hacia adelante; flequillo texturizado hasta las cejas; lados cortos
+        P(d, [(23, 44), (22, 30), (25, 20), (32, 12), (40, 8), (47, 7), (47, 32), (24, 32), (25, 46)], DI_PEL)
+        for (x0, x1, punta) in ((25, 31, 38), (30, 36, 40), (35, 41, 38), (40, 47, 39), (44, 47, 36)):
+            P(d, [(x0, 31), (x1, 31), ((x0 + x1) // 2 + 1, punta)], DI_PEL)       # puntas del flequillo hasta las cejas
+        P(d, [(22, 36), (25, 32), (26, 48), (23, 50)], acl(DI_PEL, 1.8))  # lados cortos (degradado)
+        d.line((30, 14, 26, 24), c("24242e")); d.line((38, 10, 34, 20), c("24242e")); d.line((45, 9, 43, 18), c("24242e"))   # brillo del pelo
+        d.line((40, 26, 41, 36), DI_COB); d.line((34, 27, 34, 35), acl(DI_COB, 0.75))   # mechones cobrizos sutiles al frente
+    def despues(d):
+        d.line((36, 82, 48, 92), c("a8a8b4")); d.line((60, 82, 48, 92), c("a8a8b4"))   # cadena metálica delgada
+        for x in range(38, 60, 3):
+            yy = 82 + int(10 * (1 - abs(x - 48) / 12))
+            d.point((x, yy), c("e0e0ea"))
+    return retrato_hd(c("5a4a40"), c("2a2220"), m, despues)
+
+# ------------------------------------------------------------------ DANITZA
+DA_P = c("f6dccb"); DA_PEL = c("2a1614"); DA_ROJ = c("6e2e22"); DA_ROJ2 = c("9a4630")
+def danitza_hd():
+    def m(d):
+        ropa_hd(d, c("c8323a"), c("8e2028"))
+        cara_hd(d, DA_P, quijada=1.25, menton=43, ancho=29)
+        pts = ojo_hd(d, c("3a1e12"), "grande", delineado=True, piel=DA_P)
+        ceja_hd(d, c("3a2620"), y=39, grosor=1, forma="fina")
+        nariz_hd(d, DA_P)
+        boca_hd(d, DA_P, labio=c("c45a54"), forma="seria")
+        d.point((33, 60), c("f2c4b8")); d.point((35, 60), c("f2c4b8")); d.point((34, 61), c("f2c4b8"))   # mejillas suaves
+        # choker negro
+        d.rectangle((36, 77, 47, 79), c("141016"))
+        # bob en capas hasta la mitad del cuello, puntas hacia adentro, flequillo ligero en diagonal
+        P(d, [(20, 74), (17, 56), (18, 36), (22, 22), (30, 12), (40, 7), (47, 6), (47, 22), (40, 24), (33, 30), (29, 40), (28, 56), (30, 68), (34, 76), (28, 79), (23, 78)], DA_PEL)
+        P(d, [(18, 70), (22, 78), (16, 76)], DA_PEL)                    # capa de abajo
+        d.line((30, 76, 34, 75), DA_ROJ); d.line((24, 78, 29, 78), DA_ROJ)   # puntas curvadas hacia adentro
+        for (x0, y0, x1, y1) in ((22, 30, 20, 60), (26, 22, 23, 56), (30, 16, 26, 44), (36, 11, 32, 22)):
+            d.line((x0, y0, x1, y1), DA_ROJ)                            # destellos rojizos/castaños
+        d.line((24, 26, 21, 44), DA_ROJ2); d.line((32, 14, 29, 20), DA_ROJ2)
+    def despues(d):
+        P(d, [(47, 20), (56, 22), (62, 30), (64, 38), (58, 30), (50, 25)], DA_PEL)   # flequillo en mechones diagonales
+        P(d, [(38, 22), (47, 20), (44, 30), (40, 34), (41, 27)], DA_PEL)
+        d.line((52, 23, 60, 31), DA_ROJ)
+    return retrato_hd(c("6a4a44"), c("2e2224"), m, despues)
+
+
+def reducir_hd(img):
+    """Versión 48x48 de un retrato HD (para el cuadro de diálogo): promedio 2x2 y vuelta a la paleta original."""
+    pequeno = img.resize((48, 48), Image.BOX).convert("RGB")
+    paleta = img.convert("RGB").quantize(colors=48, method=Image.Quantize.MEDIANCUT)
+    return pequeno.quantize(palette=paleta, dither=Image.Dither.NONE).convert("RGBA")
+
 def generar_retratos():
     """Caras de 48x48 (el tamaño exacto del cuadro de diálogo, así no se deforman los píxeles)."""
     for nombre, hacer in TODOS:
         guardar(hacer(), f"retratos/{nombre}.png")
+    # Pan y sus padres: se dibujan en grande (96x96) y se reducen, así se ven igual que en los conceptos
+    guardar(reducir_hd(pan_hd()), "retratos/pan.png")
+    guardar(reducir_hd(diego_hd()), "retratos/papa.png")
+    guardar(reducir_hd(danitza_hd()), "retratos/mama.png")
 
 # ---------------------------------------------------------------------------
 # CRIATURAS (64x64, para el combate)
@@ -1506,38 +1807,214 @@ def plataforma(img, cx, cy, rx, ry, rng):
         d.line((x, y, x - 1, y - 4), PASTO[0])
         d.line((x + 1, y, x + 2, y - 3), PASTO[2])
 
-def generar_fondo_combate():
-    """Fondo del combate. Las plataformas deben coincidir con POS_ENEMIGO y POS_ALIADO de combate.gd."""
-    rng = random.Random(11)
-    img = nuevo(W, H)
-    hz = 108  # línea del horizonte
-    gradiente(img, (0, 0, W, hz + 10), [c("2e2638"), c("4a3346"), c("74463f"), c("a8603e"), c("c98a4e")])
+def cresta(rng, ancho, base, alto, rugosidad=0.55):
+    """Perfil de montañas (desplazamiento del punto medio): devuelve la altura en cada x."""
+    n = 512
+    while n < ancho:
+        n *= 2
+    pts = [0.0] * (n + 1)
+    pts[0] = base - rng.randint(*alto); pts[n] = base - rng.randint(*alto)
+    tam, amp = n, float(alto[1] - alto[0])
+    while tam > 1:
+        mitad = tam // 2
+        for x in range(0, n, tam):
+            m = (pts[x] + pts[x + tam]) / 2 + rng.uniform(-amp, amp)
+            pts[x + mitad] = max(base - alto[1] - 10, min(base - 2, m))
+        amp *= rugosidad
+        tam = mitad
+    return [int(v) for v in pts[:ancho + 1]]
+
+def montanas(img, rng, base, alto, col, cima=None, rugosidad=0.6):
+    """Cordillera con laderas al sol (izquierda) y en sombra (derecha) y ceniza en las cumbres."""
     d = ImageDraw.Draw(img)
-    d.ellipse((330, 22, 366, 58), c("e8b878"))  # sol tapado por smog
-    tramado(img, (325, 36, 371, 48), c("e8b878"), c("c98a4e"), nivel=0.5)
-    skyline(img, hz - 8, c("5a3a42"), rng, (24, 70), (16, 46))
-    skyline(img, hz, c("3a2733"), rng, (12, 46), (12, 34), ventanas=c("6a4a3a"))
-    for x in (60, 75, 410):  # chimeneas a lo lejos
-        d.rectangle((x, 44, x + 6, hz), c("2a1f28"))
-        for k in range(5):
-            r = 4 + k * 3
-            d.ellipse((x - r + 3 + k * 4, 36 - k * 8 - r, x + r + 3 + k * 4, 36 - k * 8 + r), c("2a2228"))
-    # Suelo
-    d.rectangle((0, hz, W, H), TIERRA[1])
-    gradiente(img, (0, hz, W, hz + 18), [c("6e5440"), TIERRA[2], TIERRA[1]])
-    ruido(img, (0, hz + 10, W, H), [TIERRA[0], TIERRA[2], TIERRA[3]], 0.12, rng)
-    for _ in range(14):  # grietas
+    crudo = cresta(rng, W, base, alto, rugosidad)
+    ys = [int(sum(crudo[max(0, x - 2):x + 3]) / len(crudo[max(0, x - 2):x + 3])) for x in range(W + 1)]   # suavizado
+    sombra = tuple(int(v * 0.8) for v in col[:3]) + (255,)
+    luz = tuple(min(255, int(v * 1.15)) for v in col[:3]) + (255,)
+    alto_medio = base - (alto[0] + alto[1]) // 2
+    for x in range(W):
+        d.line((x, ys[x], x, base), col)
+        pendiente = ys[min(W, x + 4)] - ys[max(0, x - 4)]
+        if pendiente > 2:          # baja hacia la derecha: ladera en sombra
+            d.line((x, ys[x], x, min(base, ys[x] + 18)), sombra)
+        elif pendiente < -2:       # sube: le da el sol
+            d.line((x, ys[x], x, min(base, ys[x] + 3)), luz)
+        if cima and ys[x] < alto_medio - 8:
+            d.line((x, ys[x], x, ys[x] + 1), cima)
+    return ys
+
+def chimenea(d, x, y_base, alto, col, ancho=7):
+    d.rectangle((x, y_base - alto, x + ancho, y_base), col)
+    d.rectangle((x - 1, y_base - alto, x + ancho + 1, y_base - alto + 2), col)
+    for k in range(y_base - alto + 6, y_base, 9):
+        d.line((x, k, x + ancho, k), tuple(int(v * 0.8) for v in col[:3]) + (255,))
+
+def torre_electrica(d, x, y_base, alto, col):
+    d.line((x - 6, y_base, x, y_base - alto), col); d.line((x + 6, y_base, x, y_base - alto), col)
+    for k in range(4):
+        yy = y_base - k * alto // 4
+        d.line((x - 6 + k * 1.5, yy, x + 6 - k * 1.5, yy - alto // 4), col)
+    d.line((x - 10, y_base - alto + 6, x + 10, y_base - alto + 6), col)
+
+def nubes_capa(rng, colores, ancho=960, alto=110, n=14):
+    """Capa de nubes/smog que se repite (el juego la desplaza despacio)."""
+    img = nuevo(ancho, alto)
+    d = ImageDraw.Draw(img)
+    for _ in range(n):
+        x = rng.randrange(0, ancho); y = rng.randrange(8, alto - 20)
+        w = rng.randint(50, 140); h = rng.randint(5, 10)
+        col = rng.choice(colores)
+        for dx in (-ancho, 0, ancho):   # que empalme al repetirse
+            d.rectangle((x + dx, y, x + dx + w, y + h), col)
+            d.rectangle((x + dx + w // 5, y - 4, x + dx + w * 3 // 5, y), col)
+            d.line((x + dx + 4, y + h + 1, x + dx + w - 6, y + h + 1), tuple(int(v * 0.85) for v in col[:3]) + (col[3],))
+    return img
+
+def suelo_combate(img, rng, hz, base, oscuro, claro, detalles):
+    d = ImageDraw.Draw(img)
+    d.rectangle((0, hz, W, H), base)
+    gradiente(img, (0, hz, W, hz + 20), [claro, base])
+    ruido(img, (0, hz + 10, W, H), [oscuro, claro], 0.1, rng)
+    for _ in range(16):   # grietas
         x, y = rng.randrange(0, W), rng.randrange(hz + 20, H)
         for _ in range(6):
             nx, ny = x + rng.randint(-4, 6), y + rng.randint(-1, 3)
-            d.line((x, y, nx, ny), TIERRA[4])
+            d.line((x, y, nx, ny), oscuro)
             x, y = nx, ny
-    for _ in range(8):  # restos en el suelo
-        x, y = rng.randrange(0, W), rng.randrange(hz + 6, hz + 50)
-        d.rectangle((x, y, x + rng.randint(4, 12), y + rng.randint(2, 5)), rng.choice([OXIDO[1], METAL[1], CONCRETO[2]]))
+    detalles(d)
     plataforma(img, 340, 124, 66, 12, rng)
     plataforma(img, 138, 182, 82, 13, rng)
-    guardar(img, "fondos/combate_paramo.png")
+
+def fondo_paramo():
+    """Páramo: montañas de ceniza, fábricas que humean y ruinas al fondo."""
+    rng = random.Random(11)
+    hz = 108
+    cielo = nuevo(W, H)
+    gradiente(cielo, (0, 0, W, hz + 12), [c("2a2236"), c("4a3346"), c("74463f"), c("a8603e"), c("d4924e")])
+    d = ImageDraw.Draw(cielo)
+    d.ellipse((330, 26, 362, 58), c("f0c080")); d.ellipse((336, 32, 356, 52), c("fbe0a8"))
+    tramado(cielo, (322, 38, 370, 48), c("e8b878"), c("c98a4e"), nivel=0.5)
+    lejos = nuevo(W, H)
+    montanas(lejos, rng, hz - 10, (14, 56), c("6a4458"), cima=c("a48090"), rugosidad=0.62)
+    montanas(lejos, rng, hz - 2, (6, 30), c("4e3044"), rugosidad=0.6)
+    medio = nuevo(W, H)
+    skyline(medio, hz, c("3a2733"), rng, (12, 46), (12, 34), ventanas=c("6a4a3a"))
+    d = ImageDraw.Draw(medio)
+    for (x, alto) in ((176, 64), (190, 52), (404, 70)):
+        chimenea(d, x, hz, alto, c("2a1f28"))
+    torre_electrica(d, 40, hz, 40, c("2a1f28")); torre_electrica(d, 100, hz - 2, 30, c("2a1f28"))
+    d.line((40, hz - 34, 70, hz - 22, 100, hz - 26), c("2a1f28"))     # cable que cuelga
+    d.line((100, hz - 26, 135, hz - 14, 170, hz - 20), c("2a1f28"))
+    suelo = nuevo(W, H)
+    def det(d):
+        for _ in range(10):   # restos y piedras
+            x, y = rng.randrange(0, W), rng.randrange(hz + 6, hz + 50)
+            d.rectangle((x, y, x + rng.randint(4, 12), y + rng.randint(2, 5)), rng.choice([OXIDO[1], METAL[1], CONCRETO[2]]))
+        d.polygon([(0, 270), (0, 236), (18, 228), (40, 238), (52, 270)], c("3a2a22"))     # rocas cerca de la cámara
+        d.polygon([(430, 270), (446, 240), (470, 234), (480, 240), (480, 270)], c("3a2a22"))
+        d.line((18, 228, 40, 238), c("5a4234")); d.line((446, 240, 470, 234), c("5a4234"))
+    suelo_combate(suelo, rng, hz, TIERRA[1], TIERRA[4], c("6e5440"), det)
+    nubes = nubes_capa(rng, [(90, 60, 80, 150), (140, 80, 70, 120), (60, 40, 60, 170)])
+    humo = [(179, hz - 66), (193, hz - 54), (407, hz - 72)]
+    return cielo, nubes, lejos, medio, suelo, humo
+
+def fondo_pastizal():
+    """Pastizal seco: lomas doradas, torres de alta tensión y polvo en el viento."""
+    rng = random.Random(23)
+    hz = 106
+    cielo = nuevo(W, H)
+    gradiente(cielo, (0, 0, W, hz + 12), [c("3a3a5a"), c("6a5a6a"), c("b07a5a"), c("e0a860"), c("f0c878")])
+    d = ImageDraw.Draw(cielo)
+    d.ellipse((92, 40, 120, 68), c("fff0c0"))
+    lejos = nuevo(W, H)
+    montanas(lejos, rng, hz - 10, (20, 50), c("7a6070"), rugosidad=0.5)
+    montanas(lejos, rng, hz - 2, (8, 26), c("8a6a50"), rugosidad=0.45)
+    medio = nuevo(W, H)
+    d = ImageDraw.Draw(medio)
+    for (x, alto) in ((150, 54), (330, 46), (460, 50)):
+        torre_electrica(d, x, hz + 2, alto, c("4a3a3a"))
+    d.line((150, hz - 48, 240, hz - 30, 330, hz - 40), c("4a3a3a")); d.line((330, hz - 40, 395, hz - 28, 460, hz - 44), c("4a3a3a"))
+    for x in range(0, W, 3):   # pasto alto en el horizonte
+        h = rng.randint(2, 7)
+        d.line((x, hz + 2, x + rng.randint(-1, 1), hz + 2 - h), rng.choice([PASTO[0], PASTO[2], PASTO[4]]))
+    d.polygon([(380, hz + 2), (392, hz - 18), (400, hz - 22), (412, hz - 12), (416, hz + 2)], c("4a3a30"))   # casa en ruinas
+    d.rectangle((394, hz - 12, 398, hz - 6), c("1e1612"))
+    suelo = nuevo(W, H)
+    def det(d):
+        for _ in range(90):   # matas de pasto seco
+            x, y = rng.randrange(0, W), rng.randrange(hz + 8, H)
+            for k in range(3):
+                d.line((x + k, y, x + k + rng.randint(-1, 1), y - rng.randint(3, 7)), rng.choice([PASTO[0], PASTO[1], PASTO[2], PASTO[4]]))
+        d.polygon([(0, 270), (0, 230), (30, 236), (60, 270)], c("5a5226"))
+        d.polygon([(420, 270), (450, 232), (480, 228), (480, 270)], c("5a5226"))
+    suelo_combate(suelo, rng, hz, c("a08a4a"), c("6e5a30"), c("c0a860"), det)
+    nubes = nubes_capa(rng, [(255, 230, 200, 110), (240, 200, 170, 90), (200, 170, 170, 120)], n=10)
+    return cielo, nubes, lejos, medio, suelo, []
+
+def fondo_chatarra():
+    """Afueras de Bastión de Óxido: montañas de chatarra, grúas y la muralla de la ciudad."""
+    rng = random.Random(37)
+    hz = 110
+    cielo = nuevo(W, H)
+    gradiente(cielo, (0, 0, W, hz + 12), [c("2a1a1e"), c("5a2a24"), c("8a4024"), c("c0602a"), c("d8823a")])
+    d = ImageDraw.Draw(cielo)
+    d.ellipse((60, 34, 100, 74), c("e07a3a")); d.ellipse((68, 42, 92, 66), c("f0a050"))
+    lejos = nuevo(W, H)
+    ys = montanas(lejos, rng, hz - 6, (16, 44), c("5a3028"), rugosidad=0.7)   # montañas de chatarra
+    d = ImageDraw.Draw(lejos)
+    for _ in range(60):
+        x = rng.randrange(0, W)
+        y = ys[x] + rng.randint(2, 20)
+        d.rectangle((x, y, x + rng.randint(2, 6), y + rng.randint(1, 3)), rng.choice([c("6a3a2a"), c("4a2a22"), c("7a4a30")]))
+    d.rectangle((250, hz - 40, 480, hz - 4), c("3a2422"))                                   # muralla de Bastión
+    for x in range(250, 480, 12):
+        d.rectangle((x, hz - 44, x + 6, hz - 40), c("3a2422"))
+    for (x, y) in ((280, 70), (330, 78), (390, 66), (440, 74)):
+        d.rectangle((x, y, x + 2, y + 2), c("ffb040"))                                      # luces de la ciudad
+    medio = nuevo(W, H)
+    d = ImageDraw.Draw(medio)
+    # grúa oxidada
+    d.rectangle((96, hz - 74, 101, hz), c("2a1a18"))
+    d.line((98, hz - 74, 180, hz - 70), c("2a1a18"), 3); d.line((98, hz - 74, 60, hz - 70), c("2a1a18"), 3)
+    for x in range(64, 180, 8):
+        d.line((x, hz - 72, x + 4, hz - 68), c("2a1a18"))
+    d.line((170, hz - 70, 170, hz - 40), c("2a1a18")); d.rectangle((164, hz - 40, 176, hz - 34), c("2a1a18"))
+    # autos apilados y neumáticos
+    for (x, y) in ((300, hz - 10), (306, hz - 18), (360, hz - 8)):
+        d.polygon([(x, y), (x + 4, y - 6), (x + 22, y - 6), (x + 28, y), (x + 28, y + 6), (x, y + 6)], c("3a2220"))
+    for x in (220, 232, 226):
+        d.ellipse((x, hz - 8, x + 10, hz + 2), c("1e1416"))
+    chimenea(d, 430, hz, 56, c("2a1a18")); chimenea(d, 252, hz, 62, c("2a1a18"))
+    suelo = nuevo(W, H)
+    def det(d):
+        for _ in range(26):   # placas de metal y basura
+            x, y = rng.randrange(0, W), rng.randrange(hz + 6, H)
+            d.rectangle((x, y, x + rng.randint(4, 14), y + rng.randint(2, 6)), rng.choice([OXIDO[0], OXIDO[1], METAL[1], METAL[3]]))
+        d.polygon([(0, 270), (0, 226), (14, 218), (26, 226), (34, 214), (60, 236), (64, 270)], c("4a2a22"))   # chatarra cerca
+        d.polygon([(410, 270), (424, 238), (446, 232), (462, 222), (480, 230), (480, 270)], c("4a2a22"))
+        d.line((14, 218, 26, 226), OXIDO[2]); d.line((446, 232, 462, 222), OXIDO[2])
+    suelo_combate(suelo, rng, hz, c("7a5040"), c("4a2e24"), c("8a6048"), det)
+    nubes = nubes_capa(rng, [(70, 40, 40, 150), (110, 60, 40, 120), (50, 30, 30, 170)])
+    return cielo, nubes, lejos, medio, suelo, [(433, hz - 58), (255, hz - 64)]
+
+FONDOS_COMBATE = {"paramo": fondo_paramo, "pastizal": fondo_pastizal, "chatarra": fondo_chatarra}
+
+def generar_fondo_combate():
+    """Fondos del combate por capas (el juego las mueve: nubes que pasan, humo, leve paralaje).
+    Las plataformas deben coincidir con POS_ENEMIGO y POS_ALIADO de combate.gd."""
+    info = {}
+    for nombre, hacer in FONDOS_COMBATE.items():
+        cielo, nubes, lejos, medio, suelo, humo = hacer()
+        for capa, img in (("cielo", cielo), ("nubes", nubes), ("lejos", lejos), ("medio", medio), ("suelo", suelo)):
+            guardar(img, f"fondos/{nombre}_{capa}.png")
+        junto = cielo.copy()
+        junto.alpha_composite(nubes.crop((0, 0, W, nubes.height)))
+        for img in (lejos, medio, suelo):
+            junto.alpha_composite(img)
+        guardar(junto, f"fondos/combate_{nombre}.png")   # todo junto (vista previa / respaldo)
+        info[nombre] = {"humo": [list(p) for p in humo]}
+    with open(os.path.join(ARTE, "fondos", "fondos.json"), "w", encoding="utf-8") as f:
+        json.dump(info, f, indent="\t")
 
 # ---------------------------------------------------------------------------
 # INTRO (El Recuerdo): escenas con personajes en pixel art grande
@@ -1580,7 +2057,7 @@ def luz_anillos(img, cx, cy, radios, colores_noche, calido):
 # ------------------------------------------------------------------ personajes de la intro
 # Diego: moreno, afeitado, ojos negros, todo de negro.  Danitza: piel blanca, ojos café, pelo rojizo, polera roja.
 PAPA = dict(piel=c("b98458"), pelo=c("141418"), ropa=c("26262e"), ropa2=c("30303a"), pant=c("1c1c22"), bota=c("2a2420"), ojos=c("141418"))
-MAMA = dict(piel=c("f2d2bc"), pelo=c("9a4026"), ropa=c("c42e34"), ropa2=c("a8262c"), pant=c("1c1a20"), bota=c("c42e34"), ojos=c("6a4024"))
+MAMA = dict(piel=c("f6dccb"), pelo=c("3a1c18"), ropa=c("c42e34"), ropa2=c("a8262c"), pant=c("1c1a20"), bota=c("c42e34"), ojos=c("6a4024"))
 MARCUS = dict(piel=c("e0b090"), pelo=c("d8d0c0"), ropa=c("f2efe8"), ropa2=c("d6d0c4"), pant=c("e8e4dc"), bota=c("c8c0b0"))
 
 def papa_frente(pose="abajo", despues=None):
@@ -1976,20 +2453,23 @@ def pan_cuerpo():
     return terminar(img)
 
 # ---------------------------------------------------------------- DIEGO (papá)
-DI_PIEL = c("b98458"); DI_PELO = c("141418"); DI_OJO = c("141418")
+DI_PIEL = c("c08c62"); DI_PELO = c("141418"); DI_OJO = c("141418")
 def diego_cuerpo():
     img = nuevo(48, 96); d = ImageDraw.Draw(img)
     cuerpo_tactico(d, DI_PIEL, c("202026"), c("1a1a20"), c("2a2420"), ancho=1)
     cabeza(d, DI_PIEL, DI_OJO)
-    d.polygon([(13, 16), (13, 7), (15, 4), (18, 2), (20, 3), (23, 1), (23, 8), (17, 8), (15, 11)], DI_PELO)   # pelo corto con volumen
-    d.polygon([(17, 8), (21, 8), (19, 10)], DI_PELO)
-    d.line((16, 4, 20, 2), c("2e2e38"))
+    d.polygon([(13, 16), (13, 7), (15, 4), (18, 2), (20, 3), (23, 1), (23, 9), (15, 9), (14, 14)], DI_PELO)   # pelo lacio hacia adelante
+    for (x0, x1, punta) in ((15, 18, 12), (18, 21, 13), (21, 23, 12)):
+        d.polygon([(x0, 9), (x1, 9), ((x0 + x1) // 2, punta)], DI_PELO)     # flequillo hasta las cejas
+    d.rectangle((13, 10, 14, 15), c("2a2a30"))                           # lados cortos
+    d.line((16, 4, 20, 2), c("2e2e38")); d.point((20, 10), c("8a5a2e"))  # mechón cobrizo
     img = espejar(img); d = ImageDraw.Draw(img)
     d.rectangle((34, 56, 37, 62), c("2a2a30")); d.point((35, 58), METAL[4])     # funda en el cinturón
+    d.line((20, 28, 24, 32), c("a8a8b4")); d.line((28, 28, 24, 32), c("a8a8b4"))   # cadena fina
     return terminar(img)
 
 # ---------------------------------------------------------------- DANITZA (mamá)
-DA_PIEL = c("f2d2bc"); DA_PELO = c("9a4026"); DA_PELO2 = c("c25a34"); DA_OJO = c("6a4024")
+DA_PIEL = c("f6dccb"); DA_PELO = c("2e1816"); DA_PELO2 = c("7a3424"); DA_OJO = c("3a1e12")
 def danitza_cuerpo():
     img = nuevo(48, 96); d = ImageDraw.Draw(img)
     rojo = c("c42e34")
@@ -2014,6 +2494,8 @@ def danitza_cuerpo():
     d.polygon([(12, 24), (16, 24), (16, 28), (14, 28)], DA_PELO)          # largo hasta el cuello
     d.line((15, 27, 17, 26), DA_PELO2)                                    # punta curvada hacia adentro
     d.polygon([(16, 9), (21, 9), (17, 12)], DA_PELO)                      # flequillo
+    d.rectangle((20, 27, 23, 28), c("141016"))                            # choker negro
+    d.point((16, 14), c("15111a")); d.point((16, 15), c("15111a"))        # delineado
     d.line((14, 6, 19, 3), DA_PELO2); d.line((13, 12, 13, 20), DA_PELO2)  # brillo
     img = espejar(img)
     return terminar(img)
@@ -2031,17 +2513,17 @@ def generar_conceptos():
     """Hojas de concepto (480x270) para mostrar el diseño de los personajes."""
     # --- Pan
     img = nuevo(W, H)
-    gradiente(img, (0, 0, W, H), [c("4a4a52"), c("38383f"), c("26262c")])
+    gradiente(img, (0, 0, W, H), [c("4a4e58"), c("383b44"), c("23252c")])
     d = ImageDraw.Draw(img)
-    d.ellipse((60, 238, 220, 254), c("1e1e24"))
-    img.alpha_composite(pan_cuerpo().resize((96, 192), Image.NEAREST), (92, 56))
-    img.alpha_composite(retrato_pan48().resize((144, 144), Image.NEAREST), (300, 58))
-    d.rectangle((298, 56, 445, 203), outline=c("8a8a96"))
-    texto_pixel(img, (24, 14), "PAN", 32)
-    texto_pixel(img, (26, 48), "El protagonista", 11, c("a8a8b4"))
-    texto_pixel(img, (296, 210), "Ojos verdes de cazador", 11, c("c8c8d0"))
-    texto_pixel(img, (296, 224), "Collar del gato con perla", 11, c("c8c8d0"))
-    texto_pixel(img, (296, 238), "Aro de mariposa", 11, c("c8c8d0"))
+    d.ellipse((24, 248, 152, 262), c("1a1c22"))
+    img.alpha_composite(pan_cuerpo().resize((96, 192), Image.NEAREST), (40, 68))
+    img.alpha_composite(pan_hd().resize((192, 192), Image.NEAREST), (172, 40))
+    d = ImageDraw.Draw(img)
+    d.rectangle((171, 39, 364, 232), outline=c("8a8a96"))
+    texto_pixel(img, (20, 8), "PAN", 32)
+    texto_pixel(img, (22, 42), "El protagonista", 11, c("a8a8b4"))
+    for k, linea in enumerate(["Ojos verde", "esmeralda,", "de cazador", "", "Pelo negro con", "reflejos azules", "", "Collar del gato", "con perla morada", "", "Aro de mariposa", "(oreja izquierda)", "", "Todo de negro,", "cargo táctico"]):
+        texto_pixel(img, (376, 50 + k * 12), linea, 11, c("c8c8d0"))
     guardar(img, "conceptos/pan.png")
     # --- Diego y Danitza
     img = nuevo(W, H)
@@ -2054,8 +2536,8 @@ def generar_conceptos():
     img.alpha_composite(luz)
     img.alpha_composite(danitza_cuerpo().resize((96, 192), Image.NEAREST), (236, 56))
     img.alpha_composite(diego_cuerpo().resize((96, 192), Image.NEAREST), (150, 54))
-    img.alpha_composite(retrato_papa48().resize((96, 96), Image.NEAREST), (30, 90))
-    img.alpha_composite(retrato_mama48().resize((96, 96), Image.NEAREST), (354, 90))
+    img.alpha_composite(diego_hd(), (30, 90))
+    img.alpha_composite(danitza_hd(), (354, 90))
     texto_pixel(img, (30, 64), "Diego", 16)
     texto_pixel(img, (354, 64), "Danitza", 16)
     texto_pixel(img, (150, 14), "Los padres de Pan", 22)

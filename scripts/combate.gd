@@ -62,6 +62,7 @@ func _ready() -> void:
 	tipo = datos.get("tipo", "salvaje")
 	Sonido.musica("combate")
 	Sonido.ambiente("viento")
+	_armar_fondo(str(datos.get("fondo", "paramo")))
 	var ceniza := Ambiente.ceniza(Vector2(480, 270))
 	ceniza.position = Vector2(240, 135)
 	ceniza.z_index = 0
@@ -695,9 +696,69 @@ func _preparar_luchador(s: Sprite2D, pos: Vector2, tam_sombra: float, respiracio
 	sombra.texture = TEX_SOMBRA
 	sombra.scale = Vector2(tam_sombra, 1.0)
 	escenario.add_child(sombra)
-	escenario.move_child(sombra, 1)  # justo encima del fondo, debajo de todos los sprites
+	escenario.move_child(sombra, _capas_fondo)  # justo encima del fondo, debajo de todos los sprites
 	_sombras[s] = sombra
 	_colocar(s, pos)
+
+
+# ---------------------------------------------------------------------------
+# Fondo por capas: cielo, nubes que pasan, montañas, ruinas con humo y suelo.
+# Cada lugar tiene el suyo (arte/fondos/<lugar>_<capa>.png); el lugar viene en Juego.encuentro["fondo"].
+# ---------------------------------------------------------------------------
+var _capas_fondo := 1          # cuántos nodos de fondo hay al principio del escenario
+var _nubes: Sprite2D
+var _paralaje: Array = []      # [sprite, cuánto se mece]
+var _t_fondo := 0.0
+
+
+func _armar_fondo(lugar: String) -> void:
+	var base := "res://arte/fondos/%s_" % lugar
+	var cielo := Juego.textura(base + "cielo.png")
+	if cielo == null:
+		return  # se queda el fondo de siempre
+	var fondo: TextureRect = $Escenario/Fondo
+	fondo.texture = cielo
+	var indice := fondo.get_index() + 1
+	var humos: Array = Juego._leer_json("res://arte/fondos/fondos.json").get(lugar, {}).get("humo", [])
+	for capa in ["nubes", "lejos", "medio", "suelo"]:
+		var tex := Juego.textura(base + capa + ".png")
+		if tex == null:
+			continue
+		var s := Sprite2D.new()
+		s.texture = tex
+		s.centered = false
+		if capa == "nubes":   # se repite y se desplaza despacio
+			s.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+			s.region_enabled = true
+			s.region_rect = Rect2(0, 0, 480, tex.get_height())
+			_nubes = s
+		escenario.add_child(s)
+		escenario.move_child(s, indice)
+		indice += 1
+		if capa == "lejos":
+			_paralaje.append([s, 1.0])
+		elif capa == "medio":
+			_paralaje.append([s, 2.0])
+			for p in humos:   # humo de las chimeneas, justo encima de las ruinas
+				var h := Ambiente.humo(Vector2(p[0], p[1]))
+				escenario.add_child(h)
+				escenario.move_child(h, indice)
+				indice += 1
+	if lugar == "pastizal":
+		var v := Ambiente.viento(Vector2(480, 120))
+		v.position = Vector2(0, 200)
+		escenario.add_child(v)
+		escenario.move_child(v, indice)
+		indice += 1
+	_capas_fondo = indice
+
+
+func _mover_fondo(delta: float) -> void:
+	_t_fondo += delta
+	if _nubes:
+		_nubes.region_rect.position.x = fmod(_t_fondo * 3.0, float(_nubes.texture.get_width()))
+	for par in _paralaje:   # las montañas y ruinas se mecen apenas (sensación de profundidad)
+		par[0].position.x = roundf(sin(_t_fondo * 0.35) * par[1])
 
 
 ## Pone al sprite en su lugar de reposo (los pies tocan el suelo en `pos`).
@@ -706,7 +767,8 @@ func _colocar(s: Sprite2D, pos: Vector2) -> void:
 	s.set_meta("base", pos)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_mover_fondo(delta)
 	for s in _sombras:
 		var sombra: Sprite2D = _sombras[s]
 		var base: Vector2 = s.get_meta("base", s.position)

@@ -80,7 +80,7 @@ Para probar sin repetir la intro, pon `SALTAR_PROLOGO = true` en `scripts/juego.
 | `arte/retratos/`     | Caras que salen en los diálogos (48x48, también las de los 6 comandantes) |
 | `arte/conceptos/`    | Hojas de diseño de Pan, Diego y Danitza (no se usan en el juego, son de referencia) |
 | `arte/cinematica/`   | Imágenes de la intro |
-| `arte/fondos/`       | Fondos de combate |
+| `arte/fondos/`       | Fondos de combate por capas (cielo, nubes, montañas, ruinas, suelo). Cada zona de encuentro elige el suyo con `fondo` (paramo, pastizal, chatarra) |
 | `arte/efectos/`      | Sombra, chispa de golpe y polvo del combate |
 | `arte/shaders/`      | Shader de los luchadores (destello al recibir golpes y respiración) |
 | `arte/interfaz/`     | Paneles, botones y joystick |

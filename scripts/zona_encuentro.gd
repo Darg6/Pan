@@ -14,6 +14,8 @@ extends Node2D
 @export var nivel_maximo := 2
 ## Probabilidad de encuentro en cada paso sobre pasto (0.12 = 12%)
 @export_range(0.0, 1.0) var probabilidad := 0.12
+## Fondo del combate: "paramo", "pastizal" o "chatarra" (arte/fondos/<fondo>_*.png)
+@export var fondo := "pastizal"
 
 
 func _ready() -> void:
@@ -28,6 +30,7 @@ func contiene(punto_global: Vector2) -> bool:
 func elegir_encuentro() -> Dictionary:
 	return {
 		"tipo": "salvaje",
+		"fondo": fondo,
 		"equipo": [{ "id": criaturas.pick_random(), "nivel": randi_range(nivel_minimo, nivel_maximo) }],
 	}
 

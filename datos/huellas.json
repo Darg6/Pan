@@ -6,16 +6,16 @@
  "res://escenas/combate.tscn": "a3c4927690c1cffc720369d619bc944c",
  "res://escenas/intro.tscn": "19946f7eac0b2f05e0f04f7fe9f00f03",
  "res://escenas/mapas/refugio_cero.tscn": "c375e67a8fb662f250a7f1753ddd6e54",
- "res://escenas/mapas/superficie.tscn": "339a9aa7dc32d37438f06444fd6313a1",
+ "res://escenas/mapas/superficie.tscn": "fe37892b7f900b89769b4541e4883ae8",
  "res://escenas/pan.tscn": "445975d5b2a04298c6283ac95716b759",
  "res://escenas/titulo.tscn": "8b1f1d97f2a1f5a033341927f35fc137",
  "res://escenas/ui/caja_dialogo.tscn": "345dc5ec78f621138acf7bbc5efbb2ec",
  "res://escenas/ui/hud.tscn": "95d2920d14ddf9b6d69206564cf7beff",
- "res://scripts/ambiente.gd": "1f92dc40e3bda44b74e0a402b84059b5",
+ "res://scripts/ambiente.gd": "5bd037be73314323140ecbd6b0b3bbad",
  "res://scripts/caja_dialogo.gd": "bc9421886ef11cd7db4b55be29d937f0",
- "res://scripts/combate.gd": "ddb0e295039ddf1df44fe0d055690e42",
+ "res://scripts/combate.gd": "fadea84e652bdf0e845548d85a02ca88",
  "res://scripts/disparador.gd": "03f17ab3b21965db2711f7a88d7f9228",
- "res://scripts/historia.gd": "3fbb5463bb93e1f23574316122856385",
+ "res://scripts/historia.gd": "d21214222ab84f3178c571f339033110",
  "res://scripts/hud.gd": "7acb61ccdcd3ab5d72d47e3931c6da3e",
  "res://scripts/interactuable.gd": "05991e1389cad32b1fba4fa73c14cc5f",
  "res://scripts/intro.gd": "4ae1cd9fcd1ce6ab3d46bd1df70e1e16",
@@ -26,5 +26,5 @@
  "res://scripts/pan.gd": "6c0632546f4aad9f5cbeddcd6914e28b",
  "res://scripts/sonido.gd": "ae93750fc8adc64483fd8716a16df616",
  "res://scripts/titulo.gd": "814e33f6b74c745987b34dde94f8da6a",
- "res://scripts/zona_encuentro.gd": "61e6c4beade1819382ce7140b84ffda9"
+ "res://scripts/zona_encuentro.gd": "6375730a3a3b872636c3b5e91a8c99ae"
 }

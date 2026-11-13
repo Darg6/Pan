@@ -118,6 +118,7 @@ func _pelear_con_recluta() -> void:
 	await mapa.iniciar_combate({
 		"tipo": "entrenador",
 		"evento": "recluta",
+		"fondo": "chatarra",
 		"tutorial": true,
 		"entrenador": { "nombre": "Recluta de Chatarra", "sprite": "res://arte/personajes/recluta_combate.png" },
 		"equipo": [{ "id": "oso_de_escoria", "nivel": 1 }],
@@ -183,6 +184,7 @@ func ejecutar(evento: String, nodo: Node = null) -> void:
 			await mapa.iniciar_combate({
 				"tipo": "tutorial_captura",
 				"evento": "gato",
+				"fondo": "paramo",
 				"equipo": [{ "id": "gato_mutado", "nivel": 1 }],
 			})
 		"recluta":

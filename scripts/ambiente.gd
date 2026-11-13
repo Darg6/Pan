@@ -62,6 +62,50 @@ static func polvo(area: Vector2) -> CPUParticles2D:
 	return p
 
 
+## Humo oscuro que sale de una chimenea y se lo lleva el viento.
+static func humo(pos: Vector2) -> CPUParticles2D:
+	var p := CPUParticles2D.new()
+	p.position = pos
+	p.amount = 24
+	p.lifetime = 5.0
+	p.preprocess = 5.0
+	p.texture = _pixel(2)
+	p.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	p.emission_rect_extents = Vector2(2, 1)
+	p.direction = Vector2(0.3, -1)
+	p.spread = 12
+	p.gravity = Vector2(3, -2)
+	p.initial_velocity_min = 4
+	p.initial_velocity_max = 7
+	p.scale_amount_min = 1.5
+	p.scale_amount_max = 2.5
+	var curva := Curve.new()
+	curva.add_point(Vector2(0, 0.6))
+	curva.add_point(Vector2(1, 3.0))
+	p.scale_amount_curve = curva
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 0.35, 1.0])
+	g.colors = PackedColorArray([Color(0.3, 0.26, 0.28, 0.9), Color(0.5, 0.45, 0.47, 0.6), Color(0.62, 0.57, 0.58, 0.0)])
+	p.color_ramp = g
+	return p
+
+
+## Polvo que el viento arrastra a ras del suelo (pastizales).
+static func viento(area: Vector2) -> CPUParticles2D:
+	var p := _base(34, 5.0, area)
+	p.direction = Vector2(1, -0.05)
+	p.spread = 6
+	p.gravity = Vector2(0, 0)
+	p.initial_velocity_min = 30
+	p.initial_velocity_max = 55
+	var g := Gradient.new()
+	g.set_color(0, Color(1.0, 0.9, 0.6, 0.0))
+	g.set_color(1, Color(1.0, 0.9, 0.6, 0.0))
+	g.add_point(0.3, Color(1.0, 0.92, 0.65, 0.75))
+	p.color_ramp = g
+	return p
+
+
 ## Brasas que suben de una fogata.
 static func brasas(pos: Vector2) -> CPUParticles2D:
 	var p := CPUParticles2D.new()
