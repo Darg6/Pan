@@ -623,7 +623,7 @@ def generar_objetos():
 # ---------------------------------------------------------------------------
 # PERSONAJES (Pan es simétrico de frente: se dibuja la mitad y se espeja)
 # ---------------------------------------------------------------------------
-PIEL = c("d29a6a"); PIEL_S = c("a8714a")
+PIEL = c("dcb08a"); PIEL_S = c("b48a66")   # Pan: morena clara (trigueña tirando a blanca)
 PELO = c("17171f"); PELO_AZUL = c("34508a")
 CHAQ = c("2a2a33"); CHAQ2 = c("3a3a46"); PANT = c("22222a"); BOTA = c("3a2a20")
 OJO = c("3ee07a"); OJO2 = c("1a7a40"); MOCH = c("7a4e2a"); MOCH2 = c("5a3820")
@@ -636,8 +636,8 @@ def pan_frente(paso, de_espaldas=False):
     d.rectangle((4, 18, 6, 21), PANT)              # pierna
     d.rectangle((4, 22, 6, 23), BOTA)
     d.rectangle((3, 11, 7, 17), CHAQ)              # torso
-    d.rectangle((2, 12, 2, 16), CHAQ2)             # brazo
-    d.point((2, 17), PIEL)                         # mano
+    d.rectangle((2, 12, 2, 13), CHAQ2)             # manga de la camiseta
+    d.rectangle((2, 14, 2, 17), PIEL)              # brazo
     d.line((3, 17, 7, 17), c("4a4a56"))            # cinturón
     if de_espaldas:
         d.rectangle((4, 11, 7, 17), MOCH)          # mochila
@@ -679,7 +679,8 @@ def pan_lado(paso):
     d.line((6, 17, 10, 17), c("4a4a56"))
     d.rectangle((7 + zancada // 2, 18, 9 + zancada // 2, 21), CHAQ2)  # pierna de adelante
     d.rectangle((7 + zancada // 2, 22, 10 + zancada // 2, 23), BOTA)
-    d.rectangle((8 - zancada // 2, 12, 9 - zancada // 2, 16), CHAQ2)  # brazo
+    d.rectangle((8 - zancada // 2, 12, 9 - zancada // 2, 13), CHAQ2)  # manga
+    d.rectangle((8 - zancada // 2, 14, 9 - zancada // 2, 16), PIEL)   # brazo
     d.point((9 - zancada // 2, 17), PIEL)
     d.rectangle((5, 3, 11, 10), PIEL)                                 # cara
     d.rectangle((4, 1, 10, 4), PELO)
@@ -702,7 +703,7 @@ def generar_pan_mapa():
     return hoja
 
 # ---------------------------------------------------------------- figura grande (32x48) de frente
-def figura(piel, pelo, peinado, torso, torso2, piernas, botas, ojos=OJO, pose="abajo", extra=None, despues=None):
+def figura(piel, pelo, peinado, torso, torso2, piernas, botas, ojos=OJO, pose="abajo", extra=None, despues=None, manga_corta=False):
     img = nuevo(32, 48); d = ImageDraw.Draw(img)
     # piernas
     d.rectangle((10, 32, 14, 43), piernas)
@@ -714,6 +715,9 @@ def figura(piel, pelo, peinado, torso, torso2, piernas, botas, ojos=OJO, pose="a
     if pose == "abajo":
         d.rectangle((5, 18, 8, 29), torso2)
         d.rectangle((5, 30, 7, 32), piel)
+        if manga_corta:   # camiseta: se ven los brazos
+            d.rectangle((5, 23, 7, 29), piel); d.line((8, 23, 8, 29), (0, 0, 0, 0))
+            d.line((5, 22, 8, 22), oscurecer(torso2, 0.7))
     elif pose == "cruzados":
         d.rectangle((6, 18, 8, 22), torso2)
         d.rectangle((7, 22, 15, 26), torso2)
@@ -740,6 +744,11 @@ def figura(piel, pelo, peinado, torso, torso2, piernas, botas, ojos=OJO, pose="a
         d.rectangle((9, 1, 15, 5), pelo)
         d.rectangle((8, 5, 9, 22), pelo)
         d.rectangle((10, 5, 11, 6), pelo)
+    elif peinado == "bob":   # hasta la mitad del cuello, puntas hacia adentro
+        d.rectangle((9, 1, 15, 5), pelo)
+        d.rectangle((8, 4, 9, 15), pelo)
+        d.line((9, 16, 11, 16), pelo); d.point((10, 15), pelo)
+        d.polygon([(11, 5), (15, 5), (12, 7)], pelo)
     elif peinado == "calvo":
         pass
     if extra:
@@ -762,10 +771,11 @@ def pan_combate():
     d.polygon([(6, 19), (12, 18), (15, 18), (15, 32), (8, 32), (7, 26)], CHAQ)
     d.line((9, 32, 15, 32), c("4a4a56"))
     d.line((10, 19, 10, 30), MOCH)
-    # brazos cruzados
-    d.rectangle((4, 19, 7, 27), CHAQ2)
-    d.rectangle((6, 24, 15, 27), oscurecer(CHAQ2, 0.85)); d.line((6, 24, 15, 24), CHAQ2)
-    d.rectangle((5, 26, 7, 27), PIEL)
+    # brazos cruzados (camiseta de manga corta: se ven los antebrazos)
+    d.rectangle((4, 19, 7, 22), CHAQ2)
+    d.rectangle((4, 23, 7, 27), PIEL)
+    d.rectangle((6, 24, 15, 27), PIEL); d.line((6, 27, 15, 27), oscurecer(PIEL, 0.78))
+    d.line((8, 24, 15, 24), oscurecer(PIEL, 1.0)); d.point((7, 25), oscurecer(PIEL, 0.78))
     # cuello y cara (mandíbula en punta suave)
     d.rectangle((13, 16, 15, 18), PS)
     for y, x in {7: 10, 8: 10, 9: 10, 10: 10, 11: 10, 12: 10, 13: 11, 14: 12, 15: 13, 16: 14}.items():
@@ -880,6 +890,16 @@ def ojo(d, iris, x=16, y=22, lineal=c("1a1418"), blanco=c("ece8e4"), pupila=None
     d.line((x, y, x + 5, y - 1), lineal)                           # párpado / pestaña
     d.point((x - 1, y + 1), lineal)
 
+def ojo_felino(d, iris, x=16, y=22, lineal=c("15111a")):
+    """Ojo afilado de cazador: párpado en diagonal, iris grande y pupila rasgada."""
+    d.line((x + 1, y + 2, x + 6, y + 2), c("ece8e4")); d.line((x + 2, y + 1, x + 6, y + 1), c("ece8e4"))
+    d.rectangle((x + 3, y, x + 5, y + 3), iris)
+    d.line((x + 4, y, x + 4, y + 3), oscurecer(iris, 0.2))                # pupila rasgada
+    d.point((x + 3, y), c("ffffff")); d.point((x + 5, y + 2), tuple(min(255, int(v * 1.5)) for v in iris[:3]) + (255,))
+    d.line((x + 3, y + 3, x + 5, y + 3), oscurecer(iris, 0.6))
+    d.line((x, y + 2, x + 2, y - 1), lineal); d.line((x + 2, y - 1, x + 6, y - 1), lineal)   # párpado afilado
+    d.point((x + 7, y), lineal); d.point((x, y + 3), lineal)
+
 def ceja(d, col, forma="recta", y=19):
     if forma == "recta":
         d.line((15, y, 21, y), col); d.line((16, y - 1, 20, y - 1), col)
@@ -930,33 +950,35 @@ def retrato48(fondo, piel, dibujar_mitad, despues=None, fondo2=None, solo_figura
     return img
 
 # ---------------------------------------------------------------- PAN
-PIEL_PAN = c("c98f62")
+PIEL_PAN = c("dcb08a")   # morena clara, trigueña tirando a blanca
 def retrato_pan48(solo_figura=False):
     piel = PIEL_PAN
     def m(d):
-        hombros(d, c("26262e"), c("1a1a20"))
+        hombros(d, c("22222a"), c("18181e"))                                  # camiseta negra
+        d.line((18, 37, 23, 40), c("15151a"))                                  # cuello redondo
         d.line((13, 40, 15, 47), MOCH)                                         # tirante de la mochila
         cara_base(d, piel, delgada=1)
-        ojo(d, OJO, x=16, y=23)
-        d.point((16, 25), oscurecer(piel, 0.8))                               # ojera leve (madurez)
-        ceja(d, PELO, "recta", y=20)
+        ojo_felino(d, c("3cf07a"), x=15, y=23)
+        ceja(d, PELO, "enojo", y=21)
         nariz(d, piel)
         boca(d, piel, "seria")
-        # pelo estilo Nightwing: negro profundo, masa llena y flequillo en puntas sobre la frente
-        d.polygon([(10, 27), (9, 16), (11, 10), (15, 6), (20, 4), (23, 4), (23, 13), (12, 13), (12, 28)], PELO)
-        d.polygon([(11, 12), (14, 13), (13, 23), (11, 25)], PELO)             # mechón que tapa la sien
-        d.polygon([(13, 12), (18, 12), (15, 19)], PELO)                       # puntas del flequillo
+        # pelo lacio, negro profundo, desordenado: cae sobre la frente y la nuca
+        d.polygon([(10, 28), (9, 15), (11, 9), (14, 6), (17, 3), (20, 4), (23, 2), (23, 13), (12, 13), (12, 29)], PELO)
+        d.polygon([(8, 12), (11, 9), (11, 15)], PELO)                          # puntas sueltas
+        d.polygon([(11, 12), (14, 13), (13, 24), (11, 26)], PELO)             # mechón que tapa la sien
+        d.polygon([(13, 12), (18, 12), (15, 19)], PELO)                       # flequillo en puntas
         d.polygon([(17, 12), (22, 12), (20, 18)], PELO)
         d.polygon([(21, 12), (23, 12), (23, 16)], PELO)
-        d.line((12, 11, 15, 8), PELO_AZUL); d.line((15, 8, 19, 6), PELO_AZUL)  # reflejo azul marino
-        d.point((16, 12), PELO_AZUL); d.point((20, 12), PELO_AZUL)
-        d.line((10, 27, 10, 31), PELO)                                        # nuca / patilla
+        d.line((12, 10, 15, 7), PELO_AZUL); d.line((16, 5, 19, 4), PELO_AZUL)  # reflejo azul marino, sutil
+        d.line((10, 28, 10, 32), PELO)                                        # nuca
     def despues(d):
         d.polygon([(23, 13), (28, 12), (25, 20)], PELO)                       # mechón asimétrico que cae entre los ojos
+        d.polygon([(30, 3), (36, 4), (33, 6)], PELO)                          # pelo desordenado
         d.point((36, 25), ORO); d.point((35, 26), ORO); d.point((37, 26), ORO); d.point((36, 27), c("fff0a0"))  # aro de mariposa (oreja izq. de Pan)
-        d.line((19, 38, 24, 41), PLATA); d.line((28, 38, 24, 41), PLATA)       # collar
-        d.rectangle((23, 41, 25, 43), c("b8b8c4")); d.point((24, 42), PERLA); d.point((23, 41), c("e8e8f0"))  # gatito con perla
-    return retrato48(c("2a3048"), piel, m, despues, c("14141e"), solo_figura)
+        d.line((19, 37, 24, 41), PLATA); d.line((28, 37, 24, 41), PLATA)       # collar
+        d.rectangle((23, 41, 25, 43), c("b8b8c4")); d.point((23, 40), c("b8b8c4")); d.point((25, 40), c("b8b8c4"))  # gatito (orejas)
+        d.point((24, 42), PERLA); d.point((23, 41), c("e8e8f0"))             # perla morada en el vientre
+    return retrato48(c("44444c"), piel, m, despues, c("1e1e24"), solo_figura)
 
 # ---------------------------------------------------------------- COMANDANTES
 def retrato_rictus():
@@ -1091,34 +1113,42 @@ def retrato_marcus():
     return retrato48(c("e8dcc0"), piel, m, despues, c("9a8a6a"))
 
 def retrato_papa48():
-    piel = c("c48a5e")
+    """Diego: piel morena, afeitado, ojos negros, pelo negro, ropa táctica negra."""
+    piel = c("b98458")
     def m(d):
-        hombros(d, c("4a5a4a"), c("3a4a3a"))
+        hombros(d, c("202026"), c("16161a"))
+        d.line((18, 37, 23, 40), c("121216"))
         cara_base(d, piel, quijada=1)
-        ojo(d, c("5a3a22"), x=16, y=23)
-        ceja(d, c("2a201c"), "recta", y=20)
+        ojo(d, c("141418"), x=16, y=23, pupila=c("000000"))
+        ceja(d, c("141418"), "recta", y=20)
         nariz(d, piel)
-        d.polygon([(14, 28), (17, 33), (20, 36), (23, 37), (23, 33), (19, 32), (16, 29)], c("3a2a22"))   # barba corta
         boca(d, piel, "sonrisa")
-        d.polygon([(11, 22), (11, 12), (15, 8), (23, 7), (23, 12), (16, 13), (13, 17)], c("2a201c"))
-    return retrato48(c("3a3a2a"), piel, m)
+        d.polygon([(11, 22), (11, 11), (14, 7), (18, 5), (20, 6), (23, 4), (23, 12), (16, 13), (13, 17)], c("141418"))
+        d.polygon([(16, 12), (21, 12), (18, 15)], c("141418"))
+        d.line((14, 8, 18, 6), c("2e2e38"))
+    return retrato48(c("3a3a40"), piel, m)
 
 def retrato_mama48():
-    piel = c("d8a070")
+    """Danitza: piel blanca, ojos café, pelo rojizo hasta la mitad del cuello con las puntas hacia adentro, polera roja."""
+    piel = c("f2d2bc")
+    pelo, pelo2 = c("9a4026"), c("c25a34")
     def m(d):
-        hombros(d, c("7a3a3a"), c("5e2c2c"))
+        hombros(d, c("c42e34"), c("9a2228"))
+        d.line((18, 37, 23, 40), c("8a1e24"))
         cara_base(d, piel, delgada=1)
-        ojo(d, OJO, x=16, y=23)
-        d.point((15, 23), c("1a1418"))                                                    # pestañas
-        ceja(d, c("3a2418"), "fina", y=20)
+        ojo(d, c("6a4024"), x=16, y=23)
+        d.point((15, 23), c("1a1418")); d.point((15, 22), c("1a1418"))                    # pestañas
+        ceja(d, c("7a3420"), "fina", y=20)
         nariz(d, piel)
         boca(d, piel, "sonrisa")
-        d.line((21, 33, 23, 33), c("b0605a"))
-        d.polygon([(8, 44), (9, 18), (12, 10), (17, 7), (23, 6), (23, 11), (17, 12), (13, 17), (12, 30), (13, 40)], c("3a2418"))  # pelo largo
-        d.line((12, 13, 17, 9), c("5a3a28"))
-    def despues(d):
-        d.point((36, 25), ORO)
-    return retrato48(c("3a2a34"), piel, m)
+        d.line((21, 32, 23, 32), c("c0605a")); d.line((21, 33, 23, 33), c("d8807a"))      # labios
+        d.point((17, 28), c("f0b0a8")); d.point((18, 28), c("f0b0a8"))                    # rubor
+        # pelo tipo bob: hasta la mitad del cuello, puntas curvadas hacia adentro
+        d.polygon([(10, 34), (9, 16), (11, 9), (16, 5), (23, 4), (23, 11), (17, 12), (13, 16), (13, 32), (15, 36), (11, 37)], pelo)
+        d.line((11, 36, 15, 35), pelo2); d.point((14, 34), pelo2)                          # punta hacia adentro
+        d.polygon([(16, 11), (22, 11), (17, 15)], pelo)                                   # flequillo de lado
+        d.line((11, 11, 16, 6), pelo2); d.line((10, 17, 10, 28), pelo2)                   # brillo
+    return retrato48(c("4a3036"), piel, m)
 
 def retrato_recluta48():
     piel = c("b88458")
@@ -1548,18 +1578,24 @@ def luz_anillos(img, cx, cy, radios, colores_noche, calido):
     return ImageChops.multiply(img, mapa)
 
 # ------------------------------------------------------------------ personajes de la intro
-PAPA = dict(piel=c("c48a5e"), pelo=c("2a201c"), ropa=c("4a5a4a"), ropa2=c("3a4a3a"), pant=c("3a3328"), bota=c("2a2018"))
-MAMA = dict(piel=c("d8a070"), pelo=c("3a2418"), ropa=c("7a3a3a"), ropa2=c("5e2c2c"), pant=c("33303a"), bota=c("2a2420"))
+# Diego: moreno, afeitado, ojos negros, todo de negro.  Danitza: piel blanca, ojos café, pelo rojizo, polera roja.
+PAPA = dict(piel=c("b98458"), pelo=c("141418"), ropa=c("26262e"), ropa2=c("30303a"), pant=c("1c1c22"), bota=c("2a2420"), ojos=c("141418"))
+MAMA = dict(piel=c("f2d2bc"), pelo=c("9a4026"), ropa=c("c42e34"), ropa2=c("a8262c"), pant=c("1c1a20"), bota=c("c42e34"), ojos=c("6a4024"))
 MARCUS = dict(piel=c("e0b090"), pelo=c("d8d0c0"), ropa=c("f2efe8"), ropa2=c("d6d0c4"), pant=c("e8e4dc"), bota=c("c8c0b0"))
 
 def papa_frente(pose="abajo", despues=None):
     def extra(d):
-        d.rectangle((10, 11, 15, 15), c("3a2a22"))          # barba
-        d.line((13, 13, 15, 13), c("8a5a40"))
-    return figura(PAPA["piel"], PAPA["pelo"], "corto", PAPA["ropa"], PAPA["ropa2"], PAPA["pant"], PAPA["bota"], ojos=c("5a3a22"), pose=pose, extra=extra, despues=despues)
+        d.rectangle((9, 36, 10, 39), c("30303a"))           # bolsillo cargo
+        d.point((10, 1), PAPA["pelo"]); d.point((12, 0), PAPA["pelo"])   # pelo con volumen
+    return figura(PAPA["piel"], PAPA["pelo"], "corto", PAPA["ropa"], PAPA["ropa2"], PAPA["pant"], PAPA["bota"], ojos=PAPA["ojos"],
+                  pose=pose, extra=extra, despues=despues, manga_corta=True)
 
 def mama_frente(pose="abajo", despues=None):
-    return figura(MAMA["piel"], MAMA["pelo"], "largo", MAMA["ropa"], MAMA["ropa2"], MAMA["pant"], MAMA["bota"], ojos=OJO, pose=pose, despues=despues)
+    def extra(d):
+        d.line((9, 46, 14, 46), c("f0ece4"))                 # suela blanca de las zapatillas
+        d.line((14, 13, 15, 13), c("c0605a"))                # labios
+    return figura(MAMA["piel"], MAMA["pelo"], "bob", MAMA["ropa"], MAMA["ropa2"], MAMA["pant"], MAMA["bota"], ojos=MAMA["ojos"],
+                  pose=pose, extra=extra, despues=despues, manga_corta=True)
 
 def marcus_frente(despues=None):
     def extra(d):
@@ -1577,17 +1613,17 @@ def corredor(p, peinado, paso, pelo_largo=False):
     (a, b, e) = piernas[0]
     d.line((a, b), oscurecer(p["pant"], 0.75), 3); d.line((b, e), oscurecer(p["pant"], 0.75), 3)
     d.rectangle((e[0] - 2, e[1], e[0] + 1, e[1] + 2), p["bota"])
-    d.line((12, 13, 7, 18), p["ropa2"], 2); d.line((7, 18, 5, 15), p["ropa2"], 2)   # brazo de atrás
+    d.line((12, 13, 10, 15), p["ropa2"], 2); d.line((10, 15, 7, 18), oscurecer(p["piel"], 0.8), 2); d.line((7, 18, 5, 15), oscurecer(p["piel"], 0.8), 2)   # brazo de atrás
     d.polygon([(9, 12), (16, 11), (17, 24), (10, 25)], p["ropa"])                    # torso inclinado
     (a, b, e) = piernas[1]
     d.line((a, b), p["pant"], 3); d.line((b, e), p["pant"], 3)
     d.rectangle((e[0] - 1, e[1], e[0] + 3, e[1] + 2), p["bota"])
-    d.line((15, 13, 20, 17), p["ropa2"], 2); d.line((20, 17, 22, 13), p["ropa2"], 2)  # brazo de adelante
+    d.line((15, 13, 17, 15), p["ropa2"], 2); d.line((17, 15, 20, 17), p["piel"], 2); d.line((20, 17, 22, 13), p["piel"], 2)  # brazo de adelante
     d.point((22, 12), p["piel"])
     d.rectangle((11, 2, 18, 10), p["piel"])                                          # cabeza
     d.rectangle((10, 1, 17, 4), p["pelo"]); d.rectangle((10, 4, 12, 8), p["pelo"])
-    if pelo_largo:
-        d.polygon([(10, 2), (3, 6), (1, 12), (6, 9), (10, 10)], p["pelo"])          # pelo al viento
+    if pelo_largo:   # pelo hasta el cuello que se mueve con el viento
+        d.polygon([(10, 2), (6, 4), (5, 10), (8, 12), (11, 11)], p["pelo"])
     d.point((16, 6), c("1a1416"))
     luz_lateral(img); contorno_suave(img)
     return img
@@ -1716,8 +1752,8 @@ def escena_huida():
     pegar(img, pan_lado(1), 296, 214)
     pegar(img, corredor(PAPA, "corto", 0), 360, 214)
     d = ImageDraw.Draw(img)
-    d.line((306, 186, 344, 188), PAPA["ropa2"], 4)                                                     # Pan de la mano de papá
-    d.line((250, 182, 282, 190), MAMA["ropa2"], 4)                                                     # y de mamá
+    d.line((306, 186, 344, 188), PAPA["piel"], 3)                                                     # Pan de la mano de papá
+    d.line((250, 182, 282, 190), MAMA["piel"], 3)                                                     # y de mamá
     for (x, y) in ((190, 210), (176, 206), (268, 212)):                                               # polvo
         d.ellipse((x - 4, y - 3, x + 4, y + 3), c("6a4a3a"))
     return img
@@ -1753,7 +1789,7 @@ def escena_callejon():
     for i in range(3):                                                                                # brillo que llama la atención
         d.line((136 + (i - 1) * 22, 124, 136 + (i - 1) * 30, 112), c("ffd890"), 2)
     def brazo(d):   # brazo extendido hacia la izquierda (hacia el conducto)
-        d.rectangle((0, 18, 8, 21), MAMA["ropa2"]); d.rectangle((0, 18, 1, 21), MAMA["piel"])
+        d.rectangle((0, 18, 8, 21), MAMA["piel"]); d.rectangle((6, 18, 8, 21), MAMA["ropa2"])
     pegar(img, mama_frente(despues=brazo), 236, 214)
     pegar(img, papa_frente(), 340, 214)
     pegar(img, pan_frente(0), 290, 212)
@@ -1772,7 +1808,7 @@ def escena_conducto():
     for x in range(300, 352, 14):                                                                      # rejilla cerrándose
         d.line((x, 44, x, 218), METAL[2], 5); d.line((x - 2, 44, x - 2, 218), METAL[4])
     d.rectangle((294, 40, 356, 46), METAL[1]); d.rectangle((294, 214, 356, 220), METAL[1])
-    d.polygon([(356, 100), (420, 92), (480, 96), (480, 150), (420, 146), (360, 140)], PAPA["ropa2"])   # brazo de papá
+    d.polygon([(356, 100), (420, 92), (480, 96), (480, 150), (420, 146), (360, 140)], oscurecer(PAPA["piel"], 0.85))   # brazo de papá
     d.rectangle((346, 104, 364, 136), PAPA["piel"])                                                    # su mano
     d.line((346, 112, 340, 112), PAPA["piel"], 4); d.line((346, 122, 338, 122), PAPA["piel"], 4)
     d.line((346, 104, 364, 104), oscurecer(PAPA["piel"], 0.8))
@@ -1833,6 +1869,197 @@ def generar_cinematica():
     pegar(img, pan, 150, 199, k=2)
     guardar(img, "cinematica/04_acantilado.png")
 
+
+# ---------------------------------------------------------------------------
+# CONCEPTOS: Pan, Diego y Danitza de cuerpo entero (48x96)
+# ---------------------------------------------------------------------------
+def aclarar(col, f):
+    return tuple(min(255, int(v * f)) for v in col[:3]) + (255,)
+
+# ---------------------------------------------------------------- figura de cuerpo entero (48x96), de frente
+# Se dibuja la mitad izquierda (x 0..23) y se espeja; después se agregan los detalles asimétricos.
+CUERPO_CARA = {8: 18, 9: 17, 10: 16}
+for _y in range(11, 21):
+    CUERPO_CARA[_y] = 15
+CUERPO_CARA.update({21: 16, 22: 16, 23: 17, 24: 18, 25: 19, 26: 21})
+
+def cabeza(d, piel, ojos, forma_ojo="normal", chica=False):
+    s = oscurecer(piel, 0.8); s2 = oscurecer(piel, 0.66)
+    d.rectangle((20, 26, 23, 30), s)                                      # cuello
+    d.rectangle((20, 26, 23, 27), s2)
+    for y, x in CUERPO_CARA.items():
+        x2 = x + (1 if chica and 11 <= y <= 22 else 0)
+        d.line((x2, y, 23, y), piel); d.point((x2, y), s)
+    d.rectangle((13, 14, 14, 19), piel); d.point((13, 14), s); d.line((14, 16, 14, 18), s)   # oreja
+    d.line((17, 21, 19, 23), s)                                           # pómulo
+    d.line((21, 11, 23, 11), aclarar(piel, 1.08))                         # luz en la frente
+    # ojos
+    if forma_ojo == "felino":   # afilados, de cazador: párpado en diagonal y pupila rasgada
+        d.line((17, 16, 22, 16), c("ece8e4")); d.line((18, 15, 22, 15), c("ece8e4"))
+        d.rectangle((19, 14, 21, 17), ojos)
+        d.line((20, 14, 20, 17), oscurecer(ojos, 0.22))                    # pupila rasgada de felino
+        d.point((19, 14), aclarar(ojos, 1.7)); d.line((19, 17, 21, 17), oscurecer(ojos, 0.6))
+        d.line((16, 16, 18, 13), c("15111a")); d.line((18, 13, 22, 13), c("15111a"))   # párpado afilado, en diagonal
+        d.point((22, 14), c("15111a")); d.point((16, 17), c("15111a"))
+        d.line((17, 11, 22, 12), c("15111a"))                             # ceja seria
+    else:
+        d.line((17, 16, 21, 16), c("ece8e4"))
+        d.rectangle((19, 15, 21, 16), ojos)
+        d.point((20, 16), oscurecer(ojos, 0.4)); d.point((19, 15), aclarar(ojos, 1.5) if ojos[0] > 40 else c("6a6a7a"))
+        d.line((17, 14, 21, 14), c("15111a"))
+        if chica:
+            d.point((16, 15), c("15111a"))                                # pestañas
+            d.line((17, 12, 21, 12), oscurecer(ojos, 0.6))
+        else:
+            d.line((17, 12, 21, 12), c("15111a"))
+    d.point((23, 18), s); d.point((22, 20), s); d.point((23, 20), s2)    # nariz
+    d.line((21, 23, 23, 23), oscurecer(piel, 0.58))                       # boca
+    d.point((22, 24), aclarar(piel, 1.06))
+
+def cuerpo_tactico(d, piel, camiseta, pantalon, bota, ancho=0, manga_larga=False):
+    """Camiseta, brazos, pantalón cargo y botas (mitad izquierda)."""
+    a = ancho
+    d.polygon([(12 - a, 32), (15 - a, 29), (23, 29), (23, 56), (16, 56), (15, 46), (13 - a, 40)], camiseta)
+    d.line((15 - a, 30, 19, 30), aclarar(camiseta, 1.4))                 # luz en el hombro
+    d.line((20, 29, 23, 31), oscurecer(camiseta, 0.7))                    # cuello redondo
+    d.rectangle((9 - a, 31, 12 - a, 38 if not manga_larga else 52), camiseta)   # manga
+    d.line((9 - a, 38, 12 - a, 38), oscurecer(camiseta, 0.7))
+    if not manga_larga:
+        d.rectangle((9 - a, 39, 12 - a, 52), piel)                         # brazo
+        d.line((12 - a, 40, 12 - a, 52), oscurecer(piel, 0.82))
+    d.rectangle((9 - a, 53, 12 - a, 57), piel); d.line((9 - a, 55, 12 - a, 55), oscurecer(piel, 0.8))   # puño
+    d.point((12 - a, 53), oscurecer(piel, 0.8))
+    d.line((16, 47, 21, 50), oscurecer(camiseta, 0.75))                   # arrugas de la tela
+    # cinturón
+    d.rectangle((15, 55, 23, 57), c("1e1e24")); d.point((22, 56), METAL[4])
+    # pantalón cargo con bolsillos
+    d.polygon([(15, 57), (23, 57), (23, 60), (21, 86), (12, 86), (13, 62)], pantalon)
+    d.rectangle((11, 64, 14, 73), c("2c2c34"))                            # bolsillo lateral (cargo)
+    d.line((11, 64, 14, 64), c("3e3e48")); d.point((12, 66), c("3e3e48"))
+    d.line((16, 75, 21, 76), oscurecer(pantalon, 0.7)); d.line((15, 79, 20, 80), oscurecer(pantalon, 0.7))  # arrugas
+    d.polygon([(23, 62), (23, 86), (21, 86), (22, 64)], (0, 0, 0, 0))     # separación entre piernas
+    # botas
+    d.rectangle((11, 86, 21, 92), bota); d.line((11, 86, 21, 86), aclarar(bota, 1.4))
+    d.rectangle((10, 92, 21, 94), oscurecer(bota, 0.6))
+    d.line((14, 88, 18, 88), oscurecer(bota, 0.6)); d.line((14, 90, 18, 90), oscurecer(bota, 0.6))   # cordones
+
+def terminar(img):
+    luz_lateral(img, luz=1.1, sombra=0.82)
+    contorno_suave(img)
+    return img
+
+# ---------------------------------------------------------------- PAN
+PAN_PIEL = c("dcb08a"); PAN_PELO = c("101016"); PAN_PELO2 = c("232a44"); PAN_OJO = c("3cf07a")
+PAN_ROPA = c("22222a"); PAN_PANT = c("1c1c22"); PAN_BOTA = c("2a2224")
+def pan_cuerpo():
+    img = nuevo(48, 96); d = ImageDraw.Draw(img)
+    cuerpo_tactico(d, PAN_PIEL, PAN_ROPA, PAN_PANT, PAN_BOTA)
+    d.line((14, 30, 16, 50), MOCH)                                        # tirante de la mochila
+    d.rectangle((14, 42, 16, 44), MOCH2)
+    cabeza(d, PAN_PIEL, PAN_OJO, "felino")
+    # pelo lacio, negro profundo, desordenado: cae sobre la frente y la nuca
+    d.polygon([(12, 21), (12, 9), (14, 5), (17, 3), (20, 1), (21, 3), (23, 1), (23, 9), (15, 9), (14, 14), (13, 22)], PAN_PELO)
+    d.polygon([(10, 9), (13, 6), (13, 11)], PAN_PELO)                     # puntas sueltas a los lados
+    d.polygon([(14, 8), (19, 8), (16, 13)], PAN_PELO)                     # mechones del flequillo
+    d.polygon([(18, 8), (23, 8), (21, 12)], PAN_PELO)
+    d.polygon([(12, 19), (14, 17), (15, 25), (12, 24)], PAN_PELO)         # nuca
+    d.line((15, 4, 19, 2), PAN_PELO2); d.line((13, 8, 15, 5), PAN_PELO2)  # reflejo azul marino, sutil
+    img = espejar(img); d = ImageDraw.Draw(img)
+    # detalles asimétricos
+    d.polygon([(24, 9), (29, 9), (25, 15)], PAN_PELO)                     # mechón entre los ojos
+    d.polygon([(30, 2), (36, 4), (33, 6)], PAN_PELO)                      # pelo desordenado
+    d.point((34, 18), ORO); d.point((33, 19), ORO); d.point((35, 19), ORO); d.point((34, 20), c("fff0a0"))   # aro de mariposa (oreja izquierda)
+    d.line((20, 29, 24, 33), PLATA); d.line((27, 29, 24, 33), PLATA)    # collar
+    d.rectangle((23, 33, 25, 35), c("b8b8c4")); d.point((23, 32), c("b8b8c4")); d.point((25, 32), c("b8b8c4"))   # gatito (orejas)
+    d.point((24, 34), PERLA); d.point((23, 33), c("e8e8f0"))
+    d.rectangle((31, 39, 33, 46), MOCH)                                   # correa de la mochila
+    return terminar(img)
+
+# ---------------------------------------------------------------- DIEGO (papá)
+DI_PIEL = c("b98458"); DI_PELO = c("141418"); DI_OJO = c("141418")
+def diego_cuerpo():
+    img = nuevo(48, 96); d = ImageDraw.Draw(img)
+    cuerpo_tactico(d, DI_PIEL, c("202026"), c("1a1a20"), c("2a2420"), ancho=1)
+    cabeza(d, DI_PIEL, DI_OJO)
+    d.polygon([(13, 16), (13, 7), (15, 4), (18, 2), (20, 3), (23, 1), (23, 8), (17, 8), (15, 11)], DI_PELO)   # pelo corto con volumen
+    d.polygon([(17, 8), (21, 8), (19, 10)], DI_PELO)
+    d.line((16, 4, 20, 2), c("2e2e38"))
+    img = espejar(img); d = ImageDraw.Draw(img)
+    d.rectangle((34, 56, 37, 62), c("2a2a30")); d.point((35, 58), METAL[4])     # funda en el cinturón
+    return terminar(img)
+
+# ---------------------------------------------------------------- DANITZA (mamá)
+DA_PIEL = c("f2d2bc"); DA_PELO = c("9a4026"); DA_PELO2 = c("c25a34"); DA_OJO = c("6a4024")
+def danitza_cuerpo():
+    img = nuevo(48, 96); d = ImageDraw.Draw(img)
+    rojo = c("c42e34")
+    # polera roja, brazos, pantalón ajustado negro, zapatillas rojas
+    d.polygon([(14, 32), (16, 29), (23, 29), (23, 55), (17, 55), (17, 44), (15, 40)], rojo)
+    d.line((16, 30, 20, 30), aclarar(rojo, 1.3)); d.line((20, 29, 23, 31), oscurecer(rojo, 0.7))
+    d.rectangle((12, 31, 14, 37), rojo); d.line((12, 37, 14, 37), oscurecer(rojo, 0.7))
+    d.rectangle((12, 38, 14, 52), DA_PIEL); d.line((14, 39, 14, 52), oscurecer(DA_PIEL, 0.85))
+    d.rectangle((12, 53, 14, 56), DA_PIEL)
+    d.line((18, 46, 22, 49), oscurecer(rojo, 0.75))
+    d.polygon([(16, 55), (23, 55), (23, 60), (21, 87), (15, 87), (15, 62)], c("1c1a20"))   # pantalón ajustado
+    d.line((19, 70, 21, 71), c("2c2a32"))
+    d.rectangle((14, 87, 21, 91), rojo); d.line((14, 87, 21, 87), aclarar(rojo, 1.35))   # zapatillas rojas
+    d.rectangle((13, 92, 21, 93), c("f0ece4"))                            # suela blanca
+    d.point((16, 89), c("f0ece4")); d.point((18, 89), c("f0ece4"))       # cordones
+    d.polygon([(23, 62), (23, 87), (21, 87), (22, 64)], (0, 0, 0, 0))
+    cabeza(d, DA_PIEL, DA_OJO, chica=True)
+    d.point((22, 23), c("c0605a")); d.point((23, 23), c("c0605a"))        # labios
+    d.point((18, 21), c("f0b0a8"))                                        # rubor
+    # pelo rojizo hasta la mitad del cuello, puntas curvadas hacia adentro
+    d.polygon([(13, 24), (12, 12), (14, 6), (18, 3), (23, 2), (23, 9), (17, 9), (15, 13), (15, 26)], DA_PELO)
+    d.polygon([(12, 24), (16, 24), (16, 28), (14, 28)], DA_PELO)          # largo hasta el cuello
+    d.line((15, 27, 17, 26), DA_PELO2)                                    # punta curvada hacia adentro
+    d.polygon([(16, 9), (21, 9), (17, 12)], DA_PELO)                      # flequillo
+    d.line((14, 6, 19, 3), DA_PELO2); d.line((13, 12, 13, 20), DA_PELO2)  # brillo
+    img = espejar(img)
+    return terminar(img)
+
+
+def texto_pixel(img, xy, texto, tam=16, col=c("f0e6d2"), sombra=c("15151a")):
+    from PIL import ImageFont
+    fuente = ImageFont.truetype(os.path.join(ARTE, "fuentes", "PixelifySans.ttf"), tam)
+    d = ImageDraw.Draw(img)
+    d.fontmode = "1"   # sin suavizado: letras pixel nítidas
+    d.text((xy[0] + 1, xy[1] + 1), texto, font=fuente, fill=sombra)
+    d.text(xy, texto, font=fuente, fill=col)
+
+def generar_conceptos():
+    """Hojas de concepto (480x270) para mostrar el diseño de los personajes."""
+    # --- Pan
+    img = nuevo(W, H)
+    gradiente(img, (0, 0, W, H), [c("4a4a52"), c("38383f"), c("26262c")])
+    d = ImageDraw.Draw(img)
+    d.ellipse((60, 238, 220, 254), c("1e1e24"))
+    img.alpha_composite(pan_cuerpo().resize((96, 192), Image.NEAREST), (92, 56))
+    img.alpha_composite(retrato_pan48().resize((144, 144), Image.NEAREST), (300, 58))
+    d.rectangle((298, 56, 445, 203), outline=c("8a8a96"))
+    texto_pixel(img, (24, 14), "PAN", 32)
+    texto_pixel(img, (26, 48), "El protagonista", 11, c("a8a8b4"))
+    texto_pixel(img, (296, 210), "Ojos verdes de cazador", 11, c("c8c8d0"))
+    texto_pixel(img, (296, 224), "Collar del gato con perla", 11, c("c8c8d0"))
+    texto_pixel(img, (296, 238), "Aro de mariposa", 11, c("c8c8d0"))
+    guardar(img, "conceptos/pan.png")
+    # --- Diego y Danitza
+    img = nuevo(W, H)
+    gradiente(img, (0, 0, W, H), [c("6a5048"), c("4a3a38"), c("2a2224")])
+    d = ImageDraw.Draw(img)
+    d.ellipse((150, 238, 330, 254), c("221a1a"))
+    luz = nuevo(W, H); dl = ImageDraw.Draw(luz)
+    for r, a in ((200, 30), (150, 40), (100, 50)):
+        dl.ellipse((240 - r, 120 - r, 240 + r, 120 + r), (255, 200, 140, a))
+    img.alpha_composite(luz)
+    img.alpha_composite(danitza_cuerpo().resize((96, 192), Image.NEAREST), (236, 56))
+    img.alpha_composite(diego_cuerpo().resize((96, 192), Image.NEAREST), (150, 54))
+    img.alpha_composite(retrato_papa48().resize((96, 96), Image.NEAREST), (30, 90))
+    img.alpha_composite(retrato_mama48().resize((96, 96), Image.NEAREST), (354, 90))
+    texto_pixel(img, (30, 64), "Diego", 16)
+    texto_pixel(img, (354, 64), "Danitza", 16)
+    texto_pixel(img, (150, 14), "Los padres de Pan", 22)
+    guardar(img, "conceptos/diego_y_danitza.png")
 
 # ---------------------------------------------------------------------------
 # EFECTOS DEL COMBATE: sombra bajo los luchadores, chispa de golpe y polvo
@@ -1954,6 +2181,7 @@ if __name__ == "__main__":
     generar_fondo_combate()
     generar_efectos()
     generar_cinematica()
+    generar_conceptos()
     generar_interfaz()
     with open(os.path.join(ARTE, "tiles", "tiles.json"), "w", encoding="utf-8") as f:
         json.dump({"exterior": TILES_EXT, "interior": TILES_INT}, f, indent=1, ensure_ascii=False)
