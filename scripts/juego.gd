@@ -1,46 +1,84 @@
 extends Node
 ## Estado global del juego. Está registrado como Autoload con el nombre "Juego",
-## así que desde cualquier script puedes escribir Juego.mochila, Juego.agregar_carta(...), etc.
+## así que desde cualquier script puedes escribir Juego.mochila, Juego.flags, etc.
 
 const RUTA_CRIATURAS := "res://datos/criaturas.json"
+const RUTA_DIALOGOS := "res://datos/dialogos.json"
 const NIVEL_MAXIMO := 10
 const MAX_EQUIPO := 6
 const AUMENTO_STATS_POR_NIVEL := 0.15  # +15% de stats por nivel (GDD)
 
-## Datos de todas las criaturas, leídos de datos/criaturas.json. Clave = id ("gato_mutado").
-var criaturas: Dictionary = {}
+## Pon esto en true para saltarte el prólogo mientras pruebas (empiezas en la superficie con un Gato).
+const SALTAR_PROLOGO := false
 
-## La mochila de Pan: una lista de cartas. Cada carta es un diccionario:
-## { "id": "gato_mutado", "cantidad": 1, "hp": 90 }
+const NOMBRES_OBJETOS := {
+	"carta_vinculo": "Carta de Vínculo",
+	"granada_aturdidora": "Granada Aturdidora",
+}
+
+## Datos de todas las criaturas (datos/criaturas.json). Clave = id ("gato_mutado").
+var criaturas: Dictionary = {}
+## Todos los diálogos (datos/dialogos.json). Clave = id del diálogo.
+var dialogos: Dictionary = {}
+
+## Cartas de criaturas: { "id": "gato_mutado", "cantidad": 1, "hp": 90 }.
 ## Las primeras MAX_EQUIPO cartas son el "Equipo activo".
 var mochila: Array = []
+## Objetos consumibles: id -> cantidad
+var objetos := { "carta_vinculo": 0, "granada_aturdidora": 0 }
+var monedas := 0
+var chatarra := 0
 
-# --- Estado del mundo (se guarda aquí porque la escena del mundo se destruye al ir al combate) ---
-var posicion_pan = null          # Vector2 o null si es la primera vez
-var posicion_refugio := Vector2(260, 260)
-var pasos_sin_encuentro := 0     # pasos de gracia tras un combate
-var encuentro := {}              # { "id": "aves_negras", "nivel": 1 } para la escena de combate
-var mensajes_pendientes: Array = []  # textos a mostrar al volver al mapa
+## Banderas de la historia: qué ya pasó. Ej: flags["tiene_mochila"] = true
+var flags: Dictionary = {}
+var mision := ""
+
+# --- Viaje entre escenas ---
+var entrada := ""                # nombre del Marker2D donde aparece Pan al cargar un mapa
+var posicion_pan = null          # al volver de un combate, Pan aparece donde estaba
+var mapa_actual := ""            # ruta de la escena del mapa actual
+var lugar_descanso := { "mapa": "res://escenas/mapas/refugio_cero.tscn", "entrada": "Cama" }
+var pasos_sin_encuentro := 0
+var encuentro := {}              # lo que la escena de combate debe preparar
+var resultado_combate := {}      # lo que pasó en el último combate (para la historia)
+var mensajes_pendientes: Array = []
+var cambiando_escena := false     # true mientras se carga otra escena
+
+
+func cambiar_escena(ruta: String) -> void:
+	cambiando_escena = true
+	get_tree().change_scene_to_file(ruta)
 
 
 func _ready() -> void:
 	randomize()
-	_cargar_datos()
+	criaturas = _leer_json(RUTA_CRIATURAS).get("criaturas", {})
+	dialogos = _leer_json(RUTA_DIALOGOS)
+	var inicial: String = _leer_json(RUTA_CRIATURAS).get("carta_inicial", "")
+	if inicial != "":
+		agregar_carta(inicial)
 
 
-func _cargar_datos() -> void:
-	var archivo := FileAccess.open(RUTA_CRIATURAS, FileAccess.READ)
+func _leer_json(ruta: String) -> Dictionary:
+	var archivo := FileAccess.open(ruta, FileAccess.READ)
 	if archivo == null:
-		push_error("No se pudo abrir " + RUTA_CRIATURAS)
-		return
+		push_error("No se pudo abrir " + ruta)
+		return {}
 	var datos = JSON.parse_string(archivo.get_as_text())
 	if typeof(datos) != TYPE_DICTIONARY:
-		push_error("criaturas.json tiene un error de formato")
-		return
-	criaturas = datos["criaturas"]
-	# Pan empieza con una carta de compañero.
-	if mochila.is_empty():
-		agregar_carta(datos.get("carta_inicial", "gato_mutado"))
+		push_error(ruta + " tiene un error de formato")
+		return {}
+	return datos
+
+
+func flag(nombre: String) -> bool:
+	return flags.get(nombre, false)
+
+
+func ir_a_mapa(ruta: String, nombre_entrada: String) -> void:
+	entrada = nombre_entrada
+	posicion_pan = null
+	cambiar_escena(ruta)
 
 
 # ---------------------------------------------------------------------------
@@ -73,7 +111,7 @@ func stats(id: String, nivel: int) -> Dictionary:
 	}
 
 
-## Devuelve los movimientos que la criatura conoce a ese nivel
+## Los movimientos que la criatura conoce a ese nivel
 ## (cada movimiento cambia de nombre y poder al subir de nivel).
 func movimientos(id: String, nivel: int) -> Array:
 	var lista: Array = []
@@ -106,10 +144,15 @@ func crear_luchador(id: String, nivel: int, hp_actual: int = -1) -> Dictionary:
 		"ia": c.get("ia", "agresivo"),
 		"facilidad_captura": float(c.get("facilidad_captura", 0.7)),
 		"movimientos": movimientos(id, nivel),
-		"forma": c.get("forma", "humanoide"),
-		"color": c.get("color", "#ffffff"),
 		"infectado": false,
 	}
+
+
+func textura_criatura(id: String) -> Texture2D:
+	var ruta := "res://arte/criaturas/%s.png" % id
+	if ResourceLoader.exists(ruta):
+		return load(ruta)
+	return load("res://icon.svg")
 
 
 # ---------------------------------------------------------------------------
@@ -131,8 +174,7 @@ func hp_max_carta(carta: Dictionary) -> int:
 	return stats(carta["id"], nivel_carta(carta))["hp"]
 
 
-## Agrega una carta a la mochila. Si ya la tenías, suma un duplicado (y quizá sube de nivel).
-## Devuelve información para mostrar mensajes.
+## Agrega una carta. Si ya la tenías, suma un duplicado (y quizá sube de nivel).
 func agregar_carta(id: String) -> Dictionary:
 	var i := indice_carta(id)
 	if i == -1:
@@ -145,8 +187,7 @@ func agregar_carta(id: String) -> Dictionary:
 	var hp_max_antes := hp_max_carta(carta)
 	carta["cantidad"] += 1
 	var nivel_despues := nivel_carta(carta)
-	# Al subir de nivel aumenta la vida máxima; la carta gana esa vida extra
-	# (pero una carta rota sigue rota hasta dormir en un refugio).
+	# Al subir de nivel aumenta la vida máxima (una carta rota sigue rota hasta dormir).
 	if carta["hp"] > 0:
 		carta["hp"] += hp_max_carta(carta) - hp_max_antes
 	return { "nueva": false, "nivel_antes": nivel_antes, "nivel_despues": nivel_despues, "cantidad": carta["cantidad"] }
@@ -163,7 +204,7 @@ func hay_cartas_vivas() -> bool:
 	return false
 
 
-## Dormir en un refugio: la ÚNICA forma de curar y reparar cartas (no hay objetos de revivir).
+## Dormir: la ÚNICA forma gratuita de curar y reparar cartas (no hay objetos de revivir).
 func dormir() -> void:
 	for carta in mochila:
 		carta["hp"] = hp_max_carta(carta)
@@ -174,3 +215,15 @@ func hay_cartas_heridas() -> bool:
 		if carta["hp"] < hp_max_carta(carta):
 			return true
 	return false
+
+
+func dar_objeto(id: String, cantidad: int = 1) -> void:
+	objetos[id] = objetos.get(id, 0) + cantidad
+
+
+func tiene_objeto(id: String) -> bool:
+	return objetos.get(id, 0) > 0
+
+
+func usar_objeto(id: String) -> void:
+	objetos[id] = maxi(0, objetos.get(id, 0) - 1)

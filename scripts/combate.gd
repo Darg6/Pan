@@ -1,52 +1,95 @@
 extends Control
 ## Combate por turnos (GDD: Iniciativa -> Selección -> Ejecución -> Estados -> Victoria/Derrota).
-## La criatura salvaje viene de Juego.encuentro. Tus criaturas vienen de Juego.mochila.
+## Juego.encuentro dice qué tipo de combate es:
+##   "salvaje"          -> criatura salvaje: se puede capturar y huir
+##   "entrenador"       -> bandido de la Organización: no se captura ni se huye, puede tener varias bestias
+##   "tutorial_captura" -> prólogo: Pan aún no tiene criaturas y usa la Granada + Carta de Vínculo
 
-const ESCENA_MUNDO := "res://escenas/mundo.tscn"
-const PAUSA_MENSAJE := 1.0
-const COLOR_DEBILIDAD := Color("#ff4040")
+const PAUSA_MENSAJE := 1.1
+const COLOR_DEBILIDAD := Color("#ff4a4a")
+const TEX_CARTA := preload("res://arte/interfaz/carta.png")
+const TEX_GRANADA := preload("res://arte/objetos/granada.png")
 
-@onready var figura_pan: Node2D = $FiguraPan
-@onready var figura_aliada: Node2D = $FiguraAliada
-@onready var figura_enemiga: Node2D = $FiguraEnemiga
+# Posiciones dentro del escenario de 480x270 (coinciden con las plataformas del fondo)
+const POS_ENEMIGO := Vector2(352, 136)
+const POS_ALIADO := Vector2(132, 196)
+const POS_PAN := Vector2(46, 190)
+const POS_ENTRENADOR := Vector2(440, 128)
+
+@onready var escenario: Control = $Escenario
+@onready var sprite_pan: Sprite2D = $Escenario/Pan
+@onready var sprite_aliado: Sprite2D = $Escenario/Aliado
+@onready var sprite_enemigo: Sprite2D = $Escenario/Enemigo
+@onready var sprite_entrenador: Sprite2D = $Escenario/Entrenador
+@onready var hud_aliado: PanelContainer = $HUDAliado
 @onready var nombre_aliado: Label = $HUDAliado/VBox/Nombre
 @onready var barra_aliado: ProgressBar = $HUDAliado/VBox/Barra
 @onready var vida_aliado: Label = $HUDAliado/VBox/Vida
-@onready var estado_aliado: Label = $HUDAliado/VBox/Estado
 @onready var nombre_enemigo: Label = $HUDEnemigo/VBox/Nombre
 @onready var barra_enemigo: ProgressBar = $HUDEnemigo/VBox/Barra
 @onready var estado_enemigo: Label = $HUDEnemigo/VBox/Estado
-@onready var mensaje: Label = $PanelInferior/Margen/HBox/Mensaje
-@onready var opciones: GridContainer = $PanelInferior/Margen/HBox/Opciones
+@onready var mensaje: Label = $PanelInferior/HBox/Mensaje
+@onready var opciones: GridContainer = $PanelInferior/HBox/Opciones
 @onready var transicion: ColorRect = $Transicion
 
-var aliado: Dictionary = {}      # luchador de Pan que está en el campo
+var tipo := "salvaje"
+var datos: Dictionary = {}
+var aliado: Dictionary = {}      # criatura de Pan en el campo (vacío en el tutorial)
 var indice_aliado := -1          # su posición en Juego.mochila
-var enemigo: Dictionary = {}     # criatura salvaje
+var enemigo: Dictionary = {}
+var equipo_enemigo: Array = []   # bestias que le quedan al entrenador
 var terminado := false
+var _paso_tutorial := 0
 
 
 func _ready() -> void:
-	resized.connect(_colocar_figuras)
-	_colocar_figuras()
+	Juego.cambiando_escena = false
+	datos = Juego.encuentro
+	if datos.is_empty():  # por si abres esta escena sola con F6 para probar
+		datos = { "tipo": "salvaje", "equipo": [{ "id": "aves_negras", "nivel": 1 }] }
+		if Juego.mochila.is_empty():
+			Juego.agregar_carta("gato_mutado")
+			Juego.dar_objeto("carta_vinculo", 3)
+	tipo = datos.get("tipo", "salvaje")
+	equipo_enemigo = datos.get("equipo", []).duplicate()
+
 	_preparar_barra(barra_aliado)
 	_preparar_barra(barra_enemigo)
-
-	var datos: Dictionary = Juego.encuentro
-	if datos.is_empty():  # por si abres esta escena sola con F6 para probar
-		datos = { "id": "aves_negras", "nivel": 1 }
-	enemigo = Juego.crear_luchador(datos["id"], datos["nivel"])
-	var nombre_especie: String = enemigo["nombre"]
-	enemigo["nombre"] = nombre_especie + " salvaje"  # para no confundirlo con tus cartas
-	figura_enemiga.configurar(enemigo)
-
-	transicion.color.a = 1.0
-	create_tween().tween_property(transicion, "color:a", 0.0, 0.35)
-
+	sprite_pan.position = POS_PAN
+	sprite_aliado.position = POS_ALIADO
+	sprite_enemigo.position = POS_ENEMIGO
+	sprite_entrenador.position = POS_ENTRENADOR
+	sprite_aliado.visible = false
+	hud_aliado.visible = false
 	_limpiar_opciones()
-	figura_aliada.visible = false
-	_actualizar_hud()
-	await _decir("¡Una criatura salvaje apareció: %s (Nvl %d)!" % [nombre_especie, enemigo["nivel"]])
+
+	if tipo == "entrenador":
+		var e: Dictionary = datos.get("entrenador", {})
+		sprite_entrenador.texture = load(e.get("sprite", "res://arte/personajes/recluta_combate.png"))
+		sprite_entrenador.visible = true
+	else:
+		sprite_entrenador.visible = false
+	if tipo == "tutorial_captura":
+		sprite_pan.position = POS_ALIADO + Vector2(-10, 0)  # Pan está en la posición del luchador
+
+	_sacar_enemigo(equipo_enemigo.pop_front())
+	var f := create_tween()
+	f.tween_property(transicion, "color:a", 0.0, 0.4)
+	await f.finished
+
+	match tipo:
+		"tutorial_captura":
+			await _decir("¡Un %s salvaje se lanza sobre Pan!" % enemigo["nombre_especie"])
+			await _decir("Pan todavía no tiene criaturas. Los humanos son débiles ante los monstruos...")
+			await _decir("...pero pueden usar herramientas. Abre la Mochila y usa la Granada Aturdidora.")
+			_menu_principal()
+			return
+		"entrenador":
+			var nombre_e: String = datos.get("entrenador", {}).get("nombre", "Bandido")
+			await _decir("¡%s quiere pelear!" % nombre_e)
+			await _decir("%s saca a %s (Nvl %d)." % [nombre_e, enemigo["nombre_especie"], enemigo["nivel"]])
+		_:
+			await _decir("¡Una criatura salvaje apareció: %s (Nvl %d)!" % [enemigo["nombre_especie"], enemigo["nivel"]])
 
 	var primera := _primera_carta_viva()
 	if primera == -1:
@@ -54,13 +97,23 @@ func _ready() -> void:
 		_terminar("huida")
 		return
 	await _sacar_carta(primera)
+	if datos.get("tutorial", false):
+		await _decir("Tu %s (Velocidad %d) es más rápido que el %s (Velocidad %d): atacarás primero." % [
+			aliado["nombre"], aliado["velocidad"], enemigo["nombre_especie"], enemigo["velocidad"]])
+		await _decir("Consejo: Arañazo Infeccioso deja 'Infectado'. La infección quita vida al final de cada turno.")
 	_menu_principal()
 
 
-func _colocar_figuras() -> void:
-	figura_pan.position = Vector2(size.x * 0.09, size.y * 0.5)
-	figura_aliada.position = Vector2(size.x * 0.28, size.y * 0.6)
-	figura_enemiga.position = Vector2(size.x * 0.74, size.y * 0.37)
+func _sacar_enemigo(info: Dictionary) -> void:
+	enemigo = Juego.crear_luchador(info["id"], info["nivel"])
+	enemigo["nombre_especie"] = enemigo["nombre"]
+	enemigo["nombre"] += " rival" if tipo == "entrenador" else " salvaje"
+	sprite_enemigo.texture = Juego.textura_criatura(info["id"])
+	sprite_enemigo.flip_h = true  # las criaturas miran a la derecha; el enemigo mira a la izquierda
+	sprite_enemigo.scale = Vector2.ONE
+	sprite_enemigo.modulate = Color.WHITE
+	sprite_enemigo.visible = true
+	_actualizar_hud()
 
 
 # ---------------------------------------------------------------------------
@@ -69,10 +122,20 @@ func _colocar_figuras() -> void:
 
 func _menu_principal() -> void:
 	_limpiar_opciones()
+	if tipo == "tutorial_captura":
+		mensaje.text = "¿Qué hará Pan?"
+		_agregar_boton("Luchar", Callable(), true)
+		_agregar_boton("Mochila", _menu_mochila, _paso_tutorial != 0)
+		_agregar_boton("Capturar", func(): _turno({ "tipo": "capturar" }), _paso_tutorial != 1)
+		_agregar_boton("Huir", Callable(), true)
+		return
 	mensaje.text = "¿Qué hará %s?" % aliado["nombre"]
 	_agregar_boton("Luchar", _menu_luchar)
-	_agregar_boton("Mochila", _menu_cartas.bind(false))
-	_agregar_boton("Capturar (%d%%)" % roundi(_probabilidad_captura() * 100), func(): _turno({ "tipo": "capturar" }))
+	_agregar_boton("Mochila", _menu_mochila)
+	if tipo == "salvaje":
+		_agregar_boton("Capturar %d%%" % roundi(_probabilidad_captura() * 100), func(): _turno({ "tipo": "capturar" }))
+	else:
+		_agregar_boton("Capturar", func(): _turno({ "tipo": "capturar" }))
 	_agregar_boton("Huir", func(): _turno({ "tipo": "huir" }))
 
 
@@ -86,26 +149,35 @@ func _menu_luchar() -> void:
 	_agregar_boton("Volver", _menu_principal)
 
 
-## Lista de cartas para cambiar de criatura. Si `obligatorio` es true (tu criatura cayó),
-## no hay botón de Volver y el cambio no le da turno gratis al enemigo.
-func _menu_cartas(obligatorio: bool) -> void:
+## Mochila: objetos y cartas para cambiar de criatura.
+func _menu_mochila() -> void:
 	_limpiar_opciones()
-	mensaje.text = "Elige una carta:" if obligatorio else "Mochila: cambiar de carta"
+	mensaje.text = "Mochila"
+	if Juego.tiene_objeto("granada_aturdidora"):
+		_agregar_boton("Granada x%d" % Juego.objetos["granada_aturdidora"], func(): _turno({ "tipo": "granada" }))
+	if tipo != "tutorial_captura":
+		var equipo := Juego.equipo()
+		for i in equipo.size():
+			var carta: Dictionary = equipo[i]
+			if i == indice_aliado or carta["hp"] <= 0:
+				continue
+			var nombre: String = Juego.criaturas[carta["id"]]["nombre"]
+			_agregar_boton("%s %dHP" % [nombre, carta["hp"]], func(): _turno({ "tipo": "cambio", "indice": i }))
+	if opciones.get_child_count() == 0:
+		mensaje.text = "No tienes objetos ni otras cartas sanas."
+	_agregar_boton("Volver", _menu_principal)
+
+
+## Cuando tu criatura cae: elegir otra (no hay Volver, y el enemigo no gana un turno gratis).
+func _menu_cambio_obligatorio() -> void:
+	_limpiar_opciones()
+	mensaje.text = "Elige otra carta:"
 	var equipo := Juego.equipo()
 	for i in equipo.size():
 		var carta: Dictionary = equipo[i]
-		if i == indice_aliado or carta["hp"] <= 0:
-			continue
-		var nombre: String = Juego.criaturas[carta["id"]]["nombre"]
-		var texto := "%s Nvl %d (%d HP)" % [nombre, Juego.nivel_carta(carta), carta["hp"]]
-		if obligatorio:
-			_agregar_boton(texto, _cambio_obligatorio.bind(i))
-		else:
-			_agregar_boton(texto, func(): _turno({ "tipo": "cambio", "indice": i }))
-	if not obligatorio:
-		if opciones.get_child_count() == 0:
-			mensaje.text = "No tienes otras cartas sanas en el equipo."
-		_agregar_boton("Volver", _menu_principal)
+		if carta["hp"] > 0:
+			var nombre: String = Juego.criaturas[carta["id"]]["nombre"]
+			_agregar_boton("%s %dHP" % [nombre, carta["hp"]], _cambio_obligatorio.bind(i))
 
 
 func _cambio_obligatorio(i: int) -> void:
@@ -114,12 +186,18 @@ func _cambio_obligatorio(i: int) -> void:
 	_menu_principal()
 
 
-func _agregar_boton(texto: String, accion: Callable) -> void:
+func _agregar_boton(texto: String, accion: Callable, desactivado := false) -> void:
 	var b := Button.new()
 	b.text = texto
-	b.custom_minimum_size = Vector2(250, 72)
+	b.focus_mode = Control.FOCUS_NONE
+	b.custom_minimum_size = Vector2(104, 24)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	b.pressed.connect(accion)
+	b.clip_text = true
+	if texto.length() > 14:
+		b.add_theme_font_size_override("font_size", 10)  # textos largos en letra más chica
+	b.disabled = desactivado
+	if accion.is_valid():
+		b.pressed.connect(accion)
 	opciones.add_child(b)
 
 
@@ -135,16 +213,39 @@ func _limpiar_opciones() -> void:
 
 func _turno(accion: Dictionary) -> void:
 	_limpiar_opciones()
-	var accion_enemigo := _ia_enemigo()
 
-	# Huir siempre funciona contra criaturas salvajes.
+	# Acciones que no gastan el turno
+	if accion["tipo"] == "huir" and tipo == "entrenador":
+		await _decir("¡No puedes huir de un combate contra un bandido!")
+		_menu_principal()
+		return
+	if accion["tipo"] == "capturar" and tipo == "entrenador":
+		await _decir("Pan: \"Su dispositivo de control bloquea mi carta. Tengo que derrotarlos.\"")
+		_menu_principal()
+		return
+	if accion["tipo"] == "capturar" and not Juego.tiene_objeto("carta_vinculo"):
+		await _decir("No te quedan Cartas de Vínculo. Busca más saqueando el páramo.")
+		_menu_principal()
+		return
+
 	if accion["tipo"] == "huir":
 		await _decir("¡Pan y %s escapan del combate!" % aliado["nombre"])
 		_terminar("huida")
 		return
 
-	# Fase de iniciativa: cambiar de carta y capturar tienen Prioridad +1.
-	# Si no, ataca primero el más rápido (empate = moneda al aire).
+	# Tutorial: el tiempo se detiene, el gato no ataca.
+	if tipo == "tutorial_captura":
+		await _accion_jugador(accion)
+		if not terminado:
+			if accion["tipo"] == "granada":
+				_paso_tutorial = 1
+				await _decir("Las Cartas de Vínculo ofrecen refugio a las bestias heridas. ¡Captúralo antes de que te ataque!")
+			_menu_principal()
+		return
+
+	var accion_enemigo := _ia_enemigo()
+
+	# Iniciativa: objetos, cambio y captura tienen Prioridad +1. Si no, ataca el más rápido.
 	var jugador_primero := true
 	if accion["tipo"] == "ataque":
 		if aliado["velocidad"] == enemigo["velocidad"]:
@@ -163,11 +264,10 @@ func _turno(accion: Dictionary) -> void:
 	if terminado:
 		return
 
-	# Fase de estados: la infección hace 1/8 de la vida máxima.
+	# Fase de estados: la infección quita 1/8 de la vida máxima.
 	if aliado["hp"] > 0 and enemigo["hp"] > 0:
 		await _fase_estados()
 
-	# Fase de condición: victoria / derrota.
 	if await _revisar_caidos():
 		return
 	_menu_principal()
@@ -176,12 +276,14 @@ func _turno(accion: Dictionary) -> void:
 func _accion_jugador(accion: Dictionary) -> void:
 	match accion["tipo"]:
 		"ataque":
-			await _usar_movimiento(aliado, enemigo, accion["movimiento"], figura_aliada, figura_enemiga)
+			await _usar_movimiento(aliado, enemigo, accion["movimiento"], sprite_aliado, sprite_enemigo)
 		"cambio":
 			await _decir("¡Vuelve, %s!" % aliado["nombre"])
 			await _sacar_carta(accion["indice"])
 		"capturar":
 			await _intentar_captura()
+		"granada":
+			await _usar_granada()
 
 
 func _accion_enemigo(accion: Dictionary) -> void:
@@ -193,17 +295,17 @@ func _accion_enemigo(accion: Dictionary) -> void:
 		else:
 			await _decir("¡Pero Pan le cierra el paso!")
 		return
-	await _usar_movimiento(enemigo, aliado, accion["movimiento"], figura_enemiga, figura_aliada)
+	await _usar_movimiento(enemigo, aliado, accion["movimiento"], sprite_enemigo, sprite_aliado)
 
 
 # ---------------------------------------------------------------------------
 # Daño: (Poder * (Ataque / Defensa)) * (1 + Nivel*0.2) * Debilidad * RNG(0.85-1.0)
 # ---------------------------------------------------------------------------
 
-func _modificador_tipo(tipo: String, defensor: Dictionary) -> float:
-	if tipo in defensor["debil_a"]:
+func _modificador_tipo(tipo_ataque: String, defensor: Dictionary) -> float:
+	if tipo_ataque in defensor["debil_a"]:
 		return 2.0
-	if tipo in defensor["resiste"]:
+	if tipo_ataque in defensor["resiste"]:
 		return 0.5
 	return 1.0
 
@@ -213,36 +315,36 @@ func _calcular_danio(atacante: Dictionary, defensor: Dictionary, mov: Dictionary
 	var ratio: float = atacante["ataque"] / defensor["defensa"]
 	var mult_nivel: float = 1.0 + atacante["nivel"] * 0.2
 	var debilidad := _modificador_tipo(mov["tipo"], defensor)
-	var rng := randf_range(0.85, 1.0)
-	return maxi(1, roundi(poder * ratio * mult_nivel * debilidad * rng))
+	return maxi(1, roundi(poder * ratio * mult_nivel * debilidad * randf_range(0.85, 1.0)))
 
 
-func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionary, fig_atacante: Node2D, fig_defensor: Node2D) -> void:
+func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionary, spr_atacante: Sprite2D, spr_defensor: Sprite2D) -> void:
 	await _decir("%s usa %s." % [atacante["nombre"], mov["nombre"]])
-	fig_atacante.embestir()
+	_embestir(spr_atacante)
 
 	if mov.get("efecto", "") == "evasion_arriba":
 		atacante["evasion"] = minf(atacante["evasion"] + 0.15, 0.7)
-		_texto_flotante(fig_atacante, "Evasión +", Color("#9fe8ff"))
+		_texto_flotante(spr_atacante, "EVA+", Color("#9fe8ff"))
 		await _decir("¡La evasión de %s subió!" % atacante["nombre"])
 		return
 
 	var golpes := int(mov.get("golpes", 1))
+	var precision := float(mov.get("precision", 1.0))
 	var debilidad := _modificador_tipo(mov["tipo"], defensor)
 	var aciertos := 0
 	for g in golpes:
 		if defensor["hp"] <= 0:
 			break
 		if g > 0:
-			await get_tree().create_timer(0.22).timeout
-		if randf() < defensor["evasion"]:
-			_texto_flotante(fig_defensor, "Fallo", Color(1, 1, 1, 0.6))
+			await get_tree().create_timer(0.2).timeout
+		if randf() < defensor["evasion"] or randf() > precision:
+			_texto_flotante(spr_defensor, "Fallo", Color(1, 1, 1, 0.6))
 			continue
 		var danio := _calcular_danio(atacante, defensor, mov)
 		defensor["hp"] = maxi(0, defensor["hp"] - danio)
 		aciertos += 1
-		_texto_flotante(fig_defensor, str(danio), COLOR_DEBILIDAD if debilidad > 1.0 else Color.WHITE)
-		fig_defensor.parpadear()
+		_texto_flotante(spr_defensor, str(danio), COLOR_DEBILIDAD if debilidad > 1.0 else Color.WHITE)
+		_parpadear(spr_defensor)
 		if debilidad > 1.0:
 			_sacudir_pantalla()
 		_actualizar_hud()
@@ -260,11 +362,11 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 	if mov.get("efecto", "") == "infectar" and defensor["hp"] > 0 and not defensor["infectado"]:
 		defensor["infectado"] = true
 		_actualizar_hud()
-		await _decir("¡%s quedó Infectado!" % defensor["nombre"])
+		await _decir("¡%s quedó infectado!" % defensor["nombre"])
 
 
 func _fase_estados() -> void:
-	for pareja in [[aliado, figura_aliada], [enemigo, figura_enemiga]]:
+	for pareja in [[aliado, sprite_aliado], [enemigo, sprite_enemigo]]:
 		var luchador: Dictionary = pareja[0]
 		if luchador["infectado"] and luchador["hp"] > 0:
 			var danio := maxi(1, luchador["hp_max"] / 8)
@@ -274,23 +376,33 @@ func _fase_estados() -> void:
 			await _decir("%s sufre por la infección." % luchador["nombre"])
 
 
-## Devuelve true si el combate terminó o si se abrió el menú de cambio obligatorio.
+## Devuelve true si el combate terminó o si hay que elegir otra carta.
 func _revisar_caidos() -> bool:
 	if enemigo["hp"] <= 0:
-		figura_enemiga.visible = false
+		var t := create_tween()
+		t.tween_property(sprite_enemigo, "modulate:a", 0.0, 0.4)
 		await _decir("¡%s fue derrotado!" % enemigo["nombre"])
-		await _decir("(Para capturarlo, debilítalo sin derrotarlo.)")
+		if tipo == "entrenador" and not equipo_enemigo.is_empty():
+			var nombre_e: String = datos.get("entrenador", {}).get("nombre", "El bandido")
+			_sacar_enemigo(equipo_enemigo.pop_front())
+			await _decir("%s saca a %s (Nvl %d)." % [nombre_e, enemigo["nombre_especie"], enemigo["nivel"]])
+			return false
+		if tipo == "entrenador":
+			await _decir("¡%s se quedó sin bestias!" % datos.get("entrenador", {}).get("nombre", "El bandido"))
+		else:
+			await _decir("(Para capturar una criatura, debilítala sin derrotarla.)")
 		_terminar("victoria")
 		return true
 	if aliado["hp"] <= 0:
 		_guardar_aliado()
-		figura_aliada.visible = false
-		await _decir("¡%s cayó! Su carta se rompió." % aliado["nombre"])
+		var t := create_tween()
+		t.tween_property(sprite_aliado, "modulate:a", 0.0, 0.4)
+		await _decir("¡%s cayó! Pan atrapa su carta rota en el aire." % aliado["nombre"])
 		if _primera_carta_viva() == -1:
 			await _decir("Todos los compañeros de Pan cayeron... ¡Pan huye!")
 			_terminar("derrota")
 		else:
-			_menu_cartas(true)
+			_menu_cambio_obligatorio()
 		return true
 	return false
 
@@ -307,25 +419,65 @@ func _primera_carta_viva() -> int:
 	return -1
 
 
-## Guarda la vida actual del aliado en su carta de la mochila.
 func _guardar_aliado() -> void:
 	if indice_aliado >= 0 and not aliado.is_empty():
 		Juego.mochila[indice_aliado]["hp"] = aliado["hp"]
 
 
+## Pan lanza la carta al aire y la criatura se materializa.
 func _sacar_carta(i: int) -> void:
 	_guardar_aliado()
 	var carta: Dictionary = Juego.mochila[i]
 	indice_aliado = i
 	aliado = Juego.crear_luchador(carta["id"], Juego.nivel_carta(carta), carta["hp"])
-	figura_aliada.configurar(aliado)
+	sprite_aliado.texture = Juego.textura_criatura(carta["id"])
+	sprite_aliado.flip_h = false
+	sprite_aliado.visible = true
+	sprite_aliado.modulate = Color(0.4, 1.0, 1.0, 0.0)
+	sprite_aliado.scale = Vector2(0.2, 0.2)
+	var t := create_tween().set_parallel()
+	t.tween_property(sprite_aliado, "modulate", Color.WHITE, 0.35)
+	t.tween_property(sprite_aliado, "scale", Vector2(1.2, 1.2), 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	hud_aliado.visible = true
 	_actualizar_hud()
 	await _decir("¡Adelante, %s!" % aliado["nombre"])
 
 
 # ---------------------------------------------------------------------------
-# Captura: más fácil cuanto menos vida le queda a la criatura.
+# Objetos
 # ---------------------------------------------------------------------------
+
+func _lanzar(textura: Texture2D, destino: Vector2) -> Sprite2D:
+	var s := Sprite2D.new()
+	s.texture = textura
+	s.position = sprite_pan.position + Vector2(8, -36)
+	escenario.add_child(s)
+	var inicio := s.position
+	var medio := (inicio + destino) / 2.0 + Vector2(0, -50)
+	var t := create_tween()
+	# Curva en arco (Bézier cuadrática) desde Pan hasta el objetivo
+	t.tween_method(func(k: float): s.position = inicio.lerp(medio, k).lerp(medio.lerp(destino, k), k), 0.0, 1.0, 0.45)
+	t.parallel().tween_property(s, "rotation", TAU * 2, 0.45)
+	await t.finished
+	return s
+
+
+func _usar_granada() -> void:
+	Juego.usar_objeto("granada_aturdidora")
+	await _decir("¡Pan lanza la Granada Aturdidora!")
+	var g := await _lanzar(TEX_GRANADA, sprite_enemigo.position + Vector2(0, -30))
+	g.queue_free()
+	transicion.color = Color(1, 1, 1, 0.9)
+	create_tween().tween_property(transicion, "color:a", 0.0, 0.4)
+	_sacudir_pantalla()
+	var objetivo := maxi(1, roundi(enemigo["hp_max"] * 0.15))
+	var danio: int = enemigo["hp"] - objetivo if enemigo["hp"] > objetivo else mini(5, enemigo["hp"] - 1)
+	enemigo["hp"] -= maxi(0, danio)
+	_texto_flotante(sprite_enemigo, str(maxi(0, danio)), COLOR_DEBILIDAD)
+	_parpadear(sprite_enemigo)
+	_actualizar_hud()
+	await _decir("¡%s quedó aturdido! Su vida bajó a la zona roja." % enemigo["nombre"])
+
 
 func _probabilidad_captura() -> float:
 	var vida := float(enemigo["hp"]) / float(enemigo["hp_max"])
@@ -333,55 +485,48 @@ func _probabilidad_captura() -> float:
 
 
 func _intentar_captura() -> void:
-	var probabilidad := _probabilidad_captura()
-	await _decir("¡Pan lanza una carta en blanco!")
-
-	# La carta vuela de Pan hacia la criatura
-	var carta := ColorRect.new()
-	carta.size = Vector2(36, 50)
-	carta.color = Color("#f4e9c8")
-	carta.position = figura_pan.position + Vector2(0, -120)
-	add_child(carta)
-	var destino := figura_enemiga.position + Vector2(-18, -110)
-	var t := create_tween()
-	t.tween_property(carta, "position", destino, 0.35)
+	var probabilidad := 1.0 if tipo == "tutorial_captura" else _probabilidad_captura()
+	Juego.usar_objeto("carta_vinculo")
+	await _decir("¡Pan lanza una Carta de Vínculo como un shuriken!")
+	var carta := await _lanzar(TEX_CARTA, sprite_enemigo.position + Vector2(0, -30))
+	var t := create_tween().set_parallel()
+	t.tween_property(sprite_enemigo, "scale", Vector2(0.05, 0.05), 0.3)
+	t.tween_property(sprite_enemigo, "modulate", Color(0.4, 1.0, 0.5), 0.3)
 	await t.finished
-	var t2 := create_tween()
-	t2.tween_property(figura_enemiga, "scale", Vector2(0.05, 0.05), 0.25)
-	await t2.finished
 
 	for i in 3:  # la carta tiembla
 		var t3 := create_tween()
-		t3.tween_property(carta, "rotation", 0.3, 0.12)
-		t3.tween_property(carta, "rotation", -0.3, 0.12)
-		t3.tween_property(carta, "rotation", 0.0, 0.12)
+		t3.tween_property(carta, "rotation", 0.4, 0.1)
+		t3.tween_property(carta, "rotation", -0.4, 0.1)
+		t3.tween_property(carta, "rotation", 0.0, 0.1)
 		await t3.finished
-		await get_tree().create_timer(0.25).timeout
+		await get_tree().create_timer(0.3).timeout
 
 	if randf() < probabilidad:
-		carta.color = Color("#ffd24d")
+		carta.modulate = Color(0.6, 1.0, 0.6)
 		_guardar_aliado()  # antes de agregar la carta (por si es un duplicado del aliado)
 		var r := Juego.agregar_carta(enemigo["id"])
-		var especie: String = Juego.criaturas[enemigo["id"]]["nombre"]
-		await _decir("¡Captura exitosa! %s ahora es una carta en tu mochila." % especie)
-		var aviso := "¡Carta conseguida: %s!" % especie
+		var especie: String = enemigo["nombre_especie"]
+		await _decir("¡%s atrapado! Ahora es una carta en tu mochila." % especie)
+		var aviso := "¡%s atrapado!" % especie
 		if r["nueva"]:
 			if Juego.mochila.size() > Juego.MAX_EQUIPO:
 				await _decir("Tu equipo está lleno: la carta se guardó en la Colección.")
 		elif r["nivel_despues"] > r["nivel_antes"]:
 			var texto := "¡Vínculo fortalecido! %s alcanzó el Nivel %d." % [especie, r["nivel_despues"]]
 			await _decir(texto)
-			aviso += " " + texto
+			aviso = texto
 		else:
 			var faltan: int = Juego.cartas_para_nivel(r["nivel_despues"] + 1) - r["cantidad"]
-			await _decir("Carta duplicada (%d en total). Te falta%s %d para subir de nivel." % [r["cantidad"], "" if faltan == 1 else "n", faltan])
+			await _decir("Carta duplicada (%d). Te falta%s %d para subir de nivel." % [r["cantidad"], "" if faltan == 1 else "n", faltan])
 		Juego.mensajes_pendientes.append(aviso)
 		indice_aliado = -1  # ya guardamos su vida; no volver a sobrescribirla
 		_terminar("captura")
 	else:
 		carta.queue_free()
-		var t4 := create_tween()
-		t4.tween_property(figura_enemiga, "scale", Vector2.ONE, 0.2)
+		var t4 := create_tween().set_parallel()
+		t4.tween_property(sprite_enemigo, "scale", Vector2.ONE, 0.2)
+		t4.tween_property(sprite_enemigo, "modulate", Color.WHITE, 0.2)
 		await _decir("¡%s rompió la carta y se liberó!" % enemigo["nombre"])
 
 
@@ -411,8 +556,8 @@ func _ia_enemigo() -> Dictionary:
 			peso = 100.0  # modo "rematar"
 		opciones_ia.append([peso + randf() * 5.0, { "tipo": "ataque", "movimiento": mov }])
 
-	# Arquetipo evasivo (Bestia Blanca): si está en la zona roja, intenta huir.
-	if enemigo["ia"] == "evasivo" and vida < 0.25:
+	# Arquetipo evasivo (Bestia Blanca): en la zona roja intenta huir (solo si es salvaje).
+	if enemigo["ia"] == "evasivo" and vida < 0.25 and tipo == "salvaje":
 		opciones_ia.append([95.0 + randf() * 5.0, { "tipo": "huir" }])
 
 	opciones_ia.sort_custom(func(a, b): return a[0] > b[0])
@@ -430,59 +575,74 @@ func _decir(texto: String) -> void:
 
 func _actualizar_hud() -> void:
 	if not aliado.is_empty():
-		nombre_aliado.text = "%s  Nvl %d" % [aliado["nombre"], aliado["nivel"]]
+		nombre_aliado.text = "%s Nv%d%s" % [aliado["nombre"], aliado["nivel"], "  INF" if aliado["infectado"] else ""]
 		_poner_barra(barra_aliado, aliado)
-		vida_aliado.text = "HP %d / %d" % [aliado["hp"], aliado["hp_max"]]
-		estado_aliado.text = "INFECTADO" if aliado["infectado"] else ""
-	nombre_enemigo.text = "%s  Nvl %d" % [enemigo["nombre"], enemigo["nivel"]]
-	_poner_barra(barra_enemigo, enemigo)  # el enemigo no muestra número, solo la barra
-	estado_enemigo.text = "INFECTADO" if enemigo["infectado"] else ""
+		vida_aliado.text = "HP %d/%d" % [aliado["hp"], aliado["hp_max"]]
+	if not enemigo.is_empty():
+		nombre_enemigo.text = "%s Nv%d" % [enemigo["nombre_especie"], enemigo["nivel"]]
+		_poner_barra(barra_enemigo, enemigo)  # el enemigo no muestra número, solo la barra
+		estado_enemigo.text = "INFECTADO" if enemigo["infectado"] else ""
 
 
 func _preparar_barra(barra: ProgressBar) -> void:
 	var relleno := StyleBoxFlat.new()
-	relleno.set_corner_radius_all(4)
+	relleno.anti_aliasing = false
 	barra.add_theme_stylebox_override("fill", relleno)
 	var fondo := StyleBoxFlat.new()
-	fondo.bg_color = Color(0, 0, 0, 0.5)
-	fondo.set_corner_radius_all(4)
+	fondo.bg_color = Color(0.05, 0.04, 0.05)
+	fondo.anti_aliasing = false
+	fondo.set_border_width_all(1)
+	fondo.border_color = Color(0.42, 0.29, 0.18)
 	barra.add_theme_stylebox_override("background", fondo)
 
 
 func _poner_barra(barra: ProgressBar, luchador: Dictionary) -> void:
 	barra.max_value = luchador["hp_max"]
-	var t := create_tween()
-	t.tween_property(barra, "value", float(luchador["hp"]), 0.25)
+	create_tween().tween_property(barra, "value", float(luchador["hp"]), 0.25)
 	var pct := float(luchador["hp"]) / float(luchador["hp_max"])
 	var relleno: StyleBoxFlat = barra.get_theme_stylebox("fill")
 	if pct > 0.5:
-		relleno.bg_color = Color("#4caf50")  # verde
+		relleno.bg_color = Color("#5cb85c")  # verde
 	elif pct > 0.2:
 		relleno.bg_color = Color("#e6c229")  # amarillo
 	else:
-		relleno.bg_color = Color("#e53935")  # rojo
+		relleno.bg_color = Color("#e04040")  # rojo
 
 
-func _texto_flotante(figura: Node2D, texto: String, color: Color) -> void:
+func _embestir(s: Sprite2D) -> void:
+	var dir := -1.0 if s.flip_h else 1.0
+	var inicio := s.position
+	var t := create_tween()
+	t.tween_property(s, "position", inicio + Vector2(14 * dir, -4), 0.08)
+	t.tween_property(s, "position", inicio, 0.12)
+
+
+func _parpadear(s: Sprite2D) -> void:
+	var t := create_tween()
+	for i in 2:
+		t.tween_property(s, "modulate:a", 0.2, 0.05)
+		t.tween_property(s, "modulate:a", 1.0, 0.05)
+
+
+func _texto_flotante(s: Sprite2D, texto: String, color: Color) -> void:
 	var etiqueta := Label.new()
 	etiqueta.text = texto
-	etiqueta.add_theme_font_size_override("font_size", 34)
+	etiqueta.theme_type_variation = &"NumeroDanio"
 	etiqueta.add_theme_color_override("font_color", color)
-	etiqueta.add_theme_color_override("font_outline_color", Color.BLACK)
-	etiqueta.add_theme_constant_override("outline_size", 6)
-	etiqueta.position = figura.position + Vector2(randf_range(-30, 20), -170)
-	add_child(etiqueta)
+	etiqueta.position = s.position + Vector2(randf_range(-14, 6), -70)
+	escenario.add_child(etiqueta)
 	var t := create_tween().set_parallel()
-	t.tween_property(etiqueta, "position:y", etiqueta.position.y - 60, 0.8)
-	t.tween_property(etiqueta, "modulate:a", 0.0, 0.8).set_delay(0.3)
+	t.tween_property(etiqueta, "position:y", etiqueta.position.y - 18, 0.7)
+	t.tween_property(etiqueta, "modulate:a", 0.0, 0.7).set_delay(0.3)
 	t.chain().tween_callback(etiqueta.queue_free)
 
 
 func _sacudir_pantalla() -> void:
+	var inicio := escenario.position
 	var t := create_tween()
 	for i in 6:
-		t.tween_property(self, "position", Vector2(randf_range(-10, 10), randf_range(-8, 8)), 0.04)
-	t.tween_property(self, "position", Vector2.ZERO, 0.04)
+		t.tween_property(escenario, "position", inicio + Vector2(randf_range(-4, 4), randf_range(-3, 3)), 0.035)
+	t.tween_property(escenario, "position", inicio, 0.035)
 
 
 func _terminar(resultado: String) -> void:
@@ -490,12 +650,14 @@ func _terminar(resultado: String) -> void:
 	_limpiar_opciones()
 	_guardar_aliado()
 	Juego.pasos_sin_encuentro = 4  # unos pasos de calma al volver al mapa
-	if resultado == "derrota":
-		# Pan no muere: despierta en el último refugio (allí duerme y repara sus cartas).
-		Juego.posicion_pan = Juego.posicion_refugio
-		Juego.mensajes_pendientes.append("Pan escapó con sus cartas rotas y llegó al refugio.")
+	Juego.resultado_combate = { "evento": datos.get("evento", ""), "resultado": resultado }
 	var t := create_tween()
 	t.tween_interval(0.4)
 	t.tween_property(transicion, "color:a", 1.0, 0.4)
 	await t.finished
-	get_tree().change_scene_to_file(ESCENA_MUNDO)
+	if resultado == "derrota":
+		# Pan no muere: huye y despierta en el último lugar donde durmió, con las cartas reparadas.
+		Juego.dormir()
+		Juego.ir_a_mapa(Juego.lugar_descanso["mapa"], Juego.lugar_descanso["entrada"])
+	else:
+		Juego.cambiar_escena(Juego.mapa_actual)

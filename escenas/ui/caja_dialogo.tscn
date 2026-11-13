@@ -1,0 +1,52 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/caja_dialogo.gd" id="1_caja"]
+
+[node name="CajaDialogo" type="PanelContainer"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -74.0
+offset_right = -8.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("1_caja")
+
+[node name="Fila" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Retrato" type="TextureRect" parent="Fila"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Columna" type="VBoxContainer" parent="Fila"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="Nombre" type="Label" parent="Fila/Columna"]
+layout_mode = 2
+theme_type_variation = &"NombreDialogo"
+text = "Pan"
+
+[node name="Texto" type="Label" parent="Fila/Columna"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_vertical = 3
+text = "..."
+autowrap_mode = 3
+
+[node name="Flecha" type="Label" parent="."]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_type_variation = &"NombreDialogo"
+text = "v"

@@ -1,0 +1,399 @@
+{
+	"_ayuda": "Cada diálogo es una lista de líneas. 'quien' es el nombre que se muestra (vacío = narrador). 'retrato' es el nombre de un PNG en arte/retratos/ (opcional). Puedes cambiar los textos libremente.",
+	"intro_1": [
+		{
+			"quien": "",
+			"texto": "Antes del fin, el mundo tenía ciudades, ríos limpios y cielos azules."
+		},
+		{
+			"quien": "",
+			"texto": "Después solo quedaron páramos, ruinas... y las criaturas que nacieron de la contaminación."
+		},
+		{
+			"quien": "",
+			"texto": "Diego y Danitza sobrevivieron. Le enseñaron a su hijo a recolectar, a esconderse y a luchar."
+		},
+		{
+			"quien": "",
+			"texto": "Soñaban con reconstruir la humanidad. Con una ciudad donde nadie tuviera que esconderse."
+		},
+		{
+			"quien": "Diego",
+			"texto": "¡Corre, Pan! ¡No te sueltes!"
+		}
+	],
+	"intro_2": [
+		{
+			"quien": "",
+			"texto": "Un hombre los seguía. Dijo que solo buscaba comida."
+		},
+		{
+			"quien": "Danitza",
+			"texto": "Es un callejón sin salida... Diego, ¡el conducto!"
+		},
+		{
+			"quien": "Diego",
+			"texto": "Entra ahí y no hagas ruido. Lleva la mochila. Pase lo que pase, no salgas."
+		}
+	],
+	"intro_3": [
+		{
+			"quien": "",
+			"texto": "A través de la rejilla, Pan vio una silueta impecable. Un traje blanco, limpio, imposible en este mundo."
+		},
+		{
+			"quien": "???",
+			"texto": "Los soñadores no sobreviven al fin del mundo."
+		},
+		{
+			"quien": "",
+			"texto": "Se escuchó un disparo sordo."
+		}
+	],
+	"intro_4": [
+		{
+			"quien": "Danitza",
+			"texto": "No llores, Pan. Construye."
+		}
+	],
+	"despertar": [
+		{
+			"quien": "",
+			"texto": "Refugio Cero. Años después."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "...Otra vez ese sueño."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Mis padres construyeron este búnker para mí. Ya es hora de salir."
+		},
+		{
+			"quien": "",
+			"texto": "Misión: Preparar el equipo. Busca la mochila, revisa la mesa de trabajo y toma el collar de mamá."
+		}
+	],
+	"mochila": [
+		{
+			"quien": "",
+			"texto": "Pan recoge la Mochila Táctica de cuero de su padre."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Todavía huele a él."
+		},
+		{
+			"quien": "",
+			"texto": "¡Ahora puedes abrir la Mochila con el botón de arriba a la derecha!"
+		}
+	],
+	"mesa": [
+		{
+			"quien": "",
+			"texto": "Sobre la mesa de trabajo hay 3 Cartas de Vínculo vacías y una vieja Granada Aturdidora."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Papá decía que las cartas son un refugio para las bestias heridas. Me las llevo."
+		},
+		{
+			"quien": "",
+			"texto": "Obtuviste 3 Cartas de Vínculo y 1 Granada Aturdidora."
+		}
+	],
+	"collar": [
+		{
+			"quien": "",
+			"texto": "El collar de Danitza: un gato de metal con una perla morada en el vientre."
+		},
+		{
+			"quien": "",
+			"texto": "Pan se lo cuelga al cuello. En su oreja izquierda brilla el aro de mariposa de su madre."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Seis ciudades. Seis comandantes. Voy por ti, Marcus."
+		}
+	],
+	"cama_no": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "No puedo dormir. Ya descansé suficiente. Es hora."
+		}
+	],
+	"cama_dormir": [
+		{
+			"quien": "",
+			"texto": "Pan se sienta en el borde de la cama, deja la mochila a un lado con cuidado y suspira."
+		},
+		{
+			"quien": "",
+			"texto": "..."
+		},
+		{
+			"quien": "",
+			"texto": "Las cartas brillan en verde. ¡Todos tus compañeros recuperaron su vida!"
+		},
+		{
+			"quien": "",
+			"texto": "Dormir es la única curación gratuita de este mundo. No lo olvides."
+		}
+	],
+	"falta_equipo": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Todavía no tengo todo mi equipo. La mochila, la mesa de trabajo y el collar."
+		}
+	],
+	"superficie": [
+		{
+			"quien": "",
+			"texto": "Pan abre la pesada escotilla y sale a la superficie."
+		},
+		{
+			"quien": "",
+			"texto": "El smog tapa el sol. Las afueras del páramo se extienden en todas direcciones."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Bastión de Óxido queda al este. Ahí empieza todo."
+		}
+	],
+	"gato_atrapado": [
+		{
+			"quien": "",
+			"texto": "*¡CRAC!* Un crujido metálico entre los escombros."
+		},
+		{
+			"quien": "",
+			"texto": "Un Gato Mutado está atrapado debajo de una viga oxidada. Está herido... y furioso."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Tranquilo. No voy a hacerte daño... no más del necesario."
+		},
+		{
+			"quien": "",
+			"texto": "¡El Gato Mutado sisea y se prepara para saltar!"
+		}
+	],
+	"recluta_aparece": [
+		{
+			"quien": "",
+			"texto": "*Clap... clap... clap...* Alguien aplaude lentamente."
+		},
+		{
+			"quien": "Recluta de Chatarra",
+			"retrato": "recluta",
+			"texto": "Vaya, vaya. El huérfano atrapó una mascota."
+		},
+		{
+			"quien": "Recluta de Chatarra",
+			"retrato": "recluta",
+			"texto": "Dámela y te dejaré vivir. Rictus paga bien por las bestias."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "..."
+		},
+		{
+			"quien": "",
+			"texto": "Pan no responde. Su mirada se vuelve fría como el hielo."
+		},
+		{
+			"quien": "Recluta de Chatarra",
+			"retrato": "recluta",
+			"texto": "¿No? Entonces te la quito. ¡Sal, Oso de Escoria!"
+		}
+	],
+	"recluta_derrotado": [
+		{
+			"quien": "Recluta de Chatarra",
+			"retrato": "recluta",
+			"texto": "¡N-no puede ser! ¡Rictus va a matarme!"
+		},
+		{
+			"quien": "",
+			"texto": "El Recluta entra en pánico, suelta su botín y huye hacia el este."
+		},
+		{
+			"quien": "",
+			"texto": "Obtuviste 50 monedas y un poco de chatarra."
+		},
+		{
+			"quien": "",
+			"texto": "Pan suelta los brazos y suspira. Por un momento, vuelve a ser un chico normal."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Lo hiciste bien, pero estás malherido. No tenemos medicinas... tendremos que descansar."
+		},
+		{
+			"quien": "",
+			"texto": "Misión: Vuelve al Refugio Cero y duerme en la cama."
+		}
+	],
+	"recluta_gano": [
+		{
+			"quien": "Recluta de Chatarra",
+			"retrato": "recluta",
+			"texto": "¡Ja! Vuelve cuando seas un hombre, niño."
+		}
+	],
+	"camino_herido": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Mi compañero está herido. Primero debo descansar en el Refugio Cero."
+		}
+	],
+	"camino_escombros": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Escucho algo entre los escombros, cerca del refugio. Debería revisar antes de irme."
+		}
+	],
+	"refugio_sellado": [
+		{
+			"quien": "",
+			"texto": "Pan sale del refugio por última vez."
+		},
+		{
+			"quien": "",
+			"texto": "Detrás de él, los generadores del búnker se apagan uno a uno. La escotilla se sella para siempre."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Adiós, papá. Adiós, mamá."
+		},
+		{
+			"quien": "",
+			"texto": "Misión: Sigue el camino hacia el este. Desde el acantilado del norte se ve todo el páramo."
+		}
+	],
+	"escotilla_sellada": [
+		{
+			"quien": "",
+			"texto": "La escotilla está sellada para siempre. Ya no hay vuelta atrás."
+		}
+	],
+	"titulo": [
+		{
+			"quien": "",
+			"texto": "Pan camina hasta el borde del acantilado."
+		},
+		{
+			"quien": "",
+			"texto": "A lo lejos, en el horizonte anaranjado, se levantan las chimeneas de humo negro de la Ciudad 1."
+		}
+	],
+	"mision_bastion": [
+		{
+			"quien": "",
+			"texto": "Nueva misión principal: Llega a Bastión de Óxido y encuentra al Comandante Rictus."
+		}
+	],
+	"saqueo": [
+		{
+			"quien": "",
+			"texto": "Pan se agacha y hurga entre la chatarra con ambas manos..."
+		}
+	],
+	"saqueo_vacio": [
+		{
+			"quien": "",
+			"texto": "Aquí ya no queda nada útil."
+		}
+	],
+	"cartel_bastion": [
+		{
+			"quien": "",
+			"texto": "BASTIÓN DE ÓXIDO. Impuesto de Chatarra obligatorio. Quien no cumpla la cuota, no bebe. Por orden de Rictus."
+		}
+	],
+	"ciudadano": [
+		{
+			"quien": "Ciudadano",
+			"retrato": "ciudadano",
+			"texto": "Shh... no hables tan fuerte, chico."
+		},
+		{
+			"quien": "Ciudadano",
+			"retrato": "ciudadano",
+			"texto": "Si no traemos chatarra del desierto, Rictus nos quita el agua. Si protestamos, su Titán aplasta nuestras chozas."
+		},
+		{
+			"quien": "Ciudadano",
+			"retrato": "ciudadano",
+			"texto": "Esconde tu dinero. Aquí todo el mundo trabaja para la Organización... o se muere de hambre."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "La Organización... Marcus."
+		}
+	],
+	"ciudadano_despues": [
+		{
+			"quien": "Ciudadano",
+			"retrato": "ciudadano",
+			"texto": "Si vas a dormir, usa los cartones junto a la fogata. No es mucho, pero es gratis."
+		}
+	],
+	"cama_carton": [
+		{
+			"quien": "",
+			"texto": "Pan se acuesta sobre unos cartones junto a la fogata. No es una cama, pero sirve."
+		},
+		{
+			"quien": "",
+			"texto": "Tus compañeros recuperaron toda su vida."
+		}
+	],
+	"porton": [
+		{
+			"quien": "",
+			"texto": "El portón de Bastión de Óxido está hecho de contenedores marítimos. Detrás se oye una trituradora que nunca se detiene."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Rictus está ahí dentro. El primero de seis."
+		},
+		{
+			"quien": "",
+			"texto": "(Continuará: Bastión de Óxido llegará en la próxima versión.)"
+		}
+	],
+	"sin_cartas_vivas": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Todas mis cartas están rotas. No puedo pelear así: tengo que dormir."
+		}
+	],
+	"derrota": [
+		{
+			"quien": "",
+			"texto": "Todos los compañeros de Pan cayeron. Pan huyó y, agotado, durmió en su último refugio."
+		},
+		{
+			"quien": "",
+			"texto": "Sus cartas se repararon mientras dormía."
+		}
+	]
+}
