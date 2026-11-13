@@ -77,7 +77,8 @@ Para probar sin repetir la intro, pon `SALTAR_PROLOGO = true` en `scripts/juego.
 | `arte/tiles/`        | Texturas de los mapas (16x16 por tile) |
 | `arte/criaturas/`    | Criaturas para el combate (64x64, mirando a la derecha, patas en la fila 60) |
 | `arte/personajes/`   | Pan y los personajes en el mapa y en combate |
-| `arte/retratos/`     | Caras que salen en los diálogos |
+| `arte/retratos/`     | Caras que salen en los diálogos (48x48, también las de los 6 comandantes) |
+| `arte/conceptos/`    | Hojas de diseño de Pan, Diego y Danitza (no se usan en el juego, son de referencia) |
 | `arte/cinematica/`   | Imágenes de la intro |
 | `arte/fondos/`       | Fondos de combate |
 | `arte/efectos/`      | Sombra, chispa de golpe y polvo del combate |
