@@ -86,7 +86,57 @@ Entra por el portón de contenedores (al noreste de la Superficie).
 - **Jefe**: dos reclutas en la Avenida del Impuesto y Rictus en su trono. Su Grito de Guerra
   cura a sus bestias cada 3 turnos.
 - **Al salvar la ciudad** la gente te aplaude en la plaza y te da fuerzas: +10% de ataque para
-  siempre en todas tus criaturas.
+  siempre en todas tus criaturas. También se abre la **salida este** (los vecinos quitan la
+  barricada).
+
+## Camino: la Autopista Quemada
+
+Sales de Bastión por el este. Es un río de asfalto con autos calcinados y ceniza que cae.
+
+- **Emboscada**: un Cazador Furtivo sale de detrás de un auto quemado y **ataca primero**
+  (Lobo de Ceniza y Cazador Camuflado). Su botín es alto.
+- **Piña silvestre**: cura un poco a tu carta del frente... pero viene contaminada (infección).
+- Una viajera que escapó del Sumidero, un letrero para investigar y saqueos.
+- Al este, la **boca del metro** baja al Sumidero.
+
+## Ciudad 2: El Sumidero (Dra. Vesper, La Tóxica)
+
+Una ciudad en los túneles del viejo metro: pasarelas de madera podrida sobre ríos de lodo,
+hongos que brillan en verde y violeta, y en el centro el laboratorio limpio de Vesper.
+Vesper envenena el agua y vende el "antídoto" a cambio de monstruos raros o de experimentos.
+
+- **Una ciudad viva**: los vecinos caminan sus rutas, hacen fila en la ventanilla del
+  antídoto, tosen y murmuran cuando pasas. Los niños corren, la patrulla vigila, las ratas
+  cruzan las vías y **gotas de ácido** caen del techo (mira su sombra para esquivarlas).
+- **Charcos tóxicos**: pisar los charcos verdes puede infectar a tu carta del frente. La
+  infección ya no se va sola al terminar el combate: se cura con un **Antídoto** o durmiendo.
+- **Escena del antídoto**: al llegar a la plaza ves la fila, un vecino rechazado y a Vesper,
+  que se fija en tu collar ("especímenes", "selección natural").
+- **Vagón de Sabina**: la primera tienda con **Antídotos** (curan infección, quemadura,
+  parálisis y ceguera) y la **Máscara de Filtro**.
+- **Vagón Dormitorio de Tula**: dormir (8 monedas, o gratis al liberar la ciudad).
+- **Misiones secundarias**:
+  - *Pan para los niños*: lleva 2 Piñas en lata a la madre del barrio. Te da una hoja del
+    cuaderno de Vesper con pistas para la pelea.
+  - *El filtro de Nilo*: consigue 3 Núcleos Tóxicos (los sueltan las Burbujas Tóxicas) y Nilo
+    te arma la Máscara de Filtro para entrar al **Colector de Gas** (botín y criaturas fuertes).
+  - *La entrega de Iris*: su papá necesita el antídoto. Dale uno de tus Antídotos o entrega
+    una de tus cartas (Iris te la devuelve cuando el Sumidero sea libre).
+  - Además, un anciano que pide comida limpia.
+- **Cosas para investigar**: mapa del metro, jardín de hongos, tanque envenenado, ventanilla,
+  altavoz, cristales del laboratorio, jaulas, vagón con grafitis, memorial y el cartel del
+  Benefactor. Cambian después de liberar la ciudad.
+- **Criaturas nuevas**: Lobo de Ceniza y Cazador Camuflado (autopista), Burbuja Tóxica y
+  Sirena de Fango (jardín de hongos), Tejedor de Sombras y Humanoide sin Consciencia (túneles
+  oscuros) y Guardián de Flora (colector de gas).
+- **Guardias de la Organización**: dos en la puerta del laboratorio, con 3 bestias cada uno.
+  Usan potenciadores y **Intervención Directa** (te lanzan un frasco de veneno o un molotov).
+- **Jefa: la Dra. Vesper**. Llena la arena de gas (**Campo Radioactivo**: tu carta pierde un
+  poco de vida cada turno). Burbuja Tóxica (si la golpeas con ataques físicos revienta y te
+  paraliza), Sirena de Fango (su lodo deja tu Velocidad en cero) y Guardián de Flora (te drena
+  la vida y se cura entero si debilita a tu carta). Rota tus cartas y usa ataques térmicos.
+- **Al salvar la ciudad** Pan cierra la válvula del veneno, el agua sale limpia y todo el
+  Sumidero lo aplaude: otro +10% de ataque para siempre.
 
 ## Dónde cambiar cada cosa
 
@@ -105,7 +155,8 @@ Entra por el portón de contenedores (al noreste de la Superficie).
 | Música/clima de cada mapa    | `AMBIENTACION` al inicio de `scripts/mapa.gd` (música, viento, color de luz, ceniza) |
 | Duración de las tormentas    | `CLIMA_CALMA` y `CLIMA_TORMENTA` en `scripts/mapa.gd` (segundos) |
 | Precios y límites de objetos | `OBJETOS` al inicio de `scripts/juego.gd` |
-| Lo que vende cada tienda     | `SURTIDO` en `scripts/tienda_ui.gd` |
+| Lo que vende cada tienda     | `SURTIDO` (Bastión) y `SURTIDO_SUMIDERO` en `scripts/tienda_ui.gd` |
+| Los vecinos que caminan      | Nodos con `scripts/vecino.gd` (ruta, pausa, si tosen y lo que murmuran) |
 | Las construcciones grandes   | Nodos con `scripts/decorado.gd` en `Entidades` (imagen, choque, humo, animación) |
 
 Para probar sin repetir la intro, pon `SALTAR_PROLOGO = true` en `scripts/juego.gd`.
@@ -115,7 +166,7 @@ Para probar sin repetir la intro, pon `SALTAR_PROLOGO = true` en `scripts/juego.
 | Carpeta              | Qué contiene |
 |----------------------|--------------|
 | `escenas/`           | `menu.tscn` (menú principal), `intro.tscn`, `titulo.tscn`, `combate.tscn`, `pan.tscn` |
-| `escenas/mapas/`     | `refugio_cero.tscn`, `superficie.tscn` y `bastion_oxido.tscn` |
+| `escenas/mapas/`     | `refugio_cero.tscn`, `superficie.tscn`, `bastion_oxido.tscn`, `autopista.tscn` y `sumidero.tscn` |
 | `escenas/ui/`        | HUD, caja de diálogo |
 | `scripts/`           | Código. `juego.gd` = estado (mochila, cartas, flags); `historia.gd` = la historia |
 | `datos/`             | `dialogos.json` y `criaturas.json` |
@@ -125,17 +176,17 @@ Para probar sin repetir la intro, pon `SALTAR_PROLOGO = true` en `scripts/juego.
 | `arte/retratos/`     | Caras que salen en los diálogos (48x48, también las de los 6 comandantes) |
 | `arte/conceptos/`    | Hojas de diseño de Pan, Diego y Danitza (no se usan en el juego, son de referencia) |
 | `arte/cinematica/`   | Imágenes de la intro |
-| `arte/fondos/`       | Fondos de combate por capas (cielo, nubes, montañas, ruinas, suelo). Cada zona de encuentro elige el suyo con `fondo` (paramo, pastizal, chatarra, dunas, bastion) |
+| `arte/fondos/`       | Fondos de combate por capas (cielo, nubes, montañas, ruinas, suelo). Cada zona de encuentro elige el suyo con `fondo` (paramo, pastizal, chatarra, dunas, bastion, autopista, sumidero, laboratorio) |
 | `arte/efectos/`      | Sombra, chispa de golpe y polvo del combate |
 | `arte/shaders/`      | Shader de los luchadores (destello al recibir golpes y respiración) |
 | `arte/interfaz/`     | Paneles, botones y joystick |
 | `arte/objetos/`      | Mochila, cartas, collar, iconos de la tienda, etc. |
-| `arte/decorados/`    | Construcciones grandes de Bastión (trituradora, buque, grúa, tienda, posada, trono...) |
+| `arte/decorados/`    | Construcciones grandes (Bastión: trituradora, buque, grúa...; Sumidero: vagones, laboratorio, tanques, hongos...) |
 | `arte/fuentes/`      | Letras pixel |
-| `audio/musica/`      | Música (recuerdo = intro, paramo = exploración, combate, bastion = ciudad 1, jefe = comandantes) |
-| `audio/ambiente/`    | Sonidos de fondo en bucle (viento, búnker, ciudad, tormenta) |
+| `audio/musica/`      | Música (recuerdo = intro, paramo = exploración, combate, bastion = ciudad 1, sumidero = ciudad 2, jefe = comandantes, vesper = pelea con Vesper) |
+| `audio/ambiente/`    | Sonidos de fondo en bucle (viento, búnker, ciudad, tormenta, subterraneo) |
 | `audio/sfx/`         | Efectos (golpes, captura, botones, voz de los diálogos...) |
-| `herramientas/`      | Scripts que generaron el arte y los mapas (solo para regenerarlos desde cero). El arte de Bastión está en `arte_bastion.py` |
+| `herramientas/`      | Scripts que generaron el arte y los mapas (solo para regenerarlos desde cero). El arte de Bastión está en `arte_bastion.py` y el del Sumidero en `arte_sumidero.py` |
 
 **Ojo:** si vuelves a correr las herramientas, sobrescriben el arte y los mapas. Si ya
 editaste algo a mano en Godot, no las uses.

@@ -72,9 +72,12 @@ func menu_abierto() -> bool:
 	return panel_mochila.visible or (panel_tienda != null and panel_tienda.visible)
 
 
-func abrir_tienda(nombre: String) -> void:
+func abrir_tienda(nombre: String, surtido: Array = []) -> void:
 	set_controles(false)
-	panel_tienda.abrir(nombre)
+	if surtido.is_empty():
+		panel_tienda.abrir(nombre)
+	else:
+		panel_tienda.abrir(nombre, surtido)
 	await panel_tienda.cerrado
 
 
@@ -124,3 +127,42 @@ func _siguiente_aviso() -> void:
 	t.tween_interval(2.4)
 	t.tween_property(aviso, "modulate:a", 0.0, 0.3)
 	t.finished.connect(_siguiente_aviso)
+
+
+## Pregunta con botones (ej. "¿Comer la piña?"). Devuelve el índice de la opción elegida.
+signal _eligio(i: int)
+
+
+func elegir(pregunta: String, opciones: Array) -> int:
+	set_controles(false)
+	var panel := PanelContainer.new()
+	panel.name = "Eleccion"
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	var caja := VBoxContainer.new()
+	caja.add_theme_constant_override("separation", 4)
+	panel.add_child(caja)
+	var l := Label.new()
+	l.text = pregunta
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.custom_minimum_size = Vector2(220, 0)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caja.add_child(l)
+	var botones: Array[Button] = []
+	for i in opciones.size():
+		var b := Button.new()
+		b.text = str(opciones[i])
+		b.custom_minimum_size = Vector2(180, 22)
+		b.pressed.connect(Sonido.efecto.bind("boton"))
+		b.pressed.connect(func(): _eligio.emit(i))
+		caja.add_child(b)
+		botones.append(b)
+	add_child(panel)
+	move_child(panel, transicion.get_index())
+	await get_tree().process_frame
+	panel.position = (get_viewport().get_visible_rect().size - panel.size) / 2.0
+	botones[0].grab_focus()
+	var elegido: int = await _eligio
+	panel.name = "EleccionCerrada"   # libera el nombre por si enseguida se abre otra pregunta
+	panel.queue_free()
+	set_controles(true)
+	return elegido

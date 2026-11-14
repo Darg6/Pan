@@ -491,6 +491,8 @@ def generar_tiles_exterior():
     lista.append(("tierra_oscura", tile_tierra(rng, [TIERRA[2], TIERRA[4], TIERRA[1], TIERRA[0], c("5a3f2c")]), False))
     import arte_bastion   # Ciudad 1: dunas, chatarral, placas, puertas de contenedor... (al final: no mueve los viejos)
     lista += arte_bastion.tiles(rng)
+    import arte_sumidero  # Ciudad 2: la Autopista Quemada (pasto de ceniza, baranda, asfalto roto)
+    lista += arte_sumidero.tiles_exterior(random.Random(4242))
     return armar_atlas(lista, "tiles/exterior.png", TILES_EXT)
 
 def armar_atlas(lista, ruta, registro, columnas=8):
@@ -2655,7 +2657,10 @@ def generar_interfaz():
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     import arte_bastion   # arte de la Ciudad 1 (Bastión de Óxido): herramientas/arte_bastion.py
-    FONDOS_COMBATE.update({"dunas": arte_bastion.fondo_dunas, "bastion": arte_bastion.fondo_bastion})
+    import arte_sumidero  # arte de la Ciudad 2 (El Sumidero): herramientas/arte_sumidero.py
+    FONDOS_COMBATE.update({"dunas": arte_bastion.fondo_dunas, "bastion": arte_bastion.fondo_bastion,
+                           "sumidero": arte_sumidero.fondo_sumidero, "laboratorio": arte_sumidero.fondo_laboratorio,
+                           "autopista": arte_sumidero.fondo_autopista})
     generar_tiles_exterior()
     generar_tiles_interior()
     generar_objetos()
@@ -2670,6 +2675,8 @@ if __name__ == "__main__":
     generar_conceptos()
     generar_interfaz()
     arte_bastion.generar()
+    arte_sumidero.generar()
+    TILES_SUB = arte_sumidero.generar_tiles_subterraneo()
     with open(os.path.join(ARTE, "tiles", "tiles.json"), "w", encoding="utf-8") as f:
-        json.dump({"exterior": TILES_EXT, "interior": TILES_INT}, f, indent=1, ensure_ascii=False)
-    print("Listo:", len(TILES_EXT), "tiles exteriores,", len(TILES_INT), "interiores")
+        json.dump({"exterior": TILES_EXT, "interior": TILES_INT, "subterraneo": TILES_SUB}, f, indent=1, ensure_ascii=False)
+    print("Listo:", len(TILES_EXT), "tiles exteriores,", len(TILES_INT), "interiores,", len(TILES_SUB), "del subterráneo")

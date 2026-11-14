@@ -1209,7 +1209,1185 @@
 		},
 		{
 			"quien": "",
-			"texto": "¡Bastión de Óxido es libre! La aventura hacia la Ciudad 2 llegará en una próxima versión. Mientras tanto, puedes seguir explorando y capturando criaturas."
+			"texto": "La barricada de la salida este ya no está. El camino hacia la Autopista Quemada y el Sumidero está abierto."
+		}
+	],
+	"barricada": [
+		{
+			"quien": "",
+			"texto": "Una barricada de la Organización tapa la salida este: chapas, alambre de púas y un cartel que dice \"SOLO PERSONAL DE RICTUS\"."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Por aquí se va al Sumidero... Primero tengo que encargarme de Rictus."
+		}
+	],
+	"salida_abierta_vieja": [
+		{
+			"quien": "",
+			"texto": "Los vecinos de Bastión desarmaron la barricada de la salida este. El camino hacia el Sumidero está abierto."
+		}
+	],
+	"paseo_bastion_1": [
+		{
+			"quien": "Vecino",
+			"retrato": "ciudadano",
+			"texto": "¿Sabes? Hoy comí dos veces. ¡Dos! Hacía años que no pasaba."
+		}
+	],
+	"paseo_bastion_2": [
+		{
+			"quien": "Vecina",
+			"retrato": "ciudadano",
+			"texto": "Dicen que más allá de la autopista hay una ciudad bajo tierra. Que la gente allá tose sangre..."
+		}
+	],
+	"paseo_bastion_antes": [
+		{
+			"quien": "Vecino",
+			"retrato": "ciudadano",
+			"texto": "Camina rápido, niño. Si un guardia te ve parado, te cobra la cuota por respirar."
+		}
+	],
+	"autopista_llegada": [
+		{
+			"quien": "",
+			"texto": "La Autopista Quemada. Un río de asfalto partido, lleno de autos calcinados. La ceniza cae como nieve gris."
+		},
+		{
+			"quien": "",
+			"texto": "Al fondo, al este, una boca de metro baja hacia la oscuridad: la entrada al Sumidero."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Huele a quemado... y a algo podrido que sube de abajo."
+		}
+	],
+	"viajera": [
+		{
+			"quien": "Viajera",
+			"retrato": "vendado",
+			"texto": "*cof, cof* Vengo del Sumidero. Me escapé... pero el veneno ya lo tengo adentro."
+		},
+		{
+			"quien": "Viajera",
+			"retrato": "vendado",
+			"texto": "Allá abajo la doctora envenena el agua. Para darte el antídoto te pide monstruos raros... o que te dejes \"examinar\"."
+		},
+		{
+			"quien": "Viajera",
+			"retrato": "vendado",
+			"texto": "Si bajas, compra antídotos donde Sabina, en el andén. Y no camines por los charcos verdes."
+		}
+	],
+	"viajera_libre": [
+		{
+			"quien": "Viajera",
+			"retrato": "vendado",
+			"texto": "¿Es verdad? ¿El agua del Sumidero ya está limpia? Entonces... ¡puedo volver a casa!"
+		}
+	],
+	"inv_letrero": [
+		{
+			"quien": "",
+			"texto": "Un letrero verde de autopista, doblado por el calor: \"CENTRO — 4 KM\". Alguien pintó encima con aerosol: \"ABAJO SE MUERE\"."
+		},
+		{
+			"quien": "",
+			"texto": "Debajo, una flecha señala la escalera del metro."
+		}
+	],
+	"fruta_ve": [
+		{
+			"quien": "",
+			"texto": "Una piña silvestre crece entre la ceniza. Se ve jugosa... pero tiene manchas verdes."
+		}
+	],
+	"fruta_comer": [
+		{
+			"quien": "",
+			"texto": "Pan se la da a su compañero del frente. Se la come con muchas ganas."
+		}
+	],
+	"fruta_dejar": [
+		{
+			"quien": "",
+			"texto": "Pan la deja donde está. Mejor no arriesgarse."
+		}
+	],
+	"fruta_sin_cartas": [
+		{
+			"quien": "",
+			"texto": "Todas tus cartas están rotas. Nadie puede comerse la fruta ahora."
+		}
+	],
+	"emboscada": [
+		{
+			"quien": "",
+			"texto": "¡Algo se mueve detrás del auto quemado!"
+		},
+		{
+			"quien": "Cazador",
+			"retrato": "cazador",
+			"texto": "Je, je... Un niño solo, con un collar de Vínculo. Eso vale una fortuna en el mercado."
+		},
+		{
+			"quien": "Cazador",
+			"retrato": "cazador",
+			"texto": "Los caminos entre ciudades son míos. ¡A él, mis bestias!"
+		}
+	],
+	"cazador": [
+		{
+			"quien": "Cazador",
+			"retrato": "cazador",
+			"texto": "¿Volviste por más? Esta vez mis lobos no fallan."
+		}
+	],
+	"cazador_derrotado": [
+		{
+			"quien": "Cazador",
+			"retrato": "cazador",
+			"texto": "¡Tsk! Eres más duro de lo que pareces. Me largo de este camino..."
+		},
+		{
+			"quien": "",
+			"texto": "El cazador furtivo huye entre la ceniza."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Si así son los caminos, abajo debe ser peor."
+		}
+	],
+	"metro_cerrado": [
+		{
+			"quien": "",
+			"texto": "Hace demasiado calor aquí arriba. Pan respira hondo antes de bajar."
+		}
+	],
+	"sumidero_llegada": [
+		{
+			"quien": "",
+			"texto": "El Sumidero. Los túneles del viejo metro se convirtieron en una ciudad. Todo huele a lodo y a metal."
+		},
+		{
+			"quien": "",
+			"texto": "Hongos que brillan en verde y violeta iluminan las pasarelas de madera podrida. Del techo caen gotas que sisean al tocar el suelo."
+		},
+		{
+			"quien": "",
+			"texto": "Por todos lados se oye toser."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "¿Cómo puede vivir alguien aquí?"
+		},
+		{
+			"quien": "",
+			"texto": "(Cuidado: las gotas de ácido del techo hacen daño a tu carta del frente. Mira su sombra antes de que caigan. Y los charcos verdes pueden infectarte.)"
+		}
+	],
+	"llegada_plaza_altavoz": [
+		{
+			"quien": "Altavoz",
+			"texto": "Atención, especímenes. La ventanilla del antídoto está abierta. Una dosis por familia, a cambio de un monstruo raro o una sesión de pruebas."
+		},
+		{
+			"quien": "Altavoz",
+			"texto": "Recuerden: la Doctora Vesper los cuida. Sin ella, el agua los mata."
+		}
+	],
+	"escena_rechazado": [
+		{
+			"quien": "Vecino",
+			"retrato": "vendado",
+			"texto": "¡Por favor! ¡Traje lo que encontré! Es una rata, pero es grande, mírenla..."
+		},
+		{
+			"quien": "Guardia",
+			"retrato": "guardia_org",
+			"texto": "Eso no es raro, es basura. Sin monstruo raro, sin antídoto. Conoces las reglas."
+		},
+		{
+			"quien": "Vecino",
+			"retrato": "vendado",
+			"texto": "Mis hijos están tosiendo... ¡por favor!"
+		},
+		{
+			"quien": "Guardia",
+			"retrato": "guardia_org",
+			"texto": "Entonces te ofreces para las pruebas. Adentro."
+		}
+	],
+	"escena_vesper_puerta": [
+		{
+			"quien": "",
+			"texto": "La puerta del laboratorio se abre con un siseo. Sale una mujer con bata blanca impecable, sin una sola mancha de lodo."
+		},
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "Shh, shh. No le griten a mis sujetos. Se estresan, y el estrés arruina los resultados."
+		},
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "Este viene conmigo. Su sangre ya lleva tres semanas de exposición... será una curva preciosa."
+		}
+	],
+	"escena_vesper_pan": [
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "Oh... ¿y tú? Ese collar..."
+		},
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "Un collar de Vínculo de primera generación. Hace años que no veo uno funcionando. ¿Dónde lo conseguiste, pequeño?"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Era de mis padres."
+		},
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "Fascinante. Tú y tus criaturas serían unos especímenes excelentes. El mundo se acabó y por fin la naturaleza elige a los fuertes. Selección natural, cariño. Es hermosa."
+		},
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "Vuelve cuando quieras. Mi mesa de pruebas siempre tiene espacio."
+		},
+		{
+			"quien": "",
+			"texto": "Vesper vuelve a entrar al laboratorio arrastrando al vecino. La puerta se cierra."
+		}
+	],
+	"escena_pan_sumidero": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Envenena el agua y después vende la cura... Usa a la gente como ratas."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Para llegar a ella tendré que pasar a esos guardias. Y su gas... voy a necesitar antídotos."
+		},
+		{
+			"quien": "",
+			"texto": "(Sabina vende Antídotos en el vagón del andén. Curan la infección, la quemadura, la parálisis y la ceguera.)"
+		}
+	],
+	"sabina": [
+		{
+			"quien": "Sabina",
+			"retrato": "sabina",
+			"texto": "¡Pasa, pasa! El Vagón de Sabina: antídotos, curas y máscaras. Lo único que no vendo es agua... esa la vende la doctora."
+		},
+		{
+			"quien": "Sabina",
+			"retrato": "sabina",
+			"texto": "Mis antídotos los preparo con hongos del jardín. No son tan buenos como los de Vesper, pero no te piden un hijo a cambio."
+		}
+	],
+	"sabina_libre": [
+		{
+			"quien": "Sabina",
+			"retrato": "sabina",
+			"texto": "¡El niño que cerró la válvula! Para ti, los mejores precios del subsuelo. Bueno... los mismos precios, pero con una sonrisa."
+		}
+	],
+	"tula": [
+		{
+			"quien": "Tula",
+			"retrato": "tula",
+			"texto": "Bienvenido al Vagón Dormitorio. Las literas están viejas, pero aquí abajo no se cuela el gas."
+		},
+		{
+			"quien": "Tula",
+			"retrato": "tula",
+			"texto": "Son 8 monedas la noche. Si no tienes, duerme igual... no voy a echar a un niño a los túneles."
+		}
+	],
+	"tula_libre": [
+		{
+			"quien": "Tula",
+			"retrato": "tula",
+			"texto": "¡Tú duermes gratis aquí para siempre! Te guardé la litera de abajo, la que no cruje."
+		}
+	],
+	"cama_sumidero": [
+		{
+			"quien": "",
+			"texto": "Pagas 8 monedas a Tula. Duermes en una litera del vagón, oyendo las gotas caer sobre el techo de metal."
+		},
+		{
+			"quien": "",
+			"texto": "Tus cartas de criaturas se repararon y la infección se fue."
+		}
+	],
+	"cama_sumidero_fiada": [
+		{
+			"quien": "",
+			"texto": "No te alcanza, pero Tula te deja dormir igual. Duermes en una litera del vagón, oyendo las gotas caer sobre el techo de metal."
+		},
+		{
+			"quien": "",
+			"texto": "Tus cartas de criaturas se repararon y la infección se fue."
+		}
+	],
+	"cama_sumidero_gratis": [
+		{
+			"quien": "",
+			"texto": "Tula no te deja pagar. Duermes en la mejor litera del vagón. Por primera vez el Sumidero huele un poco a sopa."
+		},
+		{
+			"quien": "",
+			"texto": "Tus cartas de criaturas se repararon y la infección se fue."
+		}
+	],
+	"mendigo_pide": [
+		{
+			"quien": "Anciano",
+			"retrato": "vendado",
+			"texto": "Niño... *cof* ¿tienes comida limpia? Aquí todo sabe a lodo. Hace semanas que no como algo que no me queme la garganta."
+		}
+	],
+	"mendigo_gracias": [
+		{
+			"quien": "Anciano",
+			"retrato": "vendado",
+			"texto": "¿Una piña? ¿De verdad? ...Gracias, niño. Que los hongos te iluminen el camino."
+		},
+		{
+			"quien": "Anciano",
+			"retrato": "vendado",
+			"texto": "Toma, encontré esto en los túneles. A mí ya no me sirve."
+		}
+	],
+	"mendigo_sin_comida": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "No tengo comida limpia ahora... Lo siento."
+		},
+		{
+			"quien": "Anciano",
+			"retrato": "vendado",
+			"texto": "No te disculpes. Eres el único que se detuvo a mirarme."
+		}
+	],
+	"mendigo_no": [
+		{
+			"quien": "Anciano",
+			"retrato": "vendado",
+			"texto": "Entiendo... tú también tienes que sobrevivir."
+		}
+	],
+	"mendigo_despues": [
+		{
+			"quien": "Anciano",
+			"retrato": "vendado",
+			"texto": "Todavía siento el sabor de esa piña. Dulce. Me había olvidado de lo dulce."
+		}
+	],
+	"mendigo_libre": [
+		{
+			"quien": "Anciano",
+			"retrato": "vendado",
+			"texto": "¡El agua ya no quema! Bebí tres vasos seguidos. ¡Tres!"
+		}
+	],
+	"paseante_anden": [
+		{
+			"quien": "Vecino",
+			"retrato": "vendado",
+			"texto": "*cof* El antídoto dura una semana. A los siete días empieza otra vez la tos."
+		},
+		{
+			"quien": "Vecino",
+			"retrato": "vendado",
+			"texto": "Mi vecino le entregó a su único monstruo para pagar. Ahora sale a cazar en los túneles con las manos vacías."
+		}
+	],
+	"paseante_anden_libre": [
+		{
+			"quien": "Vecino",
+			"retrato": "vendado",
+			"texto": "Ya no toso. Es raro... el silencio del metro es enorme cuando nadie tose."
+		}
+	],
+	"inv_mapa_metro": [
+		{
+			"quien": "",
+			"texto": "Un mapa viejo de las líneas del metro, cubierto de musgo. Las estaciones tienen nombres de un mundo que ya no existe."
+		},
+		{
+			"quien": "",
+			"texto": "Alguien marcó con tiza: \"MERCADO\" (aquí), \"LABORATORIO\" (al sur, cruzando el río), \"COLECTOR — GAS — NO ENTRAR\" (al sureste)."
+		}
+	],
+	"inv_hongos": [
+		{
+			"quien": "",
+			"texto": "Hongos gigantes que brillan con luz propia. Debajo, entre el lodo, se mueven cosas."
+		},
+		{
+			"quien": "",
+			"texto": "Sabina los usa para sus antídotos. Las Burbujas Tóxicas se alimentan de ellos... y sueltan Núcleos Tóxicos al reventar."
+		}
+	],
+	"inv_hongos_libre": [
+		{
+			"quien": "",
+			"texto": "Los hongos brillan más que antes. Sin el veneno de Vesper en el agua, el jardín parece casi bonito."
+		}
+	],
+	"fila_1": [
+		{
+			"quien": "Vecino",
+			"retrato": "vendado",
+			"texto": "No te cueles, niño. Llevo dos días en esta fila. *cof*"
+		}
+	],
+	"fila_2": [
+		{
+			"quien": "Vecina",
+			"retrato": "vendado",
+			"texto": "Traje una Sirena de Fango. Casi me ahoga atraparla... ojalá cuente como \"rara\"."
+		}
+	],
+	"fila_3": [
+		{
+			"quien": "Anciano",
+			"retrato": "vendado",
+			"texto": "Yo ya no tengo monstruos. Hoy me toca la mesa de pruebas. Dicen que pica un poco... dicen."
+		}
+	],
+	"fila_4": [
+		{
+			"quien": "Niño",
+			"retrato": "nino",
+			"texto": "Vine por mi mamá. Ella ya no puede caminar hasta aquí. *cof, cof*"
+		}
+	],
+	"patrulla": [
+		{
+			"quien": "Patrulla",
+			"retrato": "guardia_org",
+			"texto": "¿Y tú qué miras? Circula. Sin monstruo raro, aquí no tienes nada que hacer."
+		}
+	],
+	"paseante_plaza": [
+		{
+			"quien": "Vecino",
+			"retrato": "vendado",
+			"texto": "Mi hermano entró al laboratorio hace un mes. Nunca salió. Vesper dice que \"sigue en observación\"."
+		}
+	],
+	"paseante_plaza_libre": [
+		{
+			"quien": "Vecino",
+			"retrato": "vendado",
+			"texto": "¡Mi hermano salió del laboratorio! Flaco, pero vivo. Gracias, niño. Gracias."
+		}
+	],
+	"inv_tanque_veneno": [
+		{
+			"quien": "",
+			"texto": "El tanque de agua del Sumidero. Un tubo verde baja directo desde el laboratorio y le escupe un líquido espeso."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "No es que el agua esté sucia... ella la está envenenando a propósito."
+		}
+	],
+	"inv_tanque_veneno_libre": [
+		{
+			"quien": "",
+			"texto": "La válvula está cerrada. El agua del tanque corre clara por primera vez en años."
+		}
+	],
+	"inv_ventanilla": [
+		{
+			"quien": "",
+			"texto": "La ventanilla del antídoto. Un vidrio grueso con un hueco pequeño. Al lado, una lista: \"Monstruo raro = 1 dosis. Sesión de pruebas = 1 dosis.\""
+		},
+		{
+			"quien": "",
+			"texto": "Debajo, tachado a mano: \"Niños: media dosis\"."
+		}
+	],
+	"inv_ventanilla_libre": [
+		{
+			"quien": "",
+			"texto": "La ventanilla está abierta de par en par. Los vecinos reparten las reservas de antídoto sin pedir nada a cambio."
+		}
+	],
+	"inv_altavoz": [
+		{
+			"quien": "",
+			"texto": "Un altavoz oxidado, atado a una tubería. Repite lo mismo cada hora: \"La Doctora Vesper los cuida\"."
+		}
+	],
+	"inv_altavoz_libre": [
+		{
+			"quien": "",
+			"texto": "Alguien cortó los cables del altavoz. Por fin, silencio."
+		}
+	],
+	"inv_cristal": [
+		{
+			"quien": "",
+			"texto": "Cristales blindados, sin una mancha. Detrás se ve el laboratorio: mesas de acero, tubos de ensayo y camillas con correas."
+		},
+		{
+			"quien": "",
+			"texto": "En una pizarra blanca, con letra perfecta: \"Sujeto 41: resistencia mejorada. Sujeto 42: no apto.\""
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Les puso números. Como si no tuvieran nombre."
+		}
+	],
+	"inv_cristal_libre": [
+		{
+			"quien": "",
+			"texto": "El laboratorio está vacío. Los vecinos sacaron todas las camillas y las usan como camas en el andén."
+		}
+	],
+	"inv_jaulas": [
+		{
+			"quien": "",
+			"texto": "Jaulas apiladas con los monstruos que la gente entrega por el antídoto. Una Sirena de Fango te mira entre los barrotes."
+		},
+		{
+			"quien": "",
+			"texto": "Cada jaula tiene una etiqueta: \"Muestra\". Ninguna tiene nombre."
+		}
+	],
+	"inv_jaulas_libre": [
+		{
+			"quien": "",
+			"texto": "Las jaulas están abiertas. Los monstruos volvieron con quienes los cuidaban, o se fueron a los túneles."
+		}
+	],
+	"inv_vagon_grafiti": [
+		{
+			"quien": "",
+			"texto": "Un vagón viejo cubierto de grafitis. Uno, enorme, dice: \"EL AGUA ES NUESTRA\"."
+		},
+		{
+			"quien": "",
+			"texto": "Otro, más pequeño, es el dibujo de un niño con un collar, rodeado de criaturas. Al lado: \"Los Guardianes volverán\"."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "...¿Guardianes? ¿Mis padres?"
+		}
+	],
+	"inv_vagon_grafiti_libre": [
+		{
+			"quien": "",
+			"texto": "Alguien agregó un dibujo nuevo al vagón: un niño cerrando una válvula, con un gato mutado al lado."
+		}
+	],
+	"valvula": [
+		{
+			"quien": "",
+			"texto": "Una válvula enorme conecta el laboratorio con el tanque del agua. Tiene un candado y un cartel: \"PROPIEDAD DE LA DRA. VESPER\"."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Si cierro esto, el veneno deja de llegar al agua. Pero primero tengo que encargarme de ella."
+		}
+	],
+	"valvula_libre": [
+		{
+			"quien": "",
+			"texto": "La válvula está cerrada y soldada. Nadie la va a volver a abrir."
+		}
+	],
+	"inv_memorial": [
+		{
+			"quien": "",
+			"texto": "Una pared con fotos, juguetes y velas hechas con grasa. Cientos de nombres escritos con tiza."
+		},
+		{
+			"quien": "",
+			"texto": "Arriba dice: \"Los que no aguantaron hasta el antídoto\"."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "..."
+		}
+	],
+	"inv_memorial_libre": [
+		{
+			"quien": "",
+			"texto": "Alguien escribió un nombre nuevo debajo de todos los demás: \"Ya no más\"."
+		}
+	],
+	"inv_cartel_benefactor": [
+		{
+			"quien": "",
+			"texto": "Un cartel con la cara sonriente de un hombre de traje: \"EL BENEFACTOR PROTEGE. LA ORGANIZACIÓN PROVEE.\""
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Marcus... Hasta aquí abajo llega tu cara."
+		}
+	],
+	"inv_cartel_benefactor_libre": [
+		{
+			"quien": "",
+			"texto": "El cartel del Benefactor está roto en pedazos. Los niños lo usan para jugar."
+		}
+	],
+	"nino_tos": [
+		{
+			"quien": "Niño",
+			"retrato": "nino",
+			"texto": "*cof, cof* Mi mamá dice que no es nada. Pero me duele cuando respiro."
+		},
+		{
+			"quien": "Niño",
+			"retrato": "nino",
+			"texto": "¿Tú tienes comida de arriba? ¿Cómo es comer algo que no sabe a hongo?"
+		}
+	],
+	"nino_tos_libre": [
+		{
+			"quien": "Niño",
+			"retrato": "nino",
+			"texto": "¡Ya no toso! ¡Escucha! ...¿Ves? ¡Nada! ¡Ja, ja!"
+		}
+	],
+	"nina_tos": [
+		{
+			"quien": "Niño",
+			"retrato": "nino",
+			"texto": "¡No me alcanzas! *cof* ¡Bueno, sí me alcanzas, pero es porque toso!"
+		}
+	],
+	"nina_tos_libre": [
+		{
+			"quien": "Niño",
+			"retrato": "nino",
+			"texto": "¡Corro y no me canso! ¡Juguemos a que tú eres Vesper y yo te gano!"
+		}
+	],
+	"madre_pide": [
+		{
+			"quien": "Madre",
+			"retrato": "vendado",
+			"texto": "Disculpa... ¿eres de arriba? Mis hijos no comen nada limpio desde hace semanas. Todo lo que crece aquí abajo está envenenado."
+		},
+		{
+			"quien": "Madre",
+			"retrato": "vendado",
+			"texto": "Si encuentras comida purificada... dos latas de piña bastarían para que se pongan fuertes. Te daría lo poco que tengo."
+		}
+	],
+	"madre_espera": [
+		{
+			"quien": "Madre",
+			"retrato": "vendado",
+			"texto": "¿Conseguiste comida limpia? Necesito 2 Piñas en lata. Sabina las vende en su vagón del andén... y Mila, en Bastión."
+		}
+	],
+	"madre_gracias": [
+		{
+			"quien": "Madre",
+			"retrato": "vendado",
+			"texto": "¡Piña! ¡Piña de verdad! ¡Niños, vengan a ver!"
+		},
+		{
+			"quien": "Niño",
+			"retrato": "nino",
+			"texto": "¿Es dulce? ¡Es DULCE! *cof* ¡Gracias!"
+		},
+		{
+			"quien": "Madre",
+			"retrato": "vendado",
+			"texto": "No tengo cómo pagarte esto... Toma. Mi esposo trabajaba de limpieza en el laboratorio antes de... antes. Se llevó esta hoja."
+		}
+	],
+	"madre_hoja": [
+		{
+			"quien": "",
+			"texto": "Es una hoja arrancada del cuaderno de Vesper. Con letra perfecta dice:"
+		},
+		{
+			"quien": "",
+			"texto": "\"Burbuja Tóxica: membrana reactiva. Si la golpean con fuerza física, revienta y paraliza al agresor. Usar ataques de sombra, energía o fuego.\""
+		},
+		{
+			"quien": "",
+			"texto": "\"Guardián de Flora: se alimenta de sus víctimas. Si su presa cae, recupera toda su vida. NUNCA dejar que se alimente.\""
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Con esto ya sé cómo pelea. Gracias."
+		}
+	],
+	"madre_despues": [
+		{
+			"quien": "Madre",
+			"retrato": "vendado",
+			"texto": "Mis niños todavía hablan de la piña. Dicen que cuando sean grandes van a plantar piñas arriba."
+		}
+	],
+	"madre_libre": [
+		{
+			"quien": "Madre",
+			"retrato": "vendado",
+			"texto": "El agua ya no los enferma. ¿Oyes cómo se ríen? Hacía mucho que no se reían sin toser."
+		}
+	],
+	"nilo_pide": [
+		{
+			"quien": "Nilo",
+			"retrato": "nilo",
+			"texto": "¡Eh, tú! ¿Sabes pelear? Soy Nilo, el mecánico. Estoy armando un filtro para limpiar el agua de mi barrio."
+		},
+		{
+			"quien": "Nilo",
+			"retrato": "nilo",
+			"texto": "Me falta lo más importante: Núcleos Tóxicos. Las Burbujas Tóxicas del Jardín de Hongos los sueltan al reventar."
+		},
+		{
+			"quien": "Nilo",
+			"retrato": "nilo",
+			"texto": "Tráeme 3 y te hago algo que te va a servir: una Máscara de Filtro. Con ella puedes entrar al Colector de Gas, al sureste. Allá abajo la gente dejaba cosas valiosas antes de que todo se llenara de gas."
+		}
+	],
+	"nilo_espera": [
+		{
+			"quien": "Nilo",
+			"retrato": "nilo",
+			"texto": "¿Ya tienes los Núcleos Tóxicos? Necesito 3. Las Burbujas Tóxicas del Jardín de Hongos los sueltan. Llevas %d."
+		}
+	],
+	"nilo_gracias": [
+		{
+			"quien": "Nilo",
+			"retrato": "nilo",
+			"texto": "¡Tres núcleos! Con esto el filtro funciona. Mira... ¡mira cómo sale el agua!"
+		},
+		{
+			"quien": "",
+			"texto": "Del filtro de Nilo sale un chorrito de agua casi transparente. Los vecinos se acercan con vasos."
+		},
+		{
+			"quien": "Nilo",
+			"retrato": "nilo",
+			"texto": "No alcanza para toda la ciudad, pero sí para mi barrio. Toma, tu máscara. La probé yo mismo... bueno, casi."
+		}
+	],
+	"nilo_despues": [
+		{
+			"quien": "Nilo",
+			"retrato": "nilo",
+			"texto": "El filtro sigue funcionando. Si quieres entrar al Colector de Gas, ponte la máscara y ve al sureste, pasando los túneles oscuros."
+		}
+	],
+	"nilo_libre": [
+		{
+			"quien": "Nilo",
+			"retrato": "nilo",
+			"texto": "¡Ya no necesito el filtro! El agua sale limpia de la llave. Ahora voy a usar las piezas para hacer una bomba de agua para toda la ciudad."
+		}
+	],
+	"iris_pide": [
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "Este es Chispa, mi monstruo. Lo encontré cuando era chiquito y lo cuidé yo sola."
+		},
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "Pero papá está muy enfermo. Si llevo a Chispa a la ventanilla, me dan el antídoto para él."
+		},
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "...No quiero entregarlo. Pero no quiero que papá se muera."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(Puedo darle uno de mis Antídotos de Sabina a su papá... o entregar una de mis cartas en lugar de Chispa.)"
+		}
+	],
+	"iris_antidoto": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Toma. Es un Antídoto. Dáselo a tu papá. Chispa se queda contigo."
+		},
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "¿De verdad? ¡Papá, papá, toma esto!"
+		},
+		{
+			"quien": "Padre de Iris",
+			"retrato": "vendado",
+			"texto": "*cof*... Mm... La garganta... ya no me quema."
+		},
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "¡Gracias! ¡Chispa, saluda! ...Bueno, no sabe saludar. Pero te quiere."
+		}
+	],
+	"iris_carta": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Toma esta carta. Llévala a la ventanilla en lugar de Chispa."
+		},
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "Pero... es tu amigo. ¿Estás seguro?"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Lo voy a recuperar. Te lo prometo."
+		},
+		{
+			"quien": "",
+			"texto": "Iris corre a la ventanilla. Al rato vuelve con una dosis de antídoto para su papá."
+		}
+	],
+	"iris_no": [
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "Está bien... voy a esperar un poco más. Quizás mañana papá esté mejor."
+		}
+	],
+	"iris_sin_nada": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "No tengo Antídotos... Sabina los vende en el andén. Y no puedo dar mi única carta."
+		},
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "Está bien... voy a esperar un poco más."
+		}
+	],
+	"iris_despues": [
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "Papá ya se levanta solo. ¡Y Chispa duerme en mi cama todas las noches!"
+		}
+	],
+	"iris_carta_jaula": [
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "Tu carta está en las jaulas de Vesper... Perdón. Si alguien puede sacarla, eres tú."
+		}
+	],
+	"iris_libre_devuelve": [
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "¡Mira lo que saqué de las jaulas del laboratorio! ¡Es tu carta!"
+		},
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "Te dije que te ibas a recuperar a tu amigo. ...Bueno, tú lo dijiste. Pero yo te ayudé."
+		}
+	],
+	"iris_libre": [
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "¡Ahora el agua está limpia y nadie tiene que entregar a su monstruo! Chispa y yo vamos a cuidar los túneles."
+		}
+	],
+	"padre_iris": [
+		{
+			"quien": "Padre de Iris",
+			"retrato": "vendado",
+			"texto": "*cof, cof* ...Iris... no entregues a Chispa por mí... *cof*"
+		}
+	],
+	"padre_iris_sano": [
+		{
+			"quien": "Padre de Iris",
+			"retrato": "vendado",
+			"texto": "Me salvaste la vida, niño. Y a mi hija le salvaste algo más: a su mejor amigo."
+		}
+	],
+	"puerta_gas_cerrada": [
+		{
+			"quien": "",
+			"texto": "Una puerta de rejilla. Del otro lado sale un gas amarillo verdoso que hace arder los ojos."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "*cof* No puedo respirar aquí. Necesito algo para filtrar el aire."
+		},
+		{
+			"quien": "",
+			"texto": "(Nilo, el mecánico del suroeste, podría ayudarte.)"
+		}
+	],
+	"puerta_gas_abierta": [
+		{
+			"quien": "",
+			"texto": "Pan se pone la Máscara de Filtro de Nilo. El gas ya no le quema la garganta."
+		},
+		{
+			"quien": "",
+			"texto": "(En el Colector viven criaturas fuertes. Cuidado.)"
+		}
+	],
+	"botin_gas": [
+		{
+			"quien": "",
+			"texto": "Entre el gas, una caja de seguridad de antes del colapso. Nadie pudo llegar hasta aquí en años."
+		}
+	],
+	"botin_gas_vacio": [
+		{
+			"quien": "",
+			"texto": "La caja de seguridad está vacía."
+		}
+	],
+	"paso_laboratorio": [
+		{
+			"quien": "Guardia",
+			"retrato": "guardia_org",
+			"texto": "¡Alto! Nadie entra al laboratorio sin cita de la doctora."
+		}
+	],
+	"guardia_lab_1": [
+		{
+			"quien": "Guardia Ferro",
+			"retrato": "guardia_org",
+			"texto": "¿Tú eres el mocoso que derribó a Rictus? Ja. Rictus era un matón de puerto."
+		},
+		{
+			"quien": "Guardia Ferro",
+			"retrato": "guardia_org",
+			"texto": "Nosotros somos la Organización de verdad. Entrenados, armados... y con permiso para jugar sucio."
+		}
+	],
+	"guardia_lab_1_derrotado": [
+		{
+			"quien": "Guardia Ferro",
+			"retrato": "guardia_org",
+			"texto": "Imposible... ¡Lince! ¡El mocoso viene para allá!"
+		}
+	],
+	"guardia_lab_2": [
+		{
+			"quien": "Guardia Lince",
+			"retrato": "guardia_org",
+			"texto": "Ferro siempre fue el blando del equipo. Yo no."
+		},
+		{
+			"quien": "Guardia Lince",
+			"retrato": "guardia_org",
+			"texto": "La doctora quiere tu collar intacto. Lo que pase con tus bestias, me da igual."
+		}
+	],
+	"guardia_lab_2_derrotado": [
+		{
+			"quien": "Guardia Lince",
+			"retrato": "guardia_org",
+			"texto": "Tsk... La doctora no va a estar contenta."
+		},
+		{
+			"quien": "",
+			"texto": "Los guardias del laboratorio se retiran. La puerta queda libre."
+		}
+	],
+	"guardias_listos": [
+		{
+			"quien": "",
+			"texto": "La puerta del laboratorio se abre sola. La Dra. Vesper sale, quitándose los guantes."
+		},
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "Mis guardias... rotos. Qué decepción de muestras. Bueno, mejor así: ahora puedo examinarte yo misma."
+		},
+		{
+			"quien": "",
+			"texto": "(Antes de hablar con Vesper, prepárate: cura tus cartas, compra Antídotos y duerme si lo necesitas.)"
+		}
+	],
+	"vesper_reto": [
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "Por fin, mi espécimen favorito. ¿Sabes lo que veo cuando miro este mundo roto, pequeño? Veo un laboratorio perfecto."
+		},
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "Los débiles tosen y mueren. Los fuertes resisten. Yo solo... acelero el proceso. Selección natural."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Envenenas el agua de niños. Eso no es ciencia."
+		},
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "Es la ciencia más pura que existe. Y tú vas a ser mi mejor experimento. Respira hondo, cariño..."
+		},
+		{
+			"quien": "",
+			"texto": "Vesper abre una válvula de su bata. Un gas verde empieza a llenar el aire."
+		}
+	],
+	"vesper_derrotada": [
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "No... ¡NO! Mis especímenes... ¡mis datos! ¡Años de trabajo!"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Se acabó, Vesper. ¿Dónde está Marcus?"
+		},
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "Ja... ja, ja. ¿Crees que el Benefactor está esperándote? Eres un dato más, niño. Un dato curioso."
+		},
+		{
+			"quien": "Vesper",
+			"retrato": "vesper",
+			"texto": "¿Quieres saber de tus padres? Pregúntale a Silas, en Ciudad Neón. A él le encanta hablar de fantasmas."
+		},
+		{
+			"quien": "",
+			"texto": "Vesper rompe un frasco contra el suelo. Una nube de humo morado lo tapa todo... y cuando se disipa, ya no está."
+		}
+	],
+	"vesper_valvula": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "La válvula... Si la cierro, el veneno deja de llegar al agua."
+		},
+		{
+			"quien": "",
+			"texto": "Pan gira la válvula con todas sus fuerzas. Chirría, se resiste... y por fin se cierra. El tubo verde deja de escupir veneno."
+		},
+		{
+			"quien": "",
+			"texto": "Dentro del laboratorio, Pan encuentra las reservas: cajas y cajas de antídoto. Las deja en la ventanilla, abierta para todos."
+		}
+	],
+	"celebracion_sumidero": [
+		{
+			"quien": "",
+			"texto": "Cuando Pan sale del laboratorio, todo el Sumidero está en la plaza."
+		},
+		{
+			"quien": "",
+			"texto": "¡La gente del Sumidero aplaude! Los aplausos rebotan por los túneles como un trueno."
+		},
+		{
+			"quien": "Sabina",
+			"retrato": "sabina",
+			"texto": "¡Antídoto para todas las familias! ¡Sin monstruos, sin pruebas, sin ventanilla!"
+		},
+		{
+			"quien": "Nilo",
+			"retrato": "nilo",
+			"texto": "¡El agua del tanque ya sale limpia! ¡Mi filtro y tu válvula, socio!"
+		},
+		{
+			"quien": "Iris",
+			"retrato": "iris",
+			"texto": "¡Abrimos las jaulas! ¡Todos los monstruos volvieron a casa!"
+		},
+		{
+			"quien": "Tula",
+			"retrato": "tula",
+			"texto": "Hace años que no veía a nadie sonreír aquí abajo. Gracias, niño."
+		},
+		{
+			"quien": "Niño",
+			"retrato": "nino",
+			"texto": "¡Ya no toso! ¡Escuchen! ¡NADA! ¡Ja, ja!"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Mis padres querían esto. Gente que respira tranquila."
+		}
+	],
+	"celebracion_sumidero_fuerzas": [
+		{
+			"quien": "",
+			"texto": "Los aplausos del Sumidero le dan fuerzas a Pan para continuar."
+		},
+		{
+			"quien": "",
+			"texto": "Todas tus criaturas ganan otro +10% de ataque para siempre."
+		},
+		{
+			"quien": "",
+			"texto": "Recibiste 150 monedas, 3 Antídotos y 2 Curas 50%. Tus cartas se repararon."
+		}
+	],
+	"sumidero_libre": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Dos menos. Quedan cuatro."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Silas, en Ciudad Neón... Me vas a contar todo lo que sabes de mis padres."
+		},
+		{
+			"quien": "",
+			"texto": "¡El Sumidero es libre! La aventura hacia la Ciudad 3, Ciudad Neón, llegará en una próxima versión. Mientras tanto, puedes seguir explorando y capturando criaturas."
+		}
+	],
+	"sin_cartas_vesper": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Mis cartas están rotas. Si entro así, Vesper me va a convertir en su experimento."
 		}
 	]
 }

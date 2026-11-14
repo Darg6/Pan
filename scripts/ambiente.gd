@@ -232,3 +232,68 @@ static func tormenta(area: Vector2) -> CPUParticles2D:
 	g.colors = PackedColorArray([Color(1.0, 0.88, 0.66, 0.0), Color(1.0, 0.88, 0.66, 0.9), Color(0.98, 0.72, 0.45, 0.75), Color(0.98, 0.72, 0.45, 0.0)])
 	p.color_ramp = g
 	return p
+
+
+## Burbujas tóxicas que suben y revientan (lodo del Sumidero, gas de Vesper en combate).
+static func burbujas(area: Vector2) -> CPUParticles2D:
+	var p := CPUParticles2D.new()
+	p.amount = 26
+	p.lifetime = 2.2
+	p.preprocess = 2.2
+	p.texture = _pixel(2)
+	p.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	p.emission_rect_extents = area / 2.0
+	p.direction = Vector2(0, -1)
+	p.spread = 10
+	p.gravity = Vector2(0, -6)
+	p.initial_velocity_min = 4
+	p.initial_velocity_max = 12
+	p.scale_amount_min = 0.5
+	p.scale_amount_max = 1.5
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 0.2, 0.85, 1.0])
+	g.colors = PackedColorArray([Color(0.7, 1.0, 0.4, 0.0), Color(0.7, 1.0, 0.4, 0.8), Color(0.85, 1.0, 0.6, 0.6), Color(1, 1, 1, 0.0)])
+	p.color_ramp = g
+	return p
+
+
+## Esporas que brillan y flotan alrededor de los hongos bioluminiscentes (en el mundo, no en la pantalla).
+static func esporas(pos: Vector2, color: Color, radio := 14.0) -> CPUParticles2D:
+	var p := CPUParticles2D.new()
+	p.position = pos
+	p.amount = 8
+	p.lifetime = 3.5
+	p.preprocess = 3.5
+	p.texture = _pixel()
+	p.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	p.emission_sphere_radius = radio
+	p.direction = Vector2(0, -1)
+	p.spread = 60
+	p.gravity = Vector2(0, -2)
+	p.initial_velocity_min = 2
+	p.initial_velocity_max = 6
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 0.3, 1.0])
+	g.colors = PackedColorArray([Color(color, 0.0), Color(color, 0.9), Color(color, 0.0)])
+	p.color_ramp = g
+	p.z_index = 15
+	return p
+
+
+## Niebla tóxica verde que se arrastra por la pantalla (subterráneo).
+static func niebla(area: Vector2, color := Color(0.55, 0.9, 0.45)) -> CPUParticles2D:
+	var p := _base(22, 10.0, area)
+	p.texture = _pixel(6)
+	p.direction = Vector2(1, 0)
+	p.spread = 20
+	p.gravity = Vector2.ZERO
+	p.initial_velocity_min = 2
+	p.initial_velocity_max = 6
+	p.scale_amount_min = 2.0
+	p.scale_amount_max = 4.0
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
+	g.colors = PackedColorArray([Color(color, 0.0), Color(color, 0.09), Color(color, 0.0)])
+	p.color_ramp = g
+	p.z_index = 19
+	return p

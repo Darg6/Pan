@@ -1,5 +1,5 @@
 {
-	"_ayuda": "Para agregar una criatura, copia un bloque dentro de 'criaturas', cambia su id (ej. 'oso_de_escoria') y sus valores. Tipos (escribelos sin tilde): feral, toxico, termico, fluido, chatarra, energia, sombra, terrestre, sonico. 'debil_a' recibe x2, 'resiste' recibe x0.5, 'inmune' recibe x0. 'ia' puede ser 'agresivo', 'evasivo' o 'tanque'. 'valor' es lo que pagan por la carta en el Mercado de Bestias y 'parte' lo que suelta al derrotarla. Efectos de movimientos: infectar, evasion_arriba, defensa_arriba, defensa_abajo, paralizar, bajo_tierra. La imagen de cada criatura está en arte/criaturas/<id>.png (64x64, mirando a la derecha). 'precision' (opcional) va de 0 a 1.",
+	"_ayuda": "Para agregar una criatura, copia un bloque dentro de 'criaturas', cambia su id (ej. 'oso_de_escoria') y sus valores. Tipos (escribelos sin tilde): feral, toxico, termico, fluido, chatarra, energia, sombra, terrestre, sonico. 'debil_a' recibe x2, 'resiste' recibe x0.5, 'inmune' recibe x0. 'ia' puede ser 'agresivo', 'evasivo' o 'tanque'. 'valor' es lo que pagan por la carta en el Mercado de Bestias y 'parte' lo que suelta al derrotarla. Efectos de movimientos: infectar, quemar, cegar, lodo, drenar, anular, evasion_arriba, defensa_arriba, defensa_abajo, paralizar, bajo_tierra. Pasivas: sin_infeccion, estatica, membrana, simbiosis, camuflaje, abrumado. La imagen de cada criatura está en arte/criaturas/<id>.png (64x64, mirando a la derecha). 'precision' (opcional) va de 0 a 1.",
 	"carta_inicial": "",
 	"criaturas": {
 		"bestia_blanca": {
@@ -459,6 +459,455 @@
 							"poder": 14,
 							"tipo": "terrestre",
 							"efecto": "bajo_tierra"
+						}
+					]
+				}
+			]
+		},
+		"lobo_de_ceniza": {
+			"nombre": "Lobo de Ceniza",
+			"descripcion": "Cánido grande que vive en los caminos quemados. Exhala humo que ciega y muerde con brasas en los colmillos.",
+			"tipo": "feral",
+			"debil_a": [
+				"fluido",
+				"sonico"
+			],
+			"resiste": [
+				"termico"
+			],
+			"hp": 80,
+			"ataque": 54,
+			"defensa": 40,
+			"velocidad": 88,
+			"evasion": 0.1,
+			"facilidad_captura": 0.6,
+			"ia": "agresivo",
+			"valor": 50,
+			"parte": {
+				"id": "colmillo_ceniza",
+				"nombre": "Colmillo de Ceniza",
+				"precio": 16
+			},
+			"color": "#6a625e",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Mordida de Brasa",
+							"poder": 18,
+							"tipo": "termico",
+							"golpes": 1
+						},
+						{
+							"desde_nivel": 3,
+							"nombre": "Colmillos Ígneos",
+							"poder": 28,
+							"tipo": "termico",
+							"golpes": 1,
+							"efecto": "quemar"
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Humo Denso",
+							"poder": 0,
+							"tipo": "termico",
+							"golpes": 1,
+							"efecto": "cegar",
+							"precision": 0.9
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Embestida",
+							"poder": 20,
+							"tipo": "feral",
+							"golpes": 1
+						},
+						{
+							"desde_nivel": 4,
+							"nombre": "Embestida Feroz",
+							"poder": 30,
+							"tipo": "feral",
+							"golpes": 1
+						}
+					]
+				}
+			]
+		},
+		"cazador_camuflado": {
+			"nombre": "Cazador Camuflado",
+			"descripcion": "Humanoide reptiliano. El primer turno en el campo es invisible: nada lo toca, salvo el calor o los ataques en ráfaga.",
+			"tipo": "sombra",
+			"debil_a": [
+				"termico",
+				"energia"
+			],
+			"resiste": [
+				"toxico",
+				"terrestre"
+			],
+			"inmune": [
+				"feral"
+			],
+			"pasiva": "camuflaje",
+			"hp": 62,
+			"ataque": 52,
+			"defensa": 36,
+			"velocidad": 92,
+			"evasion": 0.15,
+			"facilidad_captura": 0.5,
+			"ia": "agresivo",
+			"valor": 70,
+			"parte": {
+				"id": "escama_camaleon",
+				"nombre": "Escama Camaleónica",
+				"precio": 22
+			},
+			"color": "#4a6a4a",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Zarpa Oculta",
+							"poder": 20,
+							"tipo": "sombra",
+							"golpes": 1
+						},
+						{
+							"desde_nivel": 3,
+							"nombre": "Ejecución Silenciosa",
+							"poder": 30,
+							"tipo": "sombra",
+							"golpes": 1
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Lengua Venenosa",
+							"poder": 12,
+							"tipo": "toxico",
+							"golpes": 1,
+							"efecto": "infectar"
+						}
+					]
+				}
+			]
+		},
+		"tejedor_de_sombras": {
+			"nombre": "Tejedor de Sombras",
+			"descripcion": "Humanoide delgado de los túneles oscuros. Teje hilos de sombra que anulan los potenciadores del rival.",
+			"tipo": "sombra",
+			"debil_a": [
+				"energia",
+				"termico"
+			],
+			"resiste": [
+				"toxico",
+				"terrestre"
+			],
+			"inmune": [
+				"feral"
+			],
+			"hp": 64,
+			"ataque": 48,
+			"defensa": 40,
+			"velocidad": 72,
+			"evasion": 0.12,
+			"facilidad_captura": 0.6,
+			"ia": "agresivo",
+			"valor": 55,
+			"parte": {
+				"id": "hilo_sombra",
+				"nombre": "Hilo de Sombra",
+				"precio": 18
+			},
+			"color": "#3a2a4a",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Hilo Sombrío",
+							"poder": 20,
+							"tipo": "sombra",
+							"golpes": 1
+						},
+						{
+							"desde_nivel": 3,
+							"nombre": "Telaraña Negra",
+							"poder": 30,
+							"tipo": "sombra",
+							"golpes": 1
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Anular",
+							"poder": 8,
+							"tipo": "sombra",
+							"golpes": 1,
+							"efecto": "anular"
+						}
+					]
+				}
+			]
+		},
+		"burbuja_toxica": {
+			"nombre": "Burbuja Tóxica",
+			"descripcion": "Ser gelatinoso del lodo. Absorbe los golpes físicos: si la golpeas con el cuerpo, revienta y te paraliza con ácido.",
+			"tipo": "toxico",
+			"debil_a": [
+				"termico",
+				"terrestre"
+			],
+			"resiste": [
+				"toxico",
+				"sombra"
+			],
+			"pasiva": "membrana",
+			"hp": 78,
+			"ataque": 44,
+			"defensa": 46,
+			"velocidad": 30,
+			"evasion": 0.05,
+			"facilidad_captura": 0.65,
+			"ia": "agresivo",
+			"valor": 45,
+			"parte": {
+				"id": "nucleo_toxico",
+				"nombre": "Núcleo Tóxico",
+				"precio": 15
+			},
+			"color": "#8ae04a",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Escupitajo Ácido",
+							"poder": 16,
+							"tipo": "toxico",
+							"golpes": 1,
+							"efecto": "infectar"
+						},
+						{
+							"desde_nivel": 3,
+							"nombre": "Lluvia Ácida",
+							"poder": 24,
+							"tipo": "toxico",
+							"golpes": 1,
+							"efecto": "infectar"
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Gas Corrosivo",
+							"poder": 8,
+							"tipo": "toxico",
+							"golpes": 1,
+							"efecto": "defensa_abajo"
+						}
+					]
+				}
+			]
+		},
+		"sirena_de_fango": {
+			"nombre": "Sirena de Fango",
+			"descripcion": "Atrapa a sus presas en lodo espeso: su Velocidad baja a cero hasta que salen del campo. A diferencia del agua limpia, su barro se seca con el calor.",
+			"tipo": "fluido",
+			"debil_a": [
+				"energia",
+				"toxico",
+				"termico"
+			],
+			"resiste": [
+				"fluido",
+				"terrestre"
+			],
+			"hp": 82,
+			"ataque": 46,
+			"defensa": 44,
+			"velocidad": 58,
+			"evasion": 0.08,
+			"facilidad_captura": 0.6,
+			"ia": "agresivo",
+			"valor": 50,
+			"parte": {
+				"id": "escama_fango",
+				"nombre": "Escama de Fango",
+				"precio": 14
+			},
+			"color": "#6a7a5a",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Chorro de Lodo",
+							"poder": 18,
+							"tipo": "fluido",
+							"golpes": 1
+						},
+						{
+							"desde_nivel": 3,
+							"nombre": "Marea de Lodo",
+							"poder": 28,
+							"tipo": "fluido",
+							"golpes": 1
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Abrazo de Fango",
+							"poder": 6,
+							"tipo": "fluido",
+							"golpes": 1,
+							"efecto": "lodo",
+							"precision": 0.9
+						}
+					]
+				}
+			]
+		},
+		"guardian_de_flora": {
+			"nombre": "Guardián de Flora",
+			"descripcion": "Humanoide simbiótico cubierto de plantas. Drena la vida del rival para curarse, y si lo derrota, se cura por completo. Sus plantas se pudren con el fuego y la contaminación.",
+			"tipo": "toxico",
+			"debil_a": [
+				"termico",
+				"toxico"
+			],
+			"resiste": [
+				"sombra",
+				"fluido"
+			],
+			"pasiva": "simbiosis",
+			"hp": 110,
+			"ataque": 50,
+			"defensa": 52,
+			"velocidad": 40,
+			"evasion": 0.0,
+			"facilidad_captura": 0.35,
+			"ia": "agresivo",
+			"valor": 90,
+			"parte": {
+				"id": "semilla_simbiotica",
+				"nombre": "Semilla Simbiótica",
+				"precio": 30
+			},
+			"color": "#4a8a4a",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Raíz Drenante",
+							"poder": 18,
+							"tipo": "toxico",
+							"golpes": 1,
+							"efecto": "drenar"
+						},
+						{
+							"desde_nivel": 4,
+							"nombre": "Abrazo Simbiótico",
+							"poder": 26,
+							"tipo": "toxico",
+							"golpes": 1,
+							"efecto": "drenar"
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Esporas",
+							"poder": 8,
+							"tipo": "toxico",
+							"golpes": 1,
+							"efecto": "infectar"
+						}
+					]
+				}
+			]
+		},
+		"humanoide_sin_consciencia": {
+			"nombre": "Humanoide sin Consciencia",
+			"descripcion": "Ser transformado, sin rasgos, como un maniquí. Lento, pero con la defensa al máximo y ataques que infectan. Los ataques en ráfaga (varios golpes) lo abruman: le hacen el doble.",
+			"tipo": "toxico",
+			"debil_a": [
+				"termico",
+				"terrestre"
+			],
+			"resiste": [
+				"toxico",
+				"sombra"
+			],
+			"pasiva": "abrumado",
+			"hp": 120,
+			"ataque": 46,
+			"defensa": 70,
+			"velocidad": 18,
+			"evasion": 0.0,
+			"facilidad_captura": 0.5,
+			"ia": "agresivo",
+			"valor": 40,
+			"parte": {
+				"id": "piel_maniqui",
+				"nombre": "Piel de Maniquí",
+				"precio": 12
+			},
+			"color": "#c8c0b4",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Agarre Infeccioso",
+							"poder": 14,
+							"tipo": "toxico",
+							"golpes": 1,
+							"efecto": "infectar"
+						},
+						{
+							"desde_nivel": 3,
+							"nombre": "Abrazo Infeccioso",
+							"poder": 22,
+							"tipo": "toxico",
+							"golpes": 1,
+							"efecto": "infectar"
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Golpe Hueco",
+							"poder": 22,
+							"tipo": "feral",
+							"golpes": 1
 						}
 					]
 				}

@@ -15,9 +15,13 @@ extends Node2D
 @export var cuadros := 1
 @export var cuadros_por_segundo := 6.0
 ## Puntos (relativos al nodo) de donde sale humo
-@export var humo: Array[Vector2] = []
+@export var humo: Array = []
 ## Si esta bandera de la historia está activa, la animación se detiene (ej. la trituradora apagada)
 @export var detener_si := ""
+## Si esta bandera está activa, la construcción desaparece (ej. la barricada que quita la grúa)
+@export var ocultar_si := ""
+## Si no está vacío, solo aparece cuando esta bandera está activa (ej. el tanque con agua limpia)
+@export var mostrar_si := ""
 
 var _sprite: Sprite2D
 var _t := 0.0
@@ -40,6 +44,19 @@ func _ready() -> void:
 		var h := Ambiente.humo(p)
 		h.z_index = 1
 		add_child(h)
+	if ocultar_si != "" or mostrar_si != "":
+		add_to_group("interactuables_flags")
+		actualizar()
+
+
+## Muestra u oculta la construcción (y su choque) según las banderas de la historia.
+func actualizar() -> void:
+	var ver := not (ocultar_si != "" and Juego.flag(ocultar_si)) and not (mostrar_si != "" and not Juego.flag(mostrar_si))
+	visible = ver
+	for hijo in get_children():
+		if hijo is StaticBody2D:
+			for f in hijo.get_children():
+				f.set_deferred("disabled", not ver)
 
 
 func _actualizar() -> void:

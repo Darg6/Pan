@@ -318,3 +318,186 @@ bmanchas(1, 2, BW - 2, BH - 3, ":", 0.06, "a")
 
 guardar("bastion_oxido.txt", b)
 print("Mapas escritos en", os.path.join(AQUI, "mapas"))
+
+
+# ---------------------------------------------------------------------------
+# BASTIÓN: salida este (hacia la Autopista Quemada). La tapan contenedores caídos
+# hasta que la ciudad es libre y Bruno los mueve con su grúa.
+# ---------------------------------------------------------------------------
+for y in (30, 31):
+    b[y][BW - 1] = "s"
+guardar("bastion_oxido.txt", b)
+
+
+# ---------------------------------------------------------------------------
+# LA AUTOPISTA QUEMADA (camino de Bastión al Sumidero). Atlas exterior.
+#   %  &  pasto de ceniza (Lobos de Ceniza)   _  baranda   ~  asfalto roto
+# ---------------------------------------------------------------------------
+rng = random.Random(505)
+AW, AH = 64, 26
+a = [["." for _ in range(AW)] for _ in range(AH)]
+
+def arect(x0, y0, x1, y1, ch):
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            if 0 <= x < AW and 0 <= y < AH:
+                a[y][x] = ch
+
+def ablob(cx, cy, rx, ry, ch, sobre=None):
+    for y in range(cy - ry, cy + ry + 1):
+        for x in range(cx - rx, cx + rx + 1):
+            if 0 <= x < AW and 0 <= y < AH and (sobre is None or a[y][x] in sobre):
+                dx = (x - cx) / rx
+                dy = (y - cy) / ry
+                if dx * dx + dy * dy <= 1.0 + rng.uniform(-0.25, 0.1):
+                    a[y][x] = ch
+
+for y in range(AH):
+    for x in range(AW):
+        if rng.random() < 0.12:
+            a[y][x] = ":"
+arect(0, 0, AW - 1, 0, "#"); arect(0, 1, AW - 1, 1, "W")
+arect(0, AH - 2, AW - 1, AH - 2, "#"); arect(0, AH - 1, AW - 1, AH - 1, "W")
+arect(0, 0, 0, AH - 1, "#"); arect(AW - 1, 0, AW - 1, AH - 1, "#")
+# la autopista (de oeste a este)
+arect(0, 9, AW - 2, 15, "=")
+for x in range(1, AW - 1, 2):
+    a[12][x] = "-"
+for _ in range(26):
+    a[rng.randrange(9, 16)][rng.randrange(1, AW - 2)] = "~"
+arect(1, 8, AW - 2, 8, "_"); arect(1, 16, AW - 2, 16, "_")
+for x in (20, 21, 22, 44, 45, 46):      # huecos en la baranda para bajar al pasto de ceniza
+    a[16][x] = "="
+for x in (9, 10, 57, 58, 59, 60):       # huecos al norte (ruinas y la boca del metro)
+    a[8][x] = "="
+# el camión cruzado y una barricada de autos: hay que rodear por el pasto de ceniza
+for y in range(9, 16):
+    a[y][33] = "k" if y % 2 else "o"
+for (x, y) in ((31, 10), (35, 13), (34, 9)):
+    a[y][x] = "["; a[y][x + 1] = "]"
+# sur: el pasto de ceniza
+arect(1, 17, AW - 2, AH - 3, ".")
+ablob(14, 20, 9, 3, "%"); ablob(32, 20, 10, 3, "%"); ablob(51, 20, 8, 3, "%")
+for y in range(17, AH - 2):
+    for x in range(1, AW - 1):
+        if a[y][x] == "%" and rng.random() < 0.35:
+            a[y][x] = "&"
+for (x, y) in ((6, 18), (25, 22), (40, 19), (58, 22), (17, 23)):
+    a[y][x] = rng.choice("Ykn")
+# norte: ruinas de la ciudad vieja
+for (x0, x1) in ((3, 7), (14, 19), (25, 30), (38, 43)):
+    arect(x0, 2, x1, 2, "#"); arect(x0, 3, x1, 3, "W")
+for (x, y) in ((11, 5), (23, 6), (36, 5), (48, 4), (52, 6)):
+    a[y][x] = rng.choice("okYn")
+for (x, y) in ((16, 6), (44, 5)):
+    a[y][x] = "["; a[y][x + 1] = "]"
+ablob(30, 5, 3, 1, "%")
+# la boca del metro (este): paredes a los lados de la escalera
+arect(56, 2, 62, 4, "#")
+arect(57, 5, 57, 7, "W"); arect(61, 5, 61, 7, "W")
+arect(58, 5, 60, 7, ".")
+guardar("autopista.txt", a)
+
+
+# ---------------------------------------------------------------------------
+# EL SUMIDERO (Ciudad 2). Atlas propio "subterraneo":
+#   #  roca   W w  pared de túnel (con tubo)   A M G  azulejos del andén (letrero / grafiti)
+#   . ,  andén   _  borde amarillo   =  vía   ~  lodo tóxico   o  orilla
+#   | -  pasarela de madera   x  pasarela rota   h  hongos (criaturas)   m  musgo   r  rejilla
+#   c  charco tóxico (infecta)   t T  tubos   l L  piso del laboratorio   P  pared del laboratorio
+#   K  cristal blindado   g q  gas (criaturas, hace falta máscara)   n N  túnel oscuro (criaturas)
+#   E  escalera   k  cajas   b  barril tóxico   z  colchón   f  fogón   H  hongo grande   v  valla
+# ---------------------------------------------------------------------------
+rng = random.Random(909)
+SW, SH = 64, 48
+s = [["#" for _ in range(SW)] for _ in range(SH)]
+
+def srect(x0, y0, x1, y1, ch):
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            if 0 <= x < SW and 0 <= y < SH:
+                s[y][x] = ch
+
+def sblob(cx, cy, rx, ry, ch, sobre=None):
+    for y in range(cy - ry, cy + ry + 1):
+        for x in range(cx - rx, cx + rx + 1):
+            if 0 <= x < SW and 0 <= y < SH and (sobre is None or s[y][x] in sobre):
+                dx = (x - cx) / rx
+                dy = (y - cy) / ry
+                if dx * dx + dy * dy <= 1.0 + rng.uniform(-0.25, 0.1):
+                    s[y][x] = ch
+
+def smanchas(x0, y0, x1, y1, ch, prob, sobre):
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            if s[y][x] in sobre and rng.random() < prob:
+                s[y][x] = ch
+
+# --- Andén del Mercado (norte-oeste): la escalera, la tienda y el dormitorio en vagones
+srect(1, 3, 31, 3, "A")
+for x in (6, 15, 24):
+    s[3][x] = "M"
+s[3][28] = "G"; s[3][20] = "G"
+srect(1, 4, 31, 8, ".")
+smanchas(1, 4, 31, 8, ",", 0.12, ".")
+srect(1, 9, 31, 9, "_")
+srect(1, 10, 31, 11, "=")
+s[3][3] = "E"; s[3][4] = "E"; s[2][3] = "E"; s[2][4] = "E"
+for (x, y) in ((1, 5), (2, 8), (29, 4), (30, 5)):
+    s[y][x] = rng.choice("kb")
+s[7][27] = "f"; s[6][2] = "z"; s[7][2] = "z"
+# --- Jardín de hongos (norte-este): aquí salen criaturas
+srect(32, 3, 62, 3, "W"); s[3][40] = "w"; s[3][52] = "w"
+srect(32, 4, 62, 11, "m")
+sblob(46, 7, 11, 3, "h", "m")
+smanchas(32, 4, 62, 11, "h", 0.08, "m")
+for (x, y) in ((35, 5), (58, 5), (39, 10), (55, 10), (62, 8)):
+    s[y][x] = "H"
+s[8][33] = "c"; s[5][50] = "c"
+# --- Río de lodo tóxico (lo cruzan pasarelas de madera podrida)
+srect(1, 12, 62, 12, "o"); srect(1, 13, 62, 16, "~")
+srect(10, 12, 11, 16, "|"); srect(42, 12, 43, 16, "|"); srect(26, 12, 26, 16, "x")
+# --- La Plaza del Antídoto (centro): el laboratorio blanco de Vesper
+srect(1, 17, 62, 33, ".")
+smanchas(1, 17, 62, 33, ",", 0.1, ".")
+srect(1, 17, 13, 33, "m")                         # barrio de los vagones (oeste)
+smanchas(1, 17, 13, 33, ",", 0.2, "m")
+srect(23, 17, 38, 26, "P")                        # detrás del laboratorio
+srect(18, 27, 44, 33, "l")                        # piso limpio frente al laboratorio
+srect(18, 30, 44, 30, "L")
+srect(38, 31, 44, 31, "v")                        # valla de la fila del antídoto
+for (x, y) in ((3, 19), (4, 19), (11, 21), (3, 27), (12, 31), (2, 32)):
+    s[y][x] = rng.choice("zzk")
+s[24][7] = "f"; s[30][7] = "f"
+for (x, y) in ((50, 19), (56, 24), (48, 30), (60, 20)):
+    s[y][x] = rng.choice("kb")
+for (x, y) in ((15, 22), (52, 27), (47, 21), (58, 31), (20, 18)):
+    s[y][x] = "c"
+s[17][45] = "r"; s[25][14] = "r"; s[29][55] = "r"
+# --- Segundo río de lodo
+srect(1, 34, 62, 34, "o"); srect(1, 35, 62, 37, "~")
+srect(8, 34, 9, 37, "|"); srect(30, 34, 31, 37, "|"); srect(19, 34, 19, 37, "x")
+# --- Sur-oeste: el taller de Nilo y la familia de Iris
+srect(1, 38, 24, 46, "m")
+smanchas(1, 38, 24, 46, ",", 0.15, "m")
+for (x, y) in ((2, 39), (3, 39), (22, 45), (14, 46)):
+    s[y][x] = rng.choice("kbz")
+s[44][4] = "f"
+# --- Túneles oscuros (sur-centro): Tejedor de Sombras y Humanoides
+srect(25, 38, 46, 46, "n")
+for y in (40, 44):
+    srect(25, y, 46, y, "n")
+smanchas(25, 38, 46, 46, "N", 0.3, "n")
+srect(25, 38, 25, 39, "W"); srect(25, 45, 25, 46, "W")
+# --- Colector de Gas (sur-este): solo con Máscara de Filtro. Guardián de Flora.
+srect(47, 38, 47, 46, "W")
+s[41][47] = "r"; s[42][47] = "r"
+srect(48, 38, 62, 46, "g")
+smanchas(48, 38, 62, 46, "q", 0.35, "g")
+for (x, y) in ((50, 39), (60, 45), (61, 39)):
+    s[y][x] = "T"
+# bordes
+srect(0, 0, 0, SH - 1, "#"); srect(SW - 1, 0, SW - 1, SH - 1, "#")
+srect(0, SH - 1, SW - 1, SH - 1, "#")
+guardar("sumidero.txt", s)
+print("Mapas de la Ciudad 2 escritos")

@@ -24,6 +24,8 @@ var ocupado := false            # true mientras corre un evento o diálogo
 var _dentro_de: Dictionary = {}  # disparadores que Pan está pisando
 var _exclamacion: Sprite2D
 var _aviso_sin_cartas := false
+var _aviso_infeccion := false
+var _pasos := 0
 
 
 func _ready() -> void:
@@ -124,6 +126,12 @@ const AMBIENTACION := {
 		"luces": { "fogata": Color(1.0, 0.6, 0.25) } },
 	"bastion_oxido": { "musica": "bastion", "ambiente": "ciudad", "tinte": Color(1.0, 0.88, 0.76), "particulas": "ceniza",
 		"luces": { "fogata": Color(1.0, 0.6, 0.25), "farol": Color(1.0, 0.78, 0.4) }, "tormentas": true },
+	"autopista": { "musica": "paramo", "ambiente": "viento", "tinte": Color(0.9, 0.84, 0.82), "particulas": "ceniza" },
+	# El Sumidero: verde enfermizo y violeta, hongos que brillan, burbujas en el lodo y goteras de ácido
+	"sumidero": { "musica": "sumidero", "ambiente": "subterraneo", "tinte": Color(0.66, 0.78, 0.74), "particulas": "niebla",
+		"luces": { "fogon": Color(1.0, 0.6, 0.25), "hongo_grande": Color(0.35, 1.0, 0.9), "hongos_1": Color(0.75, 0.5, 1.0),
+			"escalera": Color(1.0, 0.95, 0.8), "cristal": Color(0.6, 1.0, 0.8) },
+		"burbujas": ["lodo_1", "lodo_2"] },
 }
 
 # ---------------------------------------------------------------------------
@@ -176,6 +184,9 @@ func _preparar_ambiente() -> void:
 			camara.add_child(Ambiente.ceniza(get_viewport_rect().size / zoom_camara))
 		"polvo":
 			camara.add_child(Ambiente.polvo(get_viewport_rect().size / zoom_camara))
+		"niebla":
+			camara.add_child(Ambiente.niebla(get_viewport_rect().size / zoom_camara))
+			camara.add_child(Ambiente.polvo(get_viewport_rect().size / zoom_camara))
 	# Luces: un brillo suave que titila sobre ciertos tiles (fogatas, generadores...)
 	var luces: Dictionary = a.get("luces", {})
 	for nombre_tile in luces:
@@ -184,11 +195,32 @@ func _preparar_ambiente() -> void:
 			$Entidades.add_child(Ambiente.luz(centro, luces[nombre_tile], nombre_tile == "fogata"))
 			if nombre_tile == "fogata":
 				$Entidades.add_child(Ambiente.brasas(centro))
+	# Luces de las construcciones grandes (hongos gigantes, el laboratorio...): metadato "luz" del nodo
+	for nodo in $Entidades.get_children():
+		if nodo.has_meta("luz"):
+			var l := Ambiente.luz(nodo.position + nodo.get_meta("luz_pos", Vector2(0, -24)), nodo.get_meta("luz"), false)
+			l.scale = Vector2(2.2, 2.2)
+			$Entidades.add_child(l)
+			if nodo.has_meta("esporas"):
+				$Entidades.add_child(Ambiente.esporas(nodo.position + Vector2(0, -26), nodo.get_meta("luz"), 18.0))
+	# Burbujas que suben del lodo tóxico (una de cada tantas celdas, para no llenar todo)
+	var k := 0
+	for nombre_tile in a.get("burbujas", []):
+		for celda in Ambiente.celdas_con_tile(suelo, nombre_tile):
+			k += 1
+			if k % 9 == 0:
+				var b := Ambiente.burbujas(Vector2(14, 6))
+				b.amount = 3
+				b.position = suelo.map_to_local(celda)
+				b.z_index = 1
+				$Entidades.add_child(b)
 	hud.agregar_vineta()
 
 
 func refrescar() -> void:
 	for nodo in get_tree().get_nodes_in_group("interactuables"):
+		nodo.actualizar()
+	for nodo in get_tree().get_nodes_in_group("interactuables_flags"):
 		nodo.actualizar()
 	hud.actualizar()
 
@@ -252,8 +284,29 @@ func pisando_pasto() -> bool:
 	return datos != null and datos.get_custom_data("pasto")
 
 
+func _celda_con(dato: String) -> bool:
+	var datos := suelo.get_cell_tile_data(suelo.local_to_map(suelo.to_local(pan.global_position)))
+	return datos != null and datos.get_custom_data(dato)
+
+
 func _on_paso_dado() -> void:
-	if ocupado or not pisando_pasto():
+	if ocupado:
+		return
+	_pasos += 1
+	# La infección sigue fuera del combate: cada 10 pasos quita un poquito de vida (nunca rompe la carta)
+	if _pasos % 10 == 0 and Juego.hay_cartas_infectadas():
+		var nombres := Juego.infeccion_al_caminar()
+		if not nombres.is_empty() and not _aviso_infeccion:
+			_aviso_infeccion = true
+			hud.mostrar_aviso("%s sigue infectado y pierde vida. (Un Antídoto o dormir lo cura.)" % nombres[0])
+	# Charcos tóxicos: pueden infectar a la carta que va al frente
+	if _celda_con("toxico") and randf() < 0.3:
+		var i := Juego.carta_al_frente()
+		if i >= 0 and not Juego.mochila[i].get("infectada", false):
+			Juego.mochila[i]["infectada"] = true
+			Sonido.efecto("burbuja", 1.2)
+			hud.mostrar_aviso("¡El lodo tóxico salpica a %s! Quedó infectado." % Juego.criaturas[Juego.mochila[i]["id"]]["nombre"])
+	if not pisando_pasto():
 		return
 	if Juego.pasos_sin_encuentro > 0:
 		Juego.pasos_sin_encuentro -= 1
@@ -291,3 +344,20 @@ func retroceder_pan(direccion: Vector2, distancia := 12.0) -> void:
 	var t := create_tween()
 	t.tween_property(pan, "global_position", pan.global_position + direccion * distancia, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	await t.finished
+
+
+## Una gota de ácido del techo cayó sobre Pan (scripts/gotera.gd): la carta del frente pierde un poco de vida.
+func gota_de_acido() -> void:
+	var i := Juego.carta_al_frente()
+	if i < 0:
+		hud.mostrar_aviso("¡Una gota de ácido! Pan se cubre con la capucha.")
+		return
+	var carta: Dictionary = Juego.mochila[i]
+	var danio := mini(carta["hp"] - 1, maxi(1, Juego.hp_max_carta(carta) / 16))
+	carta["hp"] -= maxi(0, danio)
+	var nombre: String = Juego.criaturas[carta["id"]]["nombre"]
+	var aviso := "¡Gota de ácido! %s pierde %d de vida." % [nombre, danio] if danio > 0 else "¡Gota de ácido! %s está muy débil, pero aguanta." % nombre
+	hud.mostrar_aviso(aviso)
+	var t := create_tween()
+	t.tween_property(pan, "modulate", Color(0.6, 1.0, 0.5), 0.1)
+	t.tween_property(pan, "modulate", Color.WHITE, 0.3)

@@ -40,6 +40,11 @@ const OBJETOS := {
 		"desc": "Carta vacía para capturar criaturas debilitadas." },
 	"granada_aturdidora": { "nombre": "Granada Aturdidora", "tipo": "granada", "precio": 0, "max": 5,
 		"desc": "Aturde a una criatura y baja su vida a la zona roja." },
+	# El Sumidero (Ciudad 2): los primeros objetos para curar estados alterados
+	"antidoto": { "nombre": "Antídoto", "tipo": "antidoto", "precio": 25, "max": 5,
+		"desc": "Cura la infección, la quemadura, la parálisis y la ceguera de una carta." },
+	"mascara_filtro": { "nombre": "Máscara de Filtro", "tipo": "clave", "precio": 150, "max": 1,
+		"desc": "Filtra el gas tóxico. Con ella puedes entrar al Colector de Gas del Sumidero." },
 }
 ## Lo que pagan los mercaderes por cada Reliquia del Viejo Mundo (cables, placas, relojes...).
 const PRECIO_RELIQUIA := 10
@@ -177,14 +182,15 @@ func _mostrar_error(texto: String) -> void:
 # Autodiagnóstico al iniciar: revisa que el tema, los tilesets y los mapas carguen bien.
 # Si algo falla, lo muestra en pantalla (y en la pestaña Salida) en vez de dejar todo negro.
 # ---------------------------------------------------------------------------
-const MAPAS := ["res://escenas/mapas/refugio_cero.tscn", "res://escenas/mapas/superficie.tscn", "res://escenas/mapas/bastion_oxido.tscn"]
+const MAPAS := ["res://escenas/mapas/refugio_cero.tscn", "res://escenas/mapas/superficie.tscn", "res://escenas/mapas/bastion_oxido.tscn",
+	"res://escenas/mapas/autopista.tscn", "res://escenas/mapas/sumidero.tscn"]
 
 func _autodiagnostico() -> void:
 	var problemas: Array[String] = []
 	# ¿Godot importó las imágenes y letras? (si no, nada de lo demás puede cargar)
 	var sin_importar: Array[String] = []
 	for ruta in ["res://arte/interfaz/boton.png", "res://arte/interfaz/panel.png", "res://arte/tiles/interior.png",
-			"res://arte/tiles/exterior.png", "res://arte/interfaz/exclamacion.png", "res://arte/fuentes/PixelifySans.ttf"]:
+			"res://arte/tiles/exterior.png", "res://arte/tiles/subterraneo.png", "res://arte/interfaz/exclamacion.png", "res://arte/fuentes/PixelifySans.ttf"]:
 		if load(ruta) == null:
 			sin_importar.append(ruta.trim_prefix("res://"))
 	var tema := load("res://arte/tema.tres") as Theme
@@ -192,7 +198,7 @@ func _autodiagnostico() -> void:
 		problemas.append("No carga arte/tema.tres (botones y letra pixel).")
 	elif not tema.is_type_variation(&"BotonRedondo", &"Button") or tema.default_font == null:
 		problemas.append("arte/tema.tres es una versión vieja o está incompleto.")
-	for ruta in ["res://arte/tiles/interior.tres", "res://arte/tiles/exterior.tres"]:
+	for ruta in ["res://arte/tiles/interior.tres", "res://arte/tiles/exterior.tres", "res://arte/tiles/subterraneo.tres"]:
 		var ts := load(ruta) as TileSet
 		if ts == null or ts.get_source_count() == 0:
 			problemas.append("No carga el tileset " + ruta)
@@ -346,6 +352,8 @@ func crear_luchador(id: String, nivel: int, hp_actual: int = -1) -> Dictionary:
 		"defensa": s["defensa"],
 		"velocidad": s["velocidad"],
 		"evasion": s["evasion"],
+		"evasion_base": s["evasion"],
+		"velocidad_base": s["velocidad"],
 		"tipo": c.get("tipo", "feral"),
 		"debil_a": c.get("debil_a", []),
 		"resiste": c.get("resiste", []),
@@ -359,6 +367,11 @@ func crear_luchador(id: String, nivel: int, hp_actual: int = -1) -> Dictionary:
 		"infectado": false,
 		"paralizado": 0,
 		"bajo_tierra": false,
+		"quemado": false,       # quemadura (molotov, colmillos ígneos): quita vida cada turno
+		"cegado": 0,            # turnos con la precisión baja (humo)
+		"enlodado": false,      # Velocidad en 0 hasta que sale del campo (lodo de la Sirena)
+		"camuflado": 0,         # turnos en que es invisible (Cazador Camuflado)
+		"aturdido": false,      # pierde su próxima acción (salpicadura de la Burbuja Tóxica)
 	}
 
 
@@ -484,9 +497,39 @@ func hay_cartas_vivas() -> bool:
 
 
 ## Dormir: la ÚNICA forma gratuita de curar y reparar cartas (no hay objetos de revivir).
+## También quita la infección que las cartas arrastran después de un combate.
 func dormir() -> void:
 	for carta in mochila:
 		carta["hp"] = hp_max_carta(carta)
+		carta["infectada"] = false
+
+
+## La infección no se va al terminar el combate (GDD: atrición). Fuera del combate, cada
+## varios pasos quita un poquito de vida a las cartas infectadas, pero nunca las rompe.
+## Devuelve los nombres de las cartas que perdieron vida.
+func infeccion_al_caminar() -> Array:
+	var nombres: Array = []
+	for carta in equipo():
+		if carta.get("infectada", false) and carta["hp"] > 1:
+			carta["hp"] = maxi(1, carta["hp"] - maxi(1, hp_max_carta(carta) / 40))
+			nombres.append(criaturas[carta["id"]]["nombre"])
+	return nombres
+
+
+func hay_cartas_infectadas() -> bool:
+	for carta in equipo():
+		if carta.get("infectada", false):
+			return true
+	return false
+
+
+## Primera carta del equipo que no está rota (la que va al frente al caminar), o -1.
+func carta_al_frente() -> int:
+	var eq := equipo()
+	for i in eq.size():
+		if eq[i]["hp"] > 0:
+			return i
+	return -1
 
 
 func hay_cartas_heridas() -> bool:
@@ -596,6 +639,14 @@ func usar_en_carta(id: String, i: int) -> String:
 	var hp_max := hp_max_carta(carta)
 	if carta["hp"] <= 0:
 		return "La carta de %s está rota. Solo se repara durmiendo en una ciudad." % nombre
+	if tipo_objeto(id) == "antidoto":
+		if not carta.get("infectada", false):
+			return "%s no está infectado." % nombre
+		if not tiene_objeto(id):
+			return "No te queda %s." % nombre_objeto(id)
+		carta["infectada"] = false
+		usar_objeto(id)
+		return "El Antídoto limpia la infección de %s." % nombre
 	if carta["hp"] >= hp_max:
 		return "%s ya tiene toda su vida." % nombre
 	if not tiene_objeto(id):
@@ -729,7 +780,8 @@ func resumen_partida() -> Dictionary:
 		datos = _leer_guardado(RUTA_RESPALDO)
 	if datos.is_empty():
 		return {}
-	var lugares := { "refugio_cero": "Refugio Cero", "superficie": "La Superficie", "bastion_oxido": "Bastión de Óxido" }
+	var lugares := { "refugio_cero": "Refugio Cero", "superficie": "La Superficie", "bastion_oxido": "Bastión de Óxido",
+		"autopista": "La Autopista Quemada", "sumidero": "El Sumidero" }
 	var nombre: String = datos.get("nombre_mapa", "")
 	var minutos := int(float(datos.get("tiempo_jugado", 0.0)) / 60.0)
 	return {
@@ -751,7 +803,10 @@ func cargar() -> bool:
 	mochila = []
 	for c in datos["mochila"]:
 		if c is Dictionary and criaturas.has(c.get("id", "")):
-			mochila.append({ "id": c["id"], "cantidad": maxi(1, int(c.get("cantidad", 1))), "hp": int(c.get("hp", 0)) })
+			var carta := { "id": c["id"], "cantidad": maxi(1, int(c.get("cantidad", 1))), "hp": int(c.get("hp", 0)) }
+			if c.has("infectada"):
+				carta["infectada"] = bool(c["infectada"])   # la infección sigue al cargar (Ciudad 2)
+			mochila.append(carta)
 	objetos = { "carta_vinculo": 0, "granada_aturdidora": 0 }
 	var guardados: Dictionary = datos.get("objetos", {})
 	for id in guardados:

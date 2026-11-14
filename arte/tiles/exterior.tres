@@ -1,9 +1,9 @@
 [gd_resource type="TileSet" load_steps=3 format=3]
 
-[ext_resource type="Texture2D" path="res://arte/tiles/exterior.png" id="1_e41qf"]
+[ext_resource type="Texture2D" path="res://arte/tiles/exterior.png" id="1_rc13i"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_a4tvo"]
-texture = ExtResource("1_e41qf")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yilqs"]
+texture = ExtResource("1_rc13i")
 0:0/0 = 0
 1:0/0 = 0
 2:0/0 = 0
@@ -102,9 +102,18 @@ texture = ExtResource("1_e41qf")
 0:7/0 = 0
 1:7/0 = 0
 1:7/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:7/0 = 0
+2:7/0/custom_data_0 = true
+3:7/0 = 0
+3:7/0/custom_data_0 = true
+4:7/0 = 0
+4:7/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+5:7/0 = 0
 
 [resource]
 physics_layer_0/collision_layer = 1
 custom_data_layer_0/name = "pasto"
 custom_data_layer_0/type = 1
-sources/0 = SubResource("TileSetAtlasSource_a4tvo")
+custom_data_layer_1/name = "toxico"
+custom_data_layer_1/type = 1
+sources/0 = SubResource("TileSetAtlasSource_yilqs")
