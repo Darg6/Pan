@@ -40,6 +40,22 @@ const SUBTERRANEO := {
 	"n": ["oscuro_1"], "N": ["oscuro_2"], "E": ["escalera"], "k": ["cajas"], "b": ["barril_verde"], "z": ["colchon"],
 	"f": ["fogon"], "H": ["hongo_grande"], "v": ["valla_lab"],
 }
+## Ciudad Neón y el Paso del Smog (atlas "neon"): ver la leyenda en herramientas/componer_mapas.py
+const NEON := {
+	".": ["asfalto_1", "asfalto_2", "asfalto_1"], "-": ["asfalto_linea"], ",": ["calle_1", "calle_1", "calle_2"], "=": ["calle_linea"],
+	":": ["acera_1"], ";": ["acera_2"], "s": ["smog_1"], "S": ["smog_2"], "a": ["alfombra_1"], "A": ["alfombra_2"],
+	"#": ["techo"], "W": ["pared"], "w": ["pared_ventana"], "C": ["pared_cian"], "M": ["pared_magenta"],
+	"c": ["linea_cian"], "m": ["linea_magenta"], "t": ["tarima"], "V": ["vacio"], "r": ["rejilla"], "l": ["charco_luz"],
+	"g": ["guardarrail"], "o": ["barril"], "k": ["cajas"], "b": ["basura"], "n": ["cono"], "u": ["auto_smog"],
+	"x": ["arcade"], "X": ["mesa_casino"],
+}
+## Valle Ceniza y el Bosque Calcinado (atlas "ceniza")
+const CENIZA := {
+	".": ["ceniza_1", "ceniza_1", "ceniza_2"], ",": ["ceniza_brote"], "_": ["sendero_1", "sendero_1", "sendero_2"],
+	"h": ["hierba_1"], "H": ["hierba_2"], "b": ["brasa_1"], "B": ["brasa_2"], "u": ["huerto"], "p": ["pasto_verde"],
+	"m": ["madera"], "~": ["agua_1", "agua_2"], "=": ["puente"], "#": ["bosque"], "T": ["tronco"], "t": ["tocon"],
+	"r": ["roca"], "y": ["arbusto"], "l": ["lena"], "f": ["cerca"], "F": ["cerca_v"], "w": ["barril_agua"], "k": ["canasto"],
+}
 const INTERIOR := {
 	"#": ["pared_top"], "W": ["pared"], ".": ["piso_1", "piso_1", "piso_1", "piso_2"], ",": ["piso_2"],
 	"b": ["cama_top"], "B": ["cama_bot"], "m": ["mesa_izq"], "M": ["mesa_der"], "L": ["casillero"],
@@ -67,6 +83,12 @@ func _ready() -> void:
 	_crear_bastion(ts_ext)
 	_crear_autopista(ts_ext)
 	_crear_sumidero(ts_sub)
+	var ts_neon := _crear_tileset("neon", ["smog_1", "smog_2", "alfombra_1", "alfombra_2"])
+	var ts_ceniza := _crear_tileset("ceniza", ["hierba_1", "hierba_2"])
+	_crear_paso_smog(ts_neon)
+	_crear_ciudad_neon(ts_neon)
+	_crear_bosque(ts_ceniza)
+	_crear_valle(ts_ceniza)
 	print("Proyecto construido.")
 	get_tree().quit()
 
@@ -633,4 +655,235 @@ func _crear_sumidero(ts: TileSet) -> void:
 	for p in [Vector2(7, 6), Vector2(17, 7), Vector2(24, 5), Vector2(12, 21), Vector2(35, 29), Vector2(50, 25),
 			Vector2(40, 7), Vector2(30, 42), Vector2(40, 44), Vector2(20, 40), Vector2(56, 41), Vector2(9, 31)]:
 		_gotera(s, _px(p.x, p.y))
+	# --- Túnel este (cerrado por la Organización hasta que el Sumidero es libre): lleva al Paso del Smog
+	_entrada(s, "Este", _px(61.5, 24.5))
+	_decorado(s, "RejaTunel", Vector2(62 * T16 + 8, 26 * T16), "reja_tunel", Vector2(40, 64), { "ocultar_si": "sumidero_liberado" })
+	_interactuable(s, "InvReja", _px(61, 24.5), "inv_reja_tunel", { "radio": 22.0, "ocultar_si": "sumidero_liberado" })
+	_disparador(s, "TunelEste", 63, 24, 1, 2, "salida_sumidero_este")
 	_terminar_mapa(s, _px(3.5, 4.6), "res://escenas/mapas/sumidero.tscn")
+
+
+# ---------------------------------------------------------------------------
+# CIUDAD 3: el Paso del Smog y Ciudad Neón (Comandante Silas)
+# ---------------------------------------------------------------------------
+func _farola(raiz: Node, nombre: String, pos: Vector2, cian: bool) -> void:
+	_decorado(raiz, nombre, pos, "farola_cian" if cian else "farola_magenta", Vector2(6, 4))
+	var n: Node = raiz.get_node("Entidades/" + nombre)
+	n.set_meta("luz", Color(0.35, 0.95, 1.0) if cian else Color(1.0, 0.35, 0.85))
+	n.set_meta("luz_pos", Vector2(0, -42))
+
+
+func _crear_paso_smog(ts: TileSet) -> void:
+	var p := _nuevo_mapa("PasoSmog", "paso_smog", ts, "neon", NEON)
+	var T16 := float(T)
+	var tex := func(n: String) -> Texture2D: return load("res://arte/personajes/%s.png" % n)
+	_entrada(p, "Oeste", _px(1.5, 12))
+	_entrada(p, "Este", _px(57.5, 12))
+	_decorado(p, "LetreroAire1", Vector2(6 * T16 + 8, 9 * T16), "letrero_aire", Vector2(40, 4))
+	_decorado(p, "LetreroAire2", Vector2(43 * T16, 9 * T16), "letrero_aire", Vector2(40, 4))
+	_decorado(p, "Proyector", Vector2(25 * T16, 17 * T16), "proyector_gas", Vector2(20, 6), { "ocultar_si": "neon_liberado" })
+	p.get_node("Entidades/Proyector").set_meta("luz", Color(0.35, 1.0, 0.5))
+	p.get_node("Entidades/Proyector").set_meta("luz_pos", Vector2(0, -26))
+	p.get_node("Entidades/Proyector").set_meta("esporas", true)
+	_decorado(p, "ProyectorRoto", Vector2(25 * T16, 17 * T16), "proyector_roto", Vector2(20, 6), { "mostrar_si": "neon_liberado" })
+	_interactuable(p, "InvProyector", _px(24.5, 16.2), "inv_proyector", { "radio": 22.0 })
+	_interactuable(p, "InvLetrero", _px(6.5, 9.6), "inv_letrero_aire", { "radio": 22.0 })
+	_disparador(p, "GasFalso", 20, 10, 1, 5, "gas_falso")
+	# Leo, el pedalero que escapó, se esconde entre las ruinas (cree que el aire lo va a matar)
+	_vecino(p, "Leo", "leo", "leo_mapa", [_px(41, 5.4)], { "ocultar_si": "leo_en_neon", "tose": true })
+	# Un patrullero de Silas cuida que nadie salga ni entre
+	_interactuable(p, "Patrullero", _px(54, 11.4), "patrullero", { "textura": tex.call("guardia_org_mapa"), "solido": true,
+		"ocultar_si": "patrullero_derrotado", "radio": 22.0 })
+	_disparador(p, "PasoPatrullero", 51, 10, 1, 5, "paso_patrullero")
+	var saqueo := load("res://arte/objetos/saqueo.png")
+	for q in [["SaqueoP1", Vector2(12, 22)], ["SaqueoP2", Vector2(55, 3)], ["SaqueoP3", Vector2(31, 23)]]:
+		_interactuable(p, q[0], _px(q[1].x, q[1].y), "saqueo", { "textura": saqueo, "ocultar_si": "saqueo_" + q[0] })
+	_disparador(p, "VolverSumidero", 0, 10, 1, 5, "salida_smog_oeste")
+	_disparador(p, "IrNeon", 59, 10, 1, 5, "entrar_neon")
+	_zona(p, "SmogSur", 1, 16, 58, 7, ["espectro_sonico", "espectro_sonico", "bestia_blanca", "lobo_de_ceniza", "caballero_de_neon"], 3, 4, "smog")
+	_zona(p, "SmogNorte", 10, 4, 45, 4, ["espectro_sonico", "aves_negras", "bestia_blanca"], 3, 4, "smog")
+	_terminar_mapa(p, _px(1.5, 12), "res://escenas/mapas/paso_smog.tscn")
+
+
+func _crear_ciudad_neon(ts: TileSet) -> void:
+	var n := _nuevo_mapa("CiudadNeon", "ciudad_neon", ts, "neon", NEON)
+	var T16 := float(T)
+	var tex := func(nombre: String) -> Texture2D: return load("res://arte/personajes/%s.png" % nombre)
+	_entrada(n, "Sur", _px(27.5, 37.5))
+	_entrada(n, "Norte", _px(27.5, 2.5))
+	_entrada(n, "Motel", _px(7, 17.4))
+	_entrada(n, "Plaza", _px(27.5, 19.5))
+	# --- Puertas de la ciudad (la del norte sigue cerrada por la barrera sónica hasta vencer a Silas)
+	_decorado(n, "PuertaSur", Vector2(28 * T16, 40 * T16), "puerta_neon_abierta", Vector2.ZERO)
+	_decorado(n, "PuertaNorte", Vector2(28 * T16, 3 * T16), "puerta_neon", Vector2(64, 8), { "ocultar_si": "neon_liberado" })
+	_decorado(n, "PuertaNorteAbierta", Vector2(28 * T16, 3 * T16), "puerta_neon_abierta", Vector2.ZERO, { "mostrar_si": "neon_liberado" })
+	_disparador(n, "SalidaSur", 26, 39, 4, 1, "salida_neon_sur")
+	_disparador(n, "SalidaNorte", 26, 1, 4, 1, "salida_neon_norte")
+	# --- Plaza de los Generadores (noroeste): la gente pedalea 16 horas al día para encender las luces
+	_decorado(n, "Generador1", Vector2(9 * T16, 8 * T16), "generador", Vector2(104, 14), { "cuadros": 3, "cuadros_por_segundo": 5.0, "detener_si": "neon_liberado" })
+	_decorado(n, "Generador2", Vector2(19 * T16, 8 * T16), "generador", Vector2(104, 14), { "cuadros": 3, "cuadros_por_segundo": 5.0, "detener_si": "neon_liberado" })
+	_decorado(n, "Motel", Vector2(7 * T16, 16 * T16), "motel", Vector2(100, 16))
+	_decorado(n, "TiendaCoral", Vector2(18 * T16, 16 * T16), "tienda_neon", Vector2(88, 16))
+	_decorado(n, "Holograma1", Vector2(23.5 * T16, 14 * T16), "holograma_silas", Vector2(12, 6), { "cuadros": 4, "cuadros_por_segundo": 4.0, "ocultar_si": "neon_liberado" })
+	_interactuable(n, "Coral", _px(18, 16.8), "tienda_neon", { "textura": tex.call("coral_mapa"), "solido": true, "radio": 24.0 })
+	_interactuable(n, "CamaMotel", _px(7, 16.6), "cama_neon", { "radio": 18.0 })
+	_interactuable(n, "InvGenerador", _px(9, 8.6), "inv_generador", { "radio": 22.0 })
+	_interactuable(n, "InvHolograma", _px(23.5, 14.4), "inv_holograma", { "radio": 20.0 })
+	_vecino(n, "Tobi", "tobi", "tobi_mapa", [_px(13.5, 9.4)])
+	_vecino(n, "MamaTobi", "mama_tobi", "pedalera_mapa", [_px(11.5, 9.6)], { "mostrar_si": "turno_tobi" })
+	_vecino(n, "Pedalero1", "pedalero", "pedalero_mapa", [_px(13, 10.4), _px(23, 10.4), _px(23, 17.2), _px(4, 17.2)],
+		{ "rapidez": 34.0, "pausa": 1.0, "murmullos": ["¡Sonrío-sonrío! ¡Todo bien!", "Turno-de-día-turno-de-noche...", "Shh... los micrófonos."] })
+	_vecino(n, "Pedalera1", "pedalera", "pedalera_mapa", [_px(31, 16.4), _px(53, 16.4), _px(53, 22.6), _px(31, 22.6)],
+		{ "rapidez": 36.0, "pausa": 0.8, "murmullos": ["¡Qué-lindas-luces! ¡Gracias, Silas!", "*sonrisa* *sonrisa*", "No-puedo-parar..."] })
+	# --- El Palacio Lumen (noreste): el escenario de Silas y sus dos guardias
+	_decorado(n, "PalacioLumen", Vector2(42 * T16, 9 * T16 + 8), "casino", Vector2(184, 20))
+	n.get_node("Entidades/PalacioLumen").set_meta("luz", Color(1.0, 0.45, 0.9))
+	n.get_node("Entidades/PalacioLumen").set_meta("luz_pos", Vector2(0, -60))
+	_decorado(n, "Torre1", Vector2(33 * T16, 9 * T16), "torre_sonica", Vector2(14, 6), { "cuadros": 2, "cuadros_por_segundo": 3.0 })
+	_decorado(n, "Torre2", Vector2(51 * T16, 9 * T16), "torre_sonica", Vector2(14, 6), { "cuadros": 2, "cuadros_por_segundo": 3.0 })
+	_interactuable(n, "InvTorre", _px(33, 9.2), "inv_torre", { "radio": 20.0 })
+	_interactuable(n, "InvCasino", _px(37, 10.2), "inv_casino", { "radio": 20.0 })
+	var guardia: Texture2D = tex.call("guardia_org_mapa")
+	_interactuable(n, "GuardiaNeon1", _px(39, 14.4), "guardia_neon_1", { "textura": guardia, "solido": true, "ocultar_si": "guardia_neon_1_derrotado", "radio": 22.0 })
+	_interactuable(n, "GuardiaNeon2", _px(45, 14.4), "guardia_neon_2", { "textura": guardia, "solido": true, "ocultar_si": "guardia_neon_2_derrotado", "radio": 22.0 })
+	_disparador(n, "PasoEscenario", 35, 15, 15, 1, "paso_escenario")
+	_interactuable(n, "Silas", _px(42, 11.2), "silas", { "textura": tex.call("silas_mapa"), "solido": true,
+		"mostrar_si": "silas_espera", "ocultar_si": "silas_derrotado", "radio": 24.0 })
+	_interactuable(n, "HoloPapa", _px(40.5, 12), "", { "textura": tex.call("holo_papa_mapa"), "mostrar_si": "ilusion_padres" })
+	_interactuable(n, "HoloMama", _px(43.5, 12), "", { "textura": tex.call("holo_mama_mapa"), "mostrar_si": "ilusion_padres" })
+	_vecino(n, "Vigia", "vigia_neon", "guardia_org_mapa", [_px(31, 19), _px(52, 19), _px(52, 21), _px(31, 21)],
+		{ "rapidez": 22.0, "murmullos": ["¡Sonríe, ciudadano!", "El aire de afuera mata. Eso dice Silas.", "¿Por qué no estás pedaleando?"], "ocultar_si": "neon_liberado" })
+	# --- La sala de juegos sin techo (suroeste): aquí se esconden las bestias de luz
+	_decorado(n, "Arcade", Vector2(18.5 * T16, 30 * T16), "arcade", Vector2(100, 16))
+	_interactuable(n, "InvArcade", _px(18.5, 30.4), "inv_arcade", { "radio": 22.0 })
+	_zona(n, "SalaJuegos", 2, 25, 21, 12, ["caballero_de_neon", "bailarina_electrica", "espectro_sonico", "tejedor_de_sombras"], 3, 5, "neon")
+	_decorado(n, "Holograma3", Vector2(24 * T16, 36 * T16), "holograma_silas", Vector2(12, 6), { "cuadros": 4, "cuadros_por_segundo": 4.0, "ocultar_si": "neon_liberado" })
+	# --- Sureste: el bar El Comodín, Rina la técnica, Mara y Don Ciro
+	_decorado(n, "BarComodin", Vector2(37 * T16, 28 * T16), "bar_comodin", Vector2(88, 14))
+	_interactuable(n, "Cantinero", _px(37, 28.4), "bar_comodin", { "radio": 22.0 })
+	_decorado(n, "Holograma2", Vector2(44 * T16, 25 * T16), "holograma_silas", Vector2(12, 6), { "cuadros": 4, "cuadros_por_segundo": 4.0, "ocultar_si": "neon_liberado" })
+	_decorado(n, "Torre3", Vector2(49 * T16, 31 * T16), "torre_sonica", Vector2(14, 6), { "cuadros": 2, "cuadros_por_segundo": 3.0 })
+	_vecino(n, "Rina", "rina", "rina_mapa", [_px(47.5, 31.6)])
+	_vecino(n, "Mara", "mara", "mara_mapa", [_px(36, 33)])
+	_vecino(n, "LeoNeon", "leo_neon", "leo_mapa", [_px(37.4, 33.2)], { "mostrar_si": "leo_en_neon" })
+	_vecino(n, "DonCiro", "ciro", "ciro_mapa", [_px(44, 35.4)])
+	_decorado(n, "LetreroAire3", Vector2(32 * T16, 37 * T16), "letrero_aire", Vector2(40, 4), { "ocultar_si": "neon_liberado" })
+	_interactuable(n, "InvLetreroNeon", _px(32, 37.3), "inv_letrero_neon", { "radio": 20.0, "ocultar_si": "neon_liberado" })
+	# --- Los micrófonos escondidos de Silas (misión de Rina)
+	var mic := load("res://arte/objetos/microfono.png")
+	for q in [["Microfono1", Vector2(24.4, 5.8)], ["Microfono2", Vector2(13, 34)], ["Microfono3", Vector2(53, 24)]]:
+		_interactuable(n, q[0], _px(q[1].x, q[1].y), "microfono", { "textura": mic, "ocultar_si": "mic_" + q[0] })
+	# --- Farolas de la avenida
+	var i := 0
+	for y in [6, 12, 25, 31, 36]:
+		_farola(n, "FarolaO%d" % y, Vector2(25 * T16 + 8, y * T16), i % 2 == 0)
+		_farola(n, "FarolaE%d" % y, Vector2(30 * T16 + 8, y * T16), i % 2 == 1)
+		i += 1
+	var saqueo := load("res://arte/objetos/saqueo.png")
+	for q in [["SaqueoN1", Vector2(3, 30)], ["SaqueoN2", Vector2(53, 3)], ["SaqueoN3", Vector2(52, 37)]]:
+		_interactuable(n, q[0], _px(q[1].x, q[1].y), "saqueo", { "textura": saqueo, "ocultar_si": "saqueo_" + q[0] })
+	_terminar_mapa(n, _px(27.5, 37.5), "res://escenas/mapas/ciudad_neon.tscn")
+
+
+# ---------------------------------------------------------------------------
+# CIUDAD 4: el Bosque Calcinado y Valle Ceniza (Comandante Kael)
+# ---------------------------------------------------------------------------
+func _crear_bosque(ts: TileSet) -> void:
+	var b := _nuevo_mapa("BosqueCalcinado", "bosque_calcinado", ts, "ceniza", CENIZA)
+	var T16 := float(T)
+	_entrada(b, "Oeste", _px(1.5, 13.5))
+	_entrada(b, "Este", _px(57.5, 13.5))
+	_disparador(b, "VolverNeon", 0, 13, 1, 2, "salida_bosque_oeste")
+	_disparador(b, "IrValle", 59, 13, 1, 2, "entrar_valle")
+	var k := 0
+	for q in [Vector2(5, 9), Vector2(11, 4), Vector2(18, 3), Vector2(26, 5), Vector2(4, 18), Vector2(12, 11), Vector2(23, 14),
+			Vector2(27, 24), Vector2(34, 4), Vector2(45, 7), Vector2(54, 6), Vector2(41, 18), Vector2(47, 17), Vector2(56, 10),
+			Vector2(9, 27), Vector2(34, 26), Vector2(52, 27), Vector2(20, 6)]:
+		_decorado(b, "Arbol%d" % k, Vector2(q.x * T16 + 8, q.y * T16 + 12), "arbol_quemado", Vector2(8, 6))
+		k += 1
+	for q in [Vector2(7, 23), Vector2(43, 2), Vector2(57, 23), Vector2(21, 27)]:
+		_decorado(b, "ArbolBrote%d" % k, Vector2(q.x * T16 + 8, q.y * T16 + 12), "arbol_brote", Vector2(8, 6))
+		k += 1
+	var brote := load("res://arte/objetos/brote.png")
+	for q in [["Brote1", Vector2(6, 25)], ["Brote2", Vector2(41, 3)], ["Brote3", Vector2(56, 25)]]:
+		_interactuable(b, q[0], _px(q[1].x, q[1].y), "brote", { "textura": brote, "ocultar_si": "brote_" + q[0] })
+	_interactuable(b, "InvTrampa", _px(20, 12), "inv_trampa", { "radio": 20.0 })
+	# El recaudador de la Organización va camino al valle a cobrar
+	_decorado(b, "CarretaOrg", Vector2(44 * T16, 8 * T16), "carreta_org", Vector2(40, 8), { "ocultar_si": "recaudador_derrotado" })
+	_interactuable(b, "Recaudador", _px(46, 9.6), "recaudador", { "textura": load("res://arte/personajes/recaudador_mapa.png"),
+		"solido": true, "ocultar_si": "recaudador_derrotado", "radio": 22.0 })
+	_disparador(b, "PasoRecaudador", 42, 9, 1, 2, "paso_recaudador")
+	var saqueo := load("res://arte/objetos/saqueo.png")
+	for q in [["SaqueoB1", Vector2(3, 3)], ["SaqueoB2", Vector2(57, 3)], ["SaqueoB3", Vector2(28, 27)]]:
+		_interactuable(b, q[0], _px(q[1].x, q[1].y), "saqueo", { "textura": saqueo, "ocultar_si": "saqueo_" + q[0] })
+	_zona(b, "Bosque", 1, 2, 58, 26, ["bestia_blindada", "lobo_de_ceniza", "gusano_devorador", "humanoide_sin_consciencia",
+		"bestia_blindada", "lobo_de_ceniza", "vigilante_ciego"], 4, 5, "bosque")
+	_terminar_mapa(b, _px(1.5, 13.5), "res://escenas/mapas/bosque_calcinado.tscn")
+
+
+func _crear_valle(ts: TileSet) -> void:
+	var v := _nuevo_mapa("ValleCeniza", "valle_ceniza", ts, "ceniza", CENIZA)
+	var T16 := float(T)
+	var tex := func(nombre: String) -> Texture2D: return load("res://arte/personajes/%s.png" % nombre)
+	_entrada(v, "Sur", _px(26.5, 37.5))
+	_entrada(v, "Cama", _px(10, 33.2))
+	_entrada(v, "Plaza", _px(26.5, 22.5))
+	_entrada(v, "Monumento", _px(40.5, 15.5))
+	_decorado(v, "ArcoValle", Vector2(27 * T16, 39 * T16), "arco_valle", Vector2.ZERO)
+	_disparador(v, "SalidaSur", 26, 39, 2, 1, "salida_valle_sur")
+	_disparador(v, "SalidaNorte", 26, 0, 2, 1, "salida_valle_norte")
+	# --- El invernadero de Lucía y su huerto
+	_decorado(v, "Invernadero", Vector2(12 * T16, 10 * T16), "invernadero", Vector2(76, 12))
+	_decorado(v, "Espantapajaros", Vector2(11 * T16, 14 * T16 + 8), "espantapajaros", Vector2(6, 4))
+	_interactuable(v, "InvInvernadero", _px(10, 10.4), "inv_invernadero", { "radio": 20.0 })
+	_vecino(v, "Lucia", "lucia", "lucia_mapa", [_px(16, 10.4)])
+	# --- La plaza de la olla común (todos comen de la misma olla)
+	_decorado(v, "Olla", Vector2(24 * T16, 20 * T16), "olla_comun", Vector2(24, 8), { "cuadros": 3, "cuadros_por_segundo": 5.0 })
+	v.get_node("Entidades/Olla").set_meta("luz", Color(1.0, 0.6, 0.25))
+	v.get_node("Entidades/Olla").set_meta("luz_pos", Vector2(0, -8))
+	_interactuable(v, "InvOlla", _px(24, 20.4), "olla_comun", { "radio": 20.0 })
+	_decorado(v, "Pozo", Vector2(20 * T16, 23 * T16), "pozo", Vector2(24, 8))
+	_vecino(v, "Cocinera", "cocinera", "aldeana_mapa", [_px(25.4, 20.9)])
+	_vecino(v, "NinaValle", "nina_valle", "nina_valle_mapa", [_px(20.5, 17.4), _px(31, 17.4), _px(31, 22.6), _px(20.5, 22.6)],
+		{ "rapidez": 34.0, "pausa": 1.2, "murmullos": ["¡Kael trajo carne hoy!", "¡Mira, una hojita verde!"] })
+	_vecino(v, "Aldeano", "aldeano_valle", "aldeano_mapa", [_px(26.5, 30), _px(26.5, 12), _px(33, 10.5)],
+		{ "rapidez": 18.0, "pausa": 3.0, "murmullos": ["Que no le pase nada a Kael...", "Hoy hay guiso en la olla.", "Cuidado con las brasas del bosque."] })
+	# --- El monumento a los caídos (aquí espera Kael)
+	_decorado(v, "Monumento", Vector2(40 * T16 + 8, 12 * T16), "monumento", Vector2(36, 10))
+	_interactuable(v, "InvMonumento", _px(38.4, 12.6), "inv_monumento", { "radio": 16.0 })
+	_interactuable(v, "Kael", _px(40.5, 13.4), "kael", { "textura": tex.call("kael_mapa"), "solido": true,
+		"mostrar_si": "kael_en_monumento", "ocultar_si": "kael_derrotado", "radio": 24.0 })
+	_interactuable(v, "KaelEscena", _px(26.5, 4), "", { "textura": tex.call("kael_mapa"), "mostrar_si": "kael_en_escena" })
+	_interactuable(v, "KaelRodillas", _px(40.5, 13.4), "", { "textura": tex.call("kael_rodillas_mapa"), "mostrar_si": "kael_rodillas" })
+	_vecino(v, "KaelPerdonado", "kael_perdonado", "kael_mapa", [_px(22, 18.6), _px(29.6, 18.6)], { "mostrar_si": "kael_perdonado", "rapidez": 14.0, "pausa": 5.0 })
+	# --- La cabaña de Kael y su puesto de caza (noreste)
+	_decorado(v, "CabanaKael", Vector2(47 * T16 + 8, 7 * T16), "cabana_kael", Vector2(68, 14), { "humo": [Vector2(22.5, -54)] })
+	_decorado(v, "PuestoCaza", Vector2(52 * T16, 10 * T16), "puesto_caza", Vector2(44, 8))
+	_interactuable(v, "InvPuesto", _px(52, 10.4), "inv_puesto_caza", { "radio": 20.0 })
+	_vecino(v, "Ana", "ana", "ana_mapa", [_px(45, 8.8)])
+	_vecino(v, "Teo", "teo", "teo_mapa", [_px(44, 9.8), _px(49, 9.8), _px(49, 12)], { "rapidez": 30.0, "pausa": 1.5 })
+	# --- Las cabañas del sur: la abuela Nita (cama gratis), la despensa de Hugo y la leña de Ramiro
+	_decorado(v, "CabanaNita", Vector2(10 * T16, 32 * T16), "cabana_3", Vector2(52, 14), { "humo": [Vector2(14.5, -46)] })
+	_interactuable(v, "CamaValle", _px(10, 32.4), "cama_valle", { "radio": 18.0 })
+	_vecino(v, "Nita", "nita", "nita_mapa", [_px(12.4, 32.8)])
+	_decorado(v, "Despensa", Vector2(18 * T16, 32 * T16), "cabana_2", Vector2(60, 14), { "humo": [Vector2(18.5, -50)] })
+	_interactuable(v, "Hugo", _px(18, 32.8), "tienda_valle", { "textura": tex.call("hugo_mapa"), "solido": true, "radio": 24.0 })
+	_decorado(v, "Cabana1", Vector2(39 * T16, 33 * T16), "cabana_1", Vector2(60, 14), { "humo": [Vector2(18.5, -50)] })
+	_decorado(v, "Cabana2", Vector2(47 * T16, 33 * T16), "cabana_2", Vector2(60, 14), { "humo": [Vector2(18.5, -50)] })
+	_decorado(v, "Lenera", Vector2(36 * T16 + 8, 31 * T16), "lenera", Vector2(36, 8))
+	_vecino(v, "Ramiro", "ramiro", "ramiro_mapa", [_px(34.5, 32.6), _px(38, 32.6)], { "rapidez": 16.0, "pausa": 3.0 })
+	_decorado(v, "Tendedero", Vector2(31 * T16, 36 * T16), "tendedero", Vector2(40, 4))
+	_vecino(v, "Aldeana", "aldeana_valle", "aldeana_mapa", [_px(29.5, 36.6), _px(33, 36.6)], { "rapidez": 12.0, "pausa": 4.0,
+		"murmullos": ["La ropa no se seca con tanta ceniza...", "Kael nos salvó del hambre."] })
+	var k := 0
+	for q in [Vector2(6, 6), Vector2(20, 5), Vector2(36, 3), Vector2(51, 4), Vector2(5, 22), Vector2(45, 22),
+			Vector2(8, 37), Vector2(50, 37), Vector2(22, 9), Vector2(32, 13)]:
+		_decorado(v, "Arbol%d" % k, Vector2(q.x * T16 + 8, q.y * T16 + 12), "arbol_brote", Vector2(8, 6))
+		k += 1
+	# --- Pistas (solo si Pan ejecutó a Kael: tiene que encontrar la verdad solo)
+	var pista := load("res://arte/objetos/saqueo.png")
+	_interactuable(v, "PistaCabana", _px(47.5, 8.4), "pista_cabana", { "textura": pista, "mostrar_si": "kael_ejecutado", "ocultar_si": "pista_cabana" })
+	_interactuable(v, "PistaMonumento", _px(42.2, 12.8), "pista_monumento", { "textura": pista, "mostrar_si": "kael_ejecutado", "ocultar_si": "pista_monumento" })
+	_interactuable(v, "PistaPuesto", _px(53.6, 10.6), "pista_puesto", { "textura": pista, "mostrar_si": "kael_ejecutado", "ocultar_si": "pista_puesto" })
+	_zona(v, "LindeBosque", 46, 12, 8, 11, ["bestia_blindada", "lobo_de_ceniza", "gusano_devorador"], 4, 5, "bosque")
+	_terminar_mapa(v, _px(26.5, 37.5), "res://escenas/mapas/valle_ceniza.tscn")
