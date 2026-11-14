@@ -27,6 +27,10 @@ extends Node
 ##     "La entrega de Iris" (antídoto o una carta tuya). Colector de Gas con botín.
 ##   - Dos Guardias de la Organización en la puerta del laboratorio y luego Vesper (gas).
 ##   - Al ganar: Pan cierra la válvula del veneno y la ciudad lo aplaude (+10% de ataque).
+##   - Se abre el túnel del este hacia el Paso del Smog.
+##
+## Ciudad 3, Ciudad Neón (Silas, El Ilusionista): ver scripts/historia_neon.gd
+## Ciudad 4, Valle Ceniza (Kael, El Escudo Roto) y la decisión de piedad: ver scripts/historia_valle.gd
 
 const REFUGIO := "res://escenas/mapas/refugio_cero.tscn"
 const SUPERFICIE := "res://escenas/mapas/superficie.tscn"
@@ -34,9 +38,15 @@ const ESCENA_TITULO := "res://escenas/titulo.tscn"
 const BASTION := "res://escenas/mapas/bastion_oxido.tscn"
 const AUTOPISTA := "res://escenas/mapas/autopista.tscn"
 const SUMIDERO := "res://escenas/mapas/sumidero.tscn"
+const PASO_SMOG := "res://escenas/mapas/paso_smog.tscn"
+const NEON := "res://escenas/mapas/ciudad_neon.tscn"
+const BOSQUE := "res://escenas/mapas/bosque_calcinado.tscn"
+const VALLE := "res://escenas/mapas/valle_ceniza.tscn"
 const T := 16.0  # tamaño de un tile en píxeles
 
 var mapa: Node = null  # el mapa actual (scripts/mapa.gd)
+var neon = preload("res://scripts/historia_neon.gd").new(self)    # Ciudad 3
+var valle = preload("res://scripts/historia_valle.gd").new(self)  # Ciudad 4
 
 
 func decir(id) -> void:
@@ -75,6 +85,9 @@ func al_entrar_mapa(m: Node) -> void:
 	if not r.is_empty():
 		await _despues_de_combate(r)
 		return
+	# Partidas viejas: la misión decía que Ciudad Neón llegaría "en una próxima versión"
+	if Juego.flag("sumidero_liberado") and not Juego.flag("smog_visitado") and "Ciudad Neón (llegará" in Juego.mision:
+		poner_mision("Vuelve al Sumidero y sal por el túnel del este (al este de la plaza) hacia Ciudad Neón.")
 
 	match m.nombre_mapa:
 		"refugio_cero":
@@ -117,6 +130,17 @@ func al_entrar_mapa(m: Node) -> void:
 				Juego.lugar_descanso = { "mapa": SUMIDERO, "entrada": "Posada" }
 				await decir("sumidero_llegada")
 				poner_mision("Explora el Sumidero. La plaza está al sur, cruzando el río de lodo.")
+			elif Juego.flag("sumidero_liberado") and not Juego.flag("tunel_este_abierto"):
+				# Partidas guardadas antes de la Ciudad 3: el túnel del este ya está abierto
+				Juego.flags["tunel_este_abierto"] = true
+				mapa.refrescar()
+				await decir("tunel_abierto_viejo")
+				if not Juego.flag("smog_visitado"):
+					poner_mision("Sal del Sumidero por el túnel del este (al este de la plaza) y cruza el Paso del Smog hasta Ciudad Neón.")
+		"paso_smog", "ciudad_neon":
+			await neon.al_entrar_mapa(m.nombre_mapa)
+		"bosque_calcinado", "valle_ceniza":
+			await valle.al_entrar_mapa(m.nombre_mapa)
 
 
 func _despues_de_combate(r: Dictionary) -> void:
@@ -167,6 +191,9 @@ func _despues_de_combate(r: Dictionary) -> void:
 		"vesper":
 			if resultado == "victoria":
 				await _victoria_vesper()
+		_:
+			if not await neon.despues_de_combate(r.get("evento", ""), resultado):
+				await valle.despues_de_combate(r.get("evento", ""), resultado)
 
 
 func _recluta_aparece() -> void:
@@ -481,7 +508,21 @@ func ejecutar(evento: String, nodo: Node = null) -> void:
 			await _guardia_lab(evento)
 		"vesper":
 			await _vesper()
+		"inv_reja_tunel":
+			await decir("inv_reja_tunel")
+		"salida_sumidero_este":
+			if not Juego.flag("sumidero_liberado"):
+				await decir("inv_reja_tunel")
+				await mapa.retroceder_pan(Vector2.LEFT, 16.0)
+				return
+			Juego.flags["tunel_este_abierto"] = true
+			await mapa.hud.fundido(true, 0.4)
+			Juego.ir_a_mapa(PASO_SMOG, "Oeste")
 		_:
+			if await neon.ejecutar(evento, nodo):
+				return
+			if await valle.ejecutar(evento, nodo):
+				return
 			push_warning("Evento sin programar: " + evento)
 
 
@@ -1354,9 +1395,10 @@ func _celebracion_sumidero() -> void:
 		var v := _nodo(n)
 		if v:
 			v.visible = true
+	Juego.flags["tunel_este_abierto"] = true
 	mapa.refrescar()
 	Juego.lugar_descanso = { "mapa": SUMIDERO, "entrada": "Posada" }
 	await mapa.hud.fundido(false, 0.6)
 	await decir("sumidero_libre")
-	poner_mision("El Sumidero es libre. Próximo destino: Ciudad Neón (llegará en una próxima versión).")
+	poner_mision("El Sumidero es libre. Sal por el túnel del este (al este de la plaza) hacia el Paso del Smog y Ciudad Neón.")
 	Juego.guardar_pronto = true

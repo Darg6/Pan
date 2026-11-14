@@ -601,7 +601,214 @@ def sumidero():
     sfx_sumidero()
 
 
+# ---------------------------------------------------------------------------
+# CIUDAD 3 (Ciudad Neón, Silas) y CIUDAD 4 (Valle Ceniza, Kael)
+# ---------------------------------------------------------------------------
+rng_n = np.random.default_rng(303)
+
+
+def musica_neon():
+    """Ciudad Neón: alegre por fuera, vacía por dentro. Arpegios brillantes de sintetizador sobre
+    un bajo que no descansa, con un acorde que siempre suena un poco "mal" (108 bpm)."""
+    negra = 60 / 108
+    corchea = negra / 2
+    semi = negra / 4
+    progresion = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62], [57, 60, 64], [53, 57, 60], [50, 53, 57], [52, 56, 59]]
+    compas = negra * 4
+    largo = compas * len(progresion)
+    pista = np.zeros(int(largo * SR) + SR * 2)
+    for i, ac in enumerate(progresion):
+        inicio = i * compas
+        poner(pista, pad(ac, compas * 1.2, 1200), inicio, 0.13)
+        for k in range(8):   # bajo en corcheas (como alguien que pedalea sin parar)
+            m = ac[0] - 24 + (12 if k % 2 else 0)
+            b = cuadrada(nota(m), corchea * 0.9, 0.4)
+            poner(pista, pasabajos(b, 600) * env(len(b), 0.003, 0.05, 0.5, 0.05), inicio + k * corchea, 0.32)
+        for k in range(16):  # arpegio de neón
+            m = ac[k % 3] + 24 + (12 if k % 8 >= 6 else 0)
+            a = cuadrada(nota(m), semi * 0.9, 0.125) * 0.5 + triangulo(nota(m), semi * 0.9) * 0.5
+            poner(pista, a * env(len(a), 0.002, 0.04, 0.3, 0.03), inicio + k * semi, 0.07)
+        for k in range(8):
+            if k in (0, 4):
+                poner(pista, bombo(), inicio + k * corchea, 0.7)
+            if k in (2, 6):
+                poner(pista, caja(), inicio + k * corchea, 0.32)
+            poner(pista, platillo(0.03), inicio + k * corchea + corchea / 2, 0.12)
+    melodia = [76, None, 79, 76, 74, None, 72, None, 74, 76, None, 72, 69, None, None, None,
+               76, None, 81, 79, 76, None, 74, 72, 71, None, 72, 74, 68, None, None, None]
+    for j, m in enumerate(melodia):
+        if m is not None:
+            d = corchea * 1.8
+            tono = cuadrada(nota(m), d, 0.25) * 0.4 + seno(nota(m) * 2.003, d) * 0.3 + seno(nota(m), d) * 0.3
+            poner(pista, pasabajos(tono, 2600) * env(len(tono), 0.01, 0.08, 0.5, 0.1), j * corchea * 2, 0.12)
+    pista = eco(pista, corchea * 1.5, 0.3, 0.25)
+    guardar(bucle_suave(pista[: int(largo * SR) + SR], 0.6), "musica/neon", 0.55)
+
+
+def musica_silas():
+    """Combate contra Silas: un show de casino que da vértigo. Rápida, con un arpegio que sube
+    y baja sin parar y destellos (152 bpm)."""
+    negra = 60 / 152
+    corchea = negra / 2
+    semi = negra / 4
+    progresion = [50, 50, 46, 48, 50, 50, 53, 52]   # Dm Dm Bb C Dm Dm F E
+    compas = negra * 4
+    largo = compas * len(progresion)
+    pista = np.zeros(int(largo * SR) + SR)
+    for i, raiz in enumerate(progresion):
+        inicio = i * compas
+        menor = raiz in (50, 52)
+        tercera = 3 if menor else 4
+        for k in range(8):
+            b = cuadrada(nota(raiz - 12 + (7 if k % 4 == 2 else 0)), corchea * 0.85, 0.35)
+            poner(pista, pasabajos(b, 800) * env(len(b), 0.002, 0.04, 0.6, 0.04), inicio + k * corchea, 0.42)
+        for k in range(16):  # arpegio que sube y baja (marea)
+            escala = [0, tercera, 7, 12, 7 + 12, 12, 7, tercera]
+            m = raiz + 24 + escala[k % 8]
+            a = cuadrada(nota(m), semi * 0.8, 0.25)
+            poner(pista, a * env(len(a), 0.002, 0.03, 0.3, 0.02), inicio + k * semi, 0.08)
+        for k in range(8):
+            if k % 2 == 0:
+                poner(pista, bombo(), inicio + k * corchea, 0.85)
+            if k in (2, 6):
+                poner(pista, caja(), inicio + k * corchea, 0.5)
+            poner(pista, platillo(0.04), inicio + k * corchea, 0.18)
+        brillo = seno(nota(raiz + 48), 0.25) * campana(int(0.25 * SR), 12)
+        poner(pista, brillo, inicio + corchea * 7, 0.12)
+    melodia = [74, 77, 81, 79, 77, 74, 73, None, 70, 74, 77, 76, 74, 72, 74, None]
+    for j, m in enumerate(melodia):
+        if m is not None:
+            d = negra * 1.7
+            vib = 1 + 0.012 * np.sin(2 * np.pi * 6 * t_de(d))
+            tono = cuadrada(nota(m), d, 0.5) * 0.35 + seno(nota(m) * 2, d) * 0.25 + triangulo(nota(m), d) * 0.4
+            poner(pista, pasabajos(tono * vib, 2600) * env(len(tono), 0.01, 0.1, 0.6, 0.15), j * negra * 2, 0.15)
+    guardar(pista[: int(largo * SR)], "musica/silas", 0.62)
+
+
+def musica_valle():
+    """Valle Ceniza: tranquila y un poco triste, como una canción de fogata. Guitarra pulsada
+    (cuerdas de triángulo con campana) y una flauta suave (66 bpm)."""
+    negra = 60 / 66
+    progresion = [[55, 59, 62], [52, 55, 59], [48, 52, 55], [50, 54, 57], [55, 59, 62], [52, 55, 59], [48, 52, 55], [50, 54, 57]]
+    compas = negra * 3   # vals lento
+    largo = compas * len(progresion) * 2
+    pista = np.zeros(int(largo * SR) + SR * 2)
+    for i, ac in enumerate(progresion * 2):
+        inicio = i * compas
+        poner(pista, pad(ac, compas * 1.4, 520), inicio, 0.12)
+        b = triangulo(nota(ac[0] - 12), compas * 0.9)
+        poner(pista, pasabajos(b, 300) * campana(len(b), 1.6), inicio, 0.35)
+        for k, idx in enumerate([0, 1, 2, 1, 2, 1]):   # guitarra en corcheas
+            m = ac[idx] + 12
+            c = triangulo(nota(m), negra) + 0.4 * seno(nota(m) * 2, negra)
+            poner(pista, pasabajos(c, 1800) * campana(len(c), 4.5), inicio + k * negra / 2, 0.08)
+    melodia = [71, 74, 76, 74, 71, None, 69, 67, 69, 71, None, None, 74, 76, 79, 78, 76, 74, 71, None, 69, 67, None, None]
+    for j, m in enumerate(melodia):
+        if m is not None:
+            d = negra * 1.7
+            vib = 1 + 0.008 * np.sin(2 * np.pi * 4.5 * t_de(d))
+            aire = pasabajos(rng_n.uniform(-1, 1, int(d * SR)), 3000) * 0.05
+            tono = seno(nota(m), d) * 0.8 + seno(nota(m) * 2, d) * 0.12 + aire
+            poner(pista, tono * vib * env(len(tono), 0.12, 0.2, 0.6, 0.5), j * negra * 2, 0.17)
+    pista = eco(pista, negra, 0.3, 0.3)
+    guardar(bucle_suave(pista[: int(largo * SR) + SR], 1.0), "musica/valle", 0.55)
+
+
+def musica_kael():
+    """Combate contra Kael: melancólica. No es un villano; pelea para proteger a su gente.
+    Cuerdas lentas, un piano que se repite y tambores lejanos como pasos pesados (76 bpm)."""
+    negra = 60 / 76
+    progresion = [[45, 48, 52], [41, 45, 48], [43, 47, 50], [40, 44, 47], [45, 48, 52], [41, 45, 48], [38, 41, 45], [40, 44, 47]]
+    compas = negra * 4
+    largo = compas * len(progresion)
+    pista = np.zeros(int(largo * SR) + SR * 2)
+    for i, ac in enumerate(progresion):
+        inicio = i * compas
+        poner(pista, pad([m + 12 for m in ac], compas * 1.3, 700), inicio, 0.2)
+        b = seno(nota(ac[0] - 12), compas) + 0.4 * triangulo(nota(ac[0] - 12), compas)
+        poner(pista, pasabajos(b, 260) * env(len(b), 0.2, 0.4, 0.7, 0.5), inicio, 0.45)
+        for k in range(8):   # piano: notas que se repiten como un recuerdo
+            m = ac[[0, 2, 1, 2, 0, 2, 1, 2][k]] + 24
+            pn = seno(nota(m), negra) + 0.5 * seno(nota(m) * 2, negra) + 0.2 * seno(nota(m) * 3, negra)
+            poner(pista, pn * campana(len(pn), 3.2), inicio + k * negra / 2, 0.07)
+        for k in (0, 2.5):   # tambor grave, lejano
+            poner(pista, pasabajos(bombo(0.5), 200), inicio + k * negra, 0.6)
+    melodia = [76, 74, 72, 71, 72, None, 69, None, 72, 71, 69, 68, 69, None, None, None,
+               76, 77, 76, 74, 72, None, 71, 72, 74, 72, 71, 69, 68, None, 64, None]
+    for j, m in enumerate(melodia):
+        if m is not None:
+            d = negra * 1.2
+            vib = 1 + 0.01 * np.sin(2 * np.pi * 5 * t_de(d))
+            tono = triangulo(nota(m), d) * 0.5 + seno(nota(m), d) * 0.5
+            poner(pista, pasabajos(tono * vib, 1700) * env(len(tono), 0.15, 0.2, 0.7, 0.4), j * negra, 0.16)
+    pista = eco(pista, negra * 0.75, 0.3, 0.3)
+    guardar(bucle_suave(pista[: int(largo * SR) + SR], 1.0), "musica/kael", 0.58)
+
+
+def ambiente_neon():
+    """Ciudad Neón: zumbido eléctrico de los letreros, cadenas de bicicleta y gente que murmura lejos."""
+    seg = 12
+    t = t_de(seg)
+    zumbido = 0.4 * np.sin(2 * np.pi * 120 * t) + 0.2 * np.sin(2 * np.pi * 240 * t) + 0.1 * np.sin(2 * np.pi * 360 * t)
+    zumbido *= 0.5 + 0.5 * np.sin(2 * np.pi * t / 6.0) ** 2
+    gente = pasabajos(rng_n.uniform(-1, 1, len(t)), 500) * (0.6 + 0.4 * np.sin(2 * np.pi * t / 4.0))
+    x = zumbido * 0.12 + gente * 0.8
+    for inicio in np.arange(0.1, seg - 0.3, 0.42):   # click-click de las cadenas
+        c = pasabajos(rng_n.uniform(-1, 1, int(0.03 * SR)), 3000) * campana(int(0.03 * SR), 80)
+        poner(x, c, inicio + rng_n.uniform(0, 0.05), 0.25)
+    guardar(bucle_suave(x, 1.0), "ambiente/neon", 0.45)
+
+
+def ambiente_bosque():
+    """Bosque quemado y el valle: viento bajo, ramas que crujen y brasas que chisporrotean."""
+    seg = 14
+    t = t_de(seg)
+    viento = pasabajos(rng_n.uniform(-1, 1, len(t)), 300) * (0.5 + 0.5 * np.sin(2 * np.pi * t / 7.0) ** 2)
+    x = viento
+    for inicio in np.arange(0.2, seg - 0.3, 0.25):
+        if rng_n.uniform() < 0.45:
+            ch = rng_n.uniform(-1, 1, int(0.012 * SR)) * campana(int(0.012 * SR), 200)
+            poner(x, ch, inicio + rng_n.uniform(0, 0.2), rng_n.uniform(0.05, 0.2))
+    guardar(bucle_suave(x, 1.5), "ambiente/bosque", 0.45)
+
+
+def sfx_neon_valle():
+    # destello (granada de luz y el Juego de Luces): un "fiu" brillante hacia arriba
+    d = 0.35
+    f = np.linspace(800, 3200, int(d * SR))
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * campana(int(d * SR), 9)
+    guardar(x + 0.2 * rng_n.uniform(-1, 1, len(x)) * campana(len(x), 20), "sfx/destello", 0.7)
+    # llanto (Kael): sollozos ahogados, graves
+    x = np.zeros(int(1.6 * SR))
+    for i, inicio in enumerate((0.0, 0.45, 0.95)):
+        n = int(0.35 * SR)
+        f = 180 - i * 15 + 25 * np.sin(np.linspace(0, np.pi, n))
+        v = np.sin(2 * np.pi * np.cumsum(f) / SR) * env(n, 0.05, 0.1, 0.6, 0.15)
+        v += pasabajos(rng_n.uniform(-1, 1, n), 900) * env(n, 0.02, 0.1, 0.4, 0.1) * 0.6
+        poner(x, v, inicio, 0.8)
+    guardar(pasabajos(x, 1400), "sfx/llanto", 0.55)
+    # pedal (generador): un clack metálico con giro
+    x = golpe_metal(0.25, 520) * 0.5
+    x += pasabajos(rng_n.uniform(-1, 1, len(x)), 1200) * campana(len(x), 25) * 0.6
+    guardar(x, "sfx/pedal", 0.6)
+
+
+def neon_valle():
+    musica_neon()
+    musica_silas()
+    musica_valle()
+    musica_kael()
+    ambiente_neon()
+    ambiente_bosque()
+    sfx_neon_valle()
+
+
 if __name__ == "__main__":
+    import sys
+    if "solo_nuevos" in sys.argv:   # python3 generar_audio.py solo_nuevos  (no vuelve a codificar lo de antes)
+        neon_valle()
+        print("Audio nuevo listo en", AUDIO)
+        sys.exit(0)
     musica_recuerdo()
     musica_paramo()
     musica_combate()
@@ -610,4 +817,5 @@ if __name__ == "__main__":
     sfx()
     bastion()
     sumidero()
+    neon_valle()
     print("Audio listo en", AUDIO)

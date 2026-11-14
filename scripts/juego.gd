@@ -18,6 +18,7 @@ const SUBTITULO_JUEGO := "Las Seis Ciudades"   # provisional
 ## Partida guardada (en Android y en el navegador también funciona: user:// es la memoria del juego)
 const RUTA_GUARDADO := "user://partida.json"
 const RUTA_RESPALDO := "user://partida_respaldo.json"
+const RUTA_PRUEBA := "user://partida_prueba.json"   # el menú de prueba guarda aquí (nunca toca tu partida)
 const VERSION_GUARDADO := 1
 const MENU := "res://escenas/menu.tscn"
 
@@ -45,6 +46,20 @@ const OBJETOS := {
 		"desc": "Cura la infección, la quemadura, la parálisis y la ceguera de una carta." },
 	"mascara_filtro": { "nombre": "Máscara de Filtro", "tipo": "clave", "precio": 150, "max": 1,
 		"desc": "Filtra el gas tóxico. Con ella puedes entrar al Colector de Gas del Sumidero." },
+	# Ciudad Neón (Ciudad 3)
+	"granada_luz": { "nombre": "Granada de Luz", "tipo": "destello", "precio": 40, "max": 3,
+		"desc": "Un destello que ciega a la bestia rival: falla más sus ataques durante 3 turnos." },
+	"visor_polarizado": { "nombre": "Visor Polarizado", "tipo": "clave", "precio": 0, "max": 1,
+		"desc": "Lo armó Rina con los micrófonos de Silas. Corta el brillo: el Juego de Luces molesta la mitad." },
+	"carta_leo": { "nombre": "Carta de Leo", "tipo": "clave", "precio": 0, "max": 1,
+		"desc": "Una carta arrugada de Leo para su hermana Mara (Ciudad Neón)." },
+	# Valle Ceniza (Ciudad 4)
+	"codigos_capital": { "nombre": "Códigos de la Capital", "tipo": "clave", "precio": 0, "max": 1,
+		"desc": "Los códigos de acceso que Kael guardaba. Abren puertas de la Capital." },
+	"mapa_debilidades": { "nombre": "Mapa de Debilidades", "tipo": "clave", "precio": 0, "max": 1,
+		"desc": "Lo que Kael sabe del Líder: sus defensas y sus puntos débiles." },
+	"grabacion_padres": { "nombre": "Grabación de mis padres", "tipo": "clave", "precio": 0, "max": 1,
+		"desc": "Una grabación escondida de mamá y papá. Se puede escuchar desde la mochila." },
 }
 ## Lo que pagan los mercaderes por cada Reliquia del Viejo Mundo (cables, placas, relojes...).
 const PRECIO_RELIQUIA := 10
@@ -87,6 +102,7 @@ var mensajes_pendientes: Array = []
 var cambiando_escena := false     # true mientras se carga otra escena
 var tiempo_jugado := 0.0          # segundos de juego (se guarda con la partida)
 var guardar_pronto := false       # la historia pide guardar apenas termine el evento (ej. al dormir)
+var modo_prueba := false          # true si empezaste desde el menú de prueba (ver preparar_prueba)
 
 
 ## Cambia de escena. Si algo falla, muestra el error en pantalla (nunca deja la pantalla en negro).
@@ -183,14 +199,16 @@ func _mostrar_error(texto: String) -> void:
 # Si algo falla, lo muestra en pantalla (y en la pestaña Salida) en vez de dejar todo negro.
 # ---------------------------------------------------------------------------
 const MAPAS := ["res://escenas/mapas/refugio_cero.tscn", "res://escenas/mapas/superficie.tscn", "res://escenas/mapas/bastion_oxido.tscn",
-	"res://escenas/mapas/autopista.tscn", "res://escenas/mapas/sumidero.tscn"]
+	"res://escenas/mapas/autopista.tscn", "res://escenas/mapas/sumidero.tscn", "res://escenas/mapas/paso_smog.tscn",
+	"res://escenas/mapas/ciudad_neon.tscn", "res://escenas/mapas/bosque_calcinado.tscn", "res://escenas/mapas/valle_ceniza.tscn"]
 
 func _autodiagnostico() -> void:
 	var problemas: Array[String] = []
 	# ¿Godot importó las imágenes y letras? (si no, nada de lo demás puede cargar)
 	var sin_importar: Array[String] = []
 	for ruta in ["res://arte/interfaz/boton.png", "res://arte/interfaz/panel.png", "res://arte/tiles/interior.png",
-			"res://arte/tiles/exterior.png", "res://arte/tiles/subterraneo.png", "res://arte/interfaz/exclamacion.png", "res://arte/fuentes/PixelifySans.ttf"]:
+			"res://arte/tiles/exterior.png", "res://arte/tiles/subterraneo.png", "res://arte/tiles/neon.png", "res://arte/tiles/ceniza.png",
+			"res://arte/interfaz/exclamacion.png", "res://arte/fuentes/PixelifySans.ttf"]:
 		if load(ruta) == null:
 			sin_importar.append(ruta.trim_prefix("res://"))
 	var tema := load("res://arte/tema.tres") as Theme
@@ -198,7 +216,8 @@ func _autodiagnostico() -> void:
 		problemas.append("No carga arte/tema.tres (botones y letra pixel).")
 	elif not tema.is_type_variation(&"BotonRedondo", &"Button") or tema.default_font == null:
 		problemas.append("arte/tema.tres es una versión vieja o está incompleto.")
-	for ruta in ["res://arte/tiles/interior.tres", "res://arte/tiles/exterior.tres", "res://arte/tiles/subterraneo.tres"]:
+	for ruta in ["res://arte/tiles/interior.tres", "res://arte/tiles/exterior.tres", "res://arte/tiles/subterraneo.tres",
+			"res://arte/tiles/neon.tres", "res://arte/tiles/ceniza.tres"]:
 		var ts := load(ruta) as TileSet
 		if ts == null or ts.get_source_count() == 0:
 			problemas.append("No carga el tileset " + ruta)
@@ -372,6 +391,10 @@ func crear_luchador(id: String, nivel: int, hp_actual: int = -1) -> Dictionary:
 		"enlodado": false,      # Velocidad en 0 hasta que sale del campo (lodo de la Sirena)
 		"camuflado": 0,         # turnos en que es invisible (Cazador Camuflado)
 		"aturdido": false,      # pierde su próxima acción (salpicadura de la Burbuja Tóxica)
+		"confundido": 0,        # turnos confundido (eco del Espectro Sónico, ilusiones de Silas): puede lastimarse solo
+		"esquivas_iniciales": 0,  # primeros ataques que esquiva casi seguro (la Bestia Blanca de Silas)
+		"represalia": 0.0,      # probabilidad de paralizar a quien la golpea (la Bailarina de Silas)
+		"bloquea_curas": 0.0,   # probabilidad de impedir que Pan cure (los Humanoides de Kael)
 	}
 
 
@@ -704,6 +727,7 @@ func nueva_partida() -> void:
 	mensajes_pendientes = []
 	tiempo_jugado = 0.0
 	guardar_pronto = false
+	modo_prueba = false
 	var inicial: String = _leer_json(RUTA_CRIATURAS).get("carta_inicial", "")
 	if inicial != "":
 		agregar_carta(inicial)
@@ -747,6 +771,8 @@ func guardar() -> bool:
 		"tiempo_clima": tiempo_clima,
 		"pasos_sin_encuentro": pasos_sin_encuentro,
 	}
+	if modo_prueba:   # el modo de prueba nunca toca tu partida de verdad
+		return _escribir(RUTA_PRUEBA, JSON.stringify(datos, "\t"))
 	# La partida anterior queda de respaldo, por si el guardado nuevo se corta a la mitad.
 	var anterior := FileAccess.get_file_as_string(RUTA_GUARDADO) if FileAccess.file_exists(RUTA_GUARDADO) else ""
 	if anterior != "":
@@ -781,7 +807,8 @@ func resumen_partida() -> Dictionary:
 	if datos.is_empty():
 		return {}
 	var lugares := { "refugio_cero": "Refugio Cero", "superficie": "La Superficie", "bastion_oxido": "Bastión de Óxido",
-		"autopista": "La Autopista Quemada", "sumidero": "El Sumidero" }
+		"autopista": "La Autopista Quemada", "sumidero": "El Sumidero", "paso_smog": "El Paso del Smog",
+		"ciudad_neon": "Ciudad Neón", "bosque_calcinado": "El Bosque Calcinado", "valle_ceniza": "Valle Ceniza" }
 	var nombre: String = datos.get("nombre_mapa", "")
 	var minutos := int(float(datos.get("tiempo_jugado", 0.0)) / 60.0)
 	return {
@@ -844,3 +871,75 @@ func _notification(what: int) -> void:
 	if what in [NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST]:
 		if is_inside_tree():
 			guardar()
+
+
+# ---------------------------------------------------------------------------
+# MODO PRUEBA (menú oculto: toca 5 veces el título del menú o pulsa T)
+# Empieza en la ciudad que elijas con un equipo armado, como si hubieras jugado lo anterior.
+# Guarda en user://partida_prueba.json: tu partida de verdad no se toca.
+# ---------------------------------------------------------------------------
+const PRUEBA_BANDERAS := [
+	# Prólogo
+	["desperto", "tiene_mochila", "reviso_mesa", "tiene_collar", "gato_capturado", "recluta_visible", "recluta_derrotado",
+		"durmio_refugio", "refugio_sellado", "salio_superficie", "titulo_visto", "mision_bastion", "hablo_ciudadano"],
+	# Ciudad 1: Bastión de Óxido y la Autopista
+	["bastion_visitado", "escena_rictus_vista", "guardia_1_derrotado", "guardia_2_derrotado", "rictus_derrotado_combate",
+		"rictus_derrotado", "trituradora_apagada", "bastion_liberado", "lia_sana", "salida_este_abierta", "autopista_visitada",
+		"cazador_visible", "cazador_derrotado"],
+	# Ciudad 2: el Sumidero
+	["sumidero_visitado", "escena_antidoto_vista", "guardia_lab_1_derrotado", "guardia_lab_2_derrotado", "vesper_espera",
+		"vesper_derrotada", "valvula_cerrada", "sumidero_liberado", "tunel_este_abierto"],
+	# Ciudad 3: el Paso del Smog y Ciudad Neón
+	["smog_visitado", "gas_falso_visto", "patrullero_derrotado", "neon_visitado", "hablo_coral", "guardia_neon_1_derrotado",
+		"guardia_neon_2_derrotado", "silas_espera", "ilusion_vista", "silas_derrotado", "torres_apagadas", "neon_liberado"],
+]
+const PRUEBA_EQUIPOS := [
+	[["gato_mutado", 2], ["oso_de_escoria", 1]],
+	[["gato_mutado", 4], ["oso_de_escoria", 2], ["aves_negras", 2], ["enjambre_mecanico", 1]],
+	[["gato_mutado", 8], ["espectro_sonico", 2], ["lobo_de_ceniza", 4], ["gusano_devorador", 4], ["burbuja_toxica", 2], ["bestia_blanca", 2]],
+	[["gato_mutado", 16], ["espectro_sonico", 8], ["lobo_de_ceniza", 8], ["gusano_devorador", 8], ["bailarina_electrica", 4], ["caballero_de_neon", 4]],
+]
+
+
+func preparar_prueba(ciudad: int) -> void:
+	ciudad = clampi(ciudad, 1, 4)
+	nueva_partida()
+	modo_prueba = true
+	for i in ciudad:
+		for f in PRUEBA_BANDERAS[i]:
+			flags[f] = true
+	mochila = []
+	for par in PRUEBA_EQUIPOS[ciudad - 1]:
+		if not criaturas.has(par[0]):
+			continue
+		for n in par[1]:
+			agregar_carta(par[0])
+	if mochila.is_empty() and not criaturas.is_empty():
+		agregar_carta(criaturas.keys()[0])
+	dormir()
+	bonus_ataque = 0.10 * (ciudad - 1)
+	monedas = [60, 150, 300, 400][ciudad - 1]
+	objetos["carta_vinculo"] = 10
+	objetos["granada_aturdidora"] = 1
+	dar_objeto("cura_50", 4)
+	dar_objeto("racion", 2)
+	if ciudad >= 2:
+		dar_objeto("antidoto", 3)
+		dar_objeto("potenciador_20", 2)
+		dar_objeto("cura_80", 1)
+	if ciudad >= 3:
+		dar_objeto("granada_luz", 2)
+		dar_objeto("cura_80", 1)
+	if ciudad >= 4:
+		dar_objeto("visor_polarizado", 1)
+	var inicio: Array = [
+		["res://escenas/mapas/bastion_oxido.tscn", "Puerta", { "mapa": "res://escenas/mapas/superficie.tscn", "entrada": "Fogata" },
+			"Llega a Bastión de Óxido y encuentra al Comandante Rictus."],
+		["res://escenas/mapas/sumidero.tscn", "Escalera", { "mapa": "res://escenas/mapas/bastion_oxido.tscn", "entrada": "Posada" }, ""],
+		["res://escenas/mapas/paso_smog.tscn", "Oeste", { "mapa": "res://escenas/mapas/sumidero.tscn", "entrada": "Posada" }, ""],
+		["res://escenas/mapas/bosque_calcinado.tscn", "Oeste", { "mapa": "res://escenas/mapas/ciudad_neon.tscn", "entrada": "Motel" }, ""],
+	][ciudad - 1]
+	lugar_descanso = inicio[2]
+	mision = inicio[3]
+	mensajes_pendientes.append("MODO PRUEBA: Ciudad %d. Tu partida guardada no se toca." % ciudad)
+	ir_a_mapa(inicio[0], inicio[1])

@@ -22,8 +22,8 @@
 #mm,mm,mmmmz,m..,......PPPPPPPPPPPPPPPP........c....,.......,..#
 #m,m,,mm,mmm,m,c.......PPPPPPPPPPPPPPPP..,..,.......,..,,......#
 #mm,m,m,m,mmm,.........PPPPPPPPPPPPPPPP........................#
-#mmmmmmfm,m,mm.........PPPPPPPPPPPPPPPP..........,.,....k......#
-#mmmmmmm,,,,,mr.,......PPPPPPPPPPPPPPPP.............,,.........#
+#mmmmmmfm,m,mm.........PPPPPPPPPPPPPPPP..........,.,....k.......
+#mmmmmmm,,,,,mr.,......PPPPPPPPPPPPPPPP.............,,..........
 #mmmmmmm,mmm,m..,......PPPPPPPPPPPPPPPP................,,.,.,.,#
 #mmkmmmmm,mmm,....lllllllllllllllllllllllllll.......c..........#
 #mmmmmmmmmmm,m....lllllllllllllllllllllllllll...,....,.........#

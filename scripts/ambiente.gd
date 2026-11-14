@@ -192,21 +192,62 @@ static func textura_vineta() -> Texture2D:
 ## Celdas del mapa que usan cierto tile (por su nombre en arte/tiles/tiles.json).
 static func celdas_con_tile(capa: TileMapLayer, nombre: String) -> Array[Vector2i]:
 	var lista: Array[Vector2i] = []
+	var coords := coords_de(capa, [nombre])
+	if coords.is_empty():
+		return lista
+	for celda in capa.get_used_cells():
+		if capa.get_cell_atlas_coords(celda) in coords:
+			lista.append(celda)
+	return lista
+
+
+## Coordenadas (en el atlas del mapa) de los tiles con estos nombres.
+## Busca primero en el grupo del atlas que usa el mapa (ej. "neon" si el tileset usa neon.png),
+## porque hay nombres repetidos entre atlas ("ceniza_1", "pared", "barril"...).
+static func coords_de(capa: TileMapLayer, nombres: Array) -> Array[Vector2i]:
+	var lista: Array[Vector2i] = []
 	if not FileAccess.file_exists(TILES_JSON):
 		return lista
 	var info = JSON.parse_string(FileAccess.get_file_as_string(TILES_JSON))
 	if typeof(info) != TYPE_DICTIONARY:
 		return lista
-	var coords = null
-	for grupo in info.values():
-		if grupo.has(nombre):
-			coords = Vector2i(int(grupo[nombre][0]), int(grupo[nombre][1]))
-	if coords == null:
-		return lista
-	for celda in capa.get_used_cells():
-		if capa.get_cell_atlas_coords(celda) == coords:
-			lista.append(celda)
+	var grupo = null
+	var ts := capa.tile_set
+	if ts != null and ts.get_source_count() > 0:
+		var fuente := ts.get_source(ts.get_source_id(0)) as TileSetAtlasSource
+		if fuente != null and fuente.texture != null:
+			grupo = info.get(fuente.texture.resource_path.get_file().get_basename(), null)
+	for nombre in nombres:
+		var c = null
+		if grupo is Dictionary and grupo.has(nombre):
+			c = grupo[nombre]
+		else:   # como antes: el último atlas que tenga ese nombre
+			for g in info.values():
+				if g is Dictionary and g.has(nombre):
+					c = g[nombre]
+		if c != null:
+			lista.append(Vector2i(int(c[0]), int(c[1])))
 	return lista
+
+
+## Ceniza que cae despacio y en silencio, como nieve (Valle Ceniza y el Bosque Calcinado).
+static func nieve_ceniza(area: Vector2) -> CPUParticles2D:
+	var p := _base(90, 10.0, area)
+	p.texture = _pixel(2)
+	p.direction = Vector2(0.1, 1)
+	p.spread = 25
+	p.gravity = Vector2(1, 3)
+	p.initial_velocity_min = 4
+	p.initial_velocity_max = 9
+	p.scale_amount_min = 0.5
+	p.scale_amount_max = 1.2
+	var g := Gradient.new()
+	g.set_color(0, Color(0.85, 0.85, 0.86, 0.0))
+	g.set_color(1, Color(0.75, 0.74, 0.76, 0.0))
+	g.add_point(0.12, Color(0.88, 0.87, 0.9, 0.75))
+	g.add_point(0.85, Color(0.78, 0.77, 0.8, 0.55))
+	p.color_ramp = g
+	return p
 
 
 ## Tormenta de óxido: ráfagas de polvo naranja que cruzan la pantalla de izquierda a derecha.

@@ -62,5 +62,20 @@
 				94
 			]
 		]
+	},
+	"smog": {
+		"humo": []
+	},
+	"neon": {
+		"humo": []
+	},
+	"casino": {
+		"humo": []
+	},
+	"bosque": {
+		"humo": []
+	},
+	"valle": {
+		"humo": []
 	}
 }

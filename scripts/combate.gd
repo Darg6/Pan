@@ -60,6 +60,8 @@ var _tormenta := false           # tormenta de óxido en Bastión
 var _estatica_pendiente := ""    # nombre de quien quedó paralizado por la estática (para el mensaje)
 var _campo_radioactivo := false  # Vesper llena la arena de gas: tus cartas pierden un poco de vida cada turno
 var _gas: ColorRect               # el verde del gas en pantalla
+var _juego_luces := false        # Silas: focos que marean (tus ataques pierden precisión, menos los sónicos)
+var _postura_defensiva := false  # Kael: sus bestias reciben un 25% menos de daño
 
 
 func _ready() -> void:
@@ -84,6 +86,10 @@ func _ready() -> void:
 	_campo_radioactivo = bool(datos.get("campo_radioactivo", false))
 	if _campo_radioactivo:
 		_armar_gas()
+	_juego_luces = bool(datos.get("juego_de_luces", false))
+	if _juego_luces:
+		_armar_luces()
+	_postura_defensiva = bool(datos.get("postura_defensiva", false))
 	equipo_enemigo = datos.get("equipo", []).duplicate(true)
 
 	_preparar_barra(barra_aliado)
@@ -130,9 +136,21 @@ func _ready() -> void:
 		Sonido.efecto("burbuja", 0.8)
 		await _decir("¡%s llena la arena de gas! CAMPO RADIOACTIVO: tu carta en el campo pierde un poco de vida cada turno." % datos.get("entrenador", {}).get("nombre", "La comandante"))
 		await _decir("Consejo: cambiar de carta es más rápido que atacar. Rota tus cartas para repartir el daño.")
+	if _juego_luces:
+		Sonido.efecto("destello")
+		await _decir("¡JUEGO DE LUCES! Los focos de %s marean a tus criaturas: sus ataques pierden un 30%% de precisión." % datos.get("entrenador", {}).get("nombre", "Silas"))
+		if Juego.tiene_objeto("visor_polarizado"):
+			await _decir("El Visor Polarizado de Rina corta el brillo: la pérdida baja a la mitad (15%).")
+		await _decir("Consejo: los ataques SÓNICOS no necesitan ver. Nunca fallan, aunque el rival esquive.")
+	if _postura_defensiva:
+		await _decir("POSTURA DEFENSIVA: %s protege a sus bestias. Reciben un 25%% menos de daño." % datos.get("entrenador", {}).get("nombre", "Kael"))
 	if datos.has("intervencion"):
-		await _decir("Cuidado: %s puede atacar a tu carta desde lejos cada %d turnos (Intervención Directa)." % [
-			datos.get("entrenador", {}).get("nombre", "El bandido"), _cada_intervencion()])
+		if datos["intervencion"] == "ilusion":
+			await _decir("Cuidado: cada %d turnos %s proyecta ilusiones que confunden a tu carta." % [
+				_cada_intervencion(), datos.get("entrenador", {}).get("nombre", "Silas")])
+		else:
+			await _decir("Cuidado: %s puede atacar a tu carta desde lejos cada %d turnos (Intervención Directa)." % [
+				datos.get("entrenador", {}).get("nombre", "El bandido"), _cada_intervencion()])
 
 	var primera := _primera_carta_viva()
 	if primera == -1:
@@ -164,6 +182,7 @@ func _sacar_enemigo(info: Dictionary, animar := true) -> void:
 		enemigo = Juego.crear_luchador(info["id"], info["nivel"])
 		enemigo["nombre_especie"] = enemigo["nombre"]
 		enemigo["nombre"] += " rival" if tipo == "entrenador" else " salvaje"
+		_extras_de_entrenador(enemigo, info)
 	_turnos_desde_cambio = 0
 	enemigo["bajo_tierra"] = false
 	if enemigo.get("pasiva", "") == "camuflaje":
@@ -221,7 +240,7 @@ func _menu_mochila() -> void:
 		entradas.append(["Granada x%d" % Juego.objetos["granada_aturdidora"], func(): _turno({ "tipo": "granada" })])
 	if tipo != "tutorial_captura":
 		for id in Juego.OBJETOS:
-			if Juego.tipo_objeto(id) in ["cura", "comida", "potenciador", "antidoto"] and Juego.tiene_objeto(id):
+			if Juego.tipo_objeto(id) in ["cura", "comida", "potenciador", "antidoto", "destello"] and Juego.tiene_objeto(id):
 				entradas.append(["%s x%d" % [Juego.nombre_objeto(id), Juego.objetos[id]], func(): _turno({ "tipo": "objeto", "id": id })])
 		entradas.append(["Cartas", _menu_cartas])
 	if entradas.is_empty():
@@ -506,6 +525,12 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 		precision *= 0.85   # el polvo de óxido no deja ver
 	if atacante.get("cegado", 0) > 0:
 		precision *= 0.6    # el humo no deja ver
+	# Los ataques sónicos no necesitan ver: nunca fallan. El Vigilante Ciego tampoco (Justicia Ciega).
+	var nunca_falla: bool = (mov["tipo"] == "sonico" and int(mov["poder"]) > 0) or atacante.get("pasiva", "") == "justicia_ciega"
+	if _juego_luces and atacante == aliado:
+		precision *= 0.85 if Juego.tiene_objeto("visor_polarizado") else 0.7
+	if nunca_falla:
+		precision = 1.0
 	var debilidad := _modificador_tipo(mov["tipo"], defensor)
 	if debilidad == 0.0:
 		await _acometer(spr_atacante, spr_defensor)
@@ -539,7 +564,7 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 	if int(mov["poder"]) <= 0:
 		await _acometer(spr_atacante, spr_defensor)
 		_regresar(spr_atacante)
-		if randf() < defensor["evasion"] or randf() > precision:
+		if randf() < _evasion_efectiva(defensor, nunca_falla) or randf() > precision:
 			_esquivar(spr_defensor)
 			await _decir("¡%s lo esquivó!" % defensor["nombre"])
 			return
@@ -556,7 +581,7 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 			break
 		if g > 0:
 			await _rafaga(spr_atacante, spr_defensor)
-		if randf() < defensor["evasion"] or randf() > precision:
+		if randf() < _evasion_efectiva(defensor, nunca_falla) or randf() > precision:
 			_esquivar(spr_defensor)
 			Sonido.efecto("lanzar", 1.4, -4.0)
 			_texto_flotante(spr_defensor, "Fallo", Color(1, 1, 1, 0.7))
@@ -572,6 +597,8 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 			danio = maxi(1, danio / 2)   # la gelatina absorbe los golpes físicos
 		if golpes > 1 and defensor.get("pasiva", "") == "abrumado":
 			danio *= 2                   # los Humanoides se abruman con las ráfagas
+		if _postura_defensiva and defensor == enemigo:
+			danio = maxi(1, roundi(danio * 0.75))   # Postura Defensiva de Kael
 		defensor["hp"] = maxi(0, defensor["hp"] - danio)
 		aciertos += 1
 		danio_total += danio
@@ -595,6 +622,21 @@ func _usar_movimiento(atacante: Dictionary, defensor: Dictionary, mov: Dictionar
 		await _decir("No es muy efectivo...")
 	if golpes > 1 and defensor.get("pasiva", "") == "abrumado":
 		await _decir("¡Tantos golpes abruman a %s!" % defensor["nombre"])
+	# Bestia Blindada: sus placas devuelven parte de los golpes de cuerpo
+	if defensor.get("pasiva", "") == "reflejo" and mov["tipo"] in TIPOS_FISICOS and atacante["hp"] > 0 and atacante.get("pasiva", "") != "reflejo":
+		var rebote := maxi(1, roundi(danio_total * 0.3))
+		atacante["hp"] = maxi(0, atacante["hp"] - rebote)
+		Sonido.efecto("metal", 1.2)
+		_destello(spr_atacante, COLOR_TIPO["chatarra"], 0.3)
+		_texto_flotante(spr_atacante, str(rebote), Color("#ffb070"))
+		_actualizar_hud()
+		await _decir("¡Las placas de %s devuelven %d de daño a %s!" % [defensor["nombre"], rebote, atacante["nombre"]])
+	# Bailarina de Silas: cada golpe que recibe puede paralizar a quien la golpeó
+	if float(defensor.get("represalia", 0.0)) > 0.0 and atacante["hp"] > 0 and atacante["paralizado"] <= 0 and randf() < float(defensor["represalia"]):
+		atacante["paralizado"] = 3
+		_destello(spr_atacante, COLOR_TIPO["energia"], 0.4)
+		_actualizar_hud()
+		await _decir("¡Una descarga sale de %s y paraliza a %s!" % [defensor["nombre"], atacante["nombre"]])
 	if atacante == enemigo and tipo == "entrenador" and (debilidad > 1.0 or aliado["hp"] < aliado["hp_max"] * 0.4):
 		await _frase("golpe")
 	# Burbuja Tóxica: si la golpeas con el cuerpo, revienta y te salpica ácido paralizante
@@ -679,6 +721,15 @@ func _aplicar_efecto(efecto: String, atacante: Dictionary, defensor: Dictionary,
 			_texto_flotante(spr_defensor, "VEL 0", Color("#c8a060"))
 			_actualizar_hud()
 			await _decir("¡%s queda atrapado en el lodo! Su Velocidad bajó a CERO. (Sácalo del campo para limpiarlo.)" % defensor["nombre"])
+		"confundir":
+			if defensor.get("confundido", 0) > 0:
+				await _decir("%s ya está confundido." % defensor["nombre"])
+				return
+			defensor["confundido"] = 3
+			_destello(spr_defensor, COLOR_TIPO["sonico"], 0.5)
+			_texto_flotante(spr_defensor, "CONF", Color("#f0d0ff"))
+			_actualizar_hud()
+			await _decir("¡El eco confunde a %s! Puede lastimarse solo." % defensor["nombre"])
 		"anular":
 			var quito := false
 			if defensor["ataque"] > defensor["ataque_base"] + 0.01:
@@ -745,6 +796,11 @@ func _fase_estados() -> void:
 			if luchador["cegado"] == 0 and luchador["hp"] > 0:
 				_actualizar_hud()
 				await _decir("El humo se disipa: %s ya ve bien." % luchador["nombre"])
+		if luchador.get("confundido", 0) > 0:
+			luchador["confundido"] -= 1
+			if luchador["confundido"] == 0 and luchador["hp"] > 0:
+				_actualizar_hud()
+				await _decir("%s ya no está confundido." % luchador["nombre"])
 		if luchador["camuflado"] > 0:
 			luchador["camuflado"] -= 1
 			if luchador["camuflado"] == 0 and luchador["hp"] > 0:
@@ -774,6 +830,9 @@ func _cada_intervencion() -> int:
 
 ## El bandido lanza un molotov (quemadura) o un frasco de veneno (infección) a la carta de Pan.
 func _intervencion_directa() -> void:
+	if datos.get("intervencion", "") == "ilusion":
+		await _ilusion()
+		return
 	var nombre_e: String = datos.get("entrenador", {}).get("nombre", "El bandido")
 	var molotov: bool = datos.get("intervencion", "molotov") == "molotov"
 	var t := create_tween()
@@ -812,6 +871,10 @@ func _revisar_caidos() -> bool:
 			var nombre_e: String = datos.get("entrenador", {}).get("nombre", "El bandido")
 			_sacudir_entrenador()
 			await _decir("¡%s se quedó sin bestias!" % nombre_e)
+			if datos.get("piedad", false):
+				await _rendicion()
+				_terminar("victoria")
+				return true
 			await _frase("derrota")
 			var botin: Dictionary = datos.get("botin", {})
 			if not botin.is_empty():
@@ -1068,6 +1131,7 @@ func _ia_enemigo() -> Dictionary:
 						var l := Juego.crear_luchador(cand["id"], cand["nivel"])
 						l["nombre_especie"] = l["nombre"]
 						l["nombre"] += " rival"
+						_extras_de_entrenador(l, cand)
 						equipo_enemigo[i] = l
 					opciones_ia.append([92.0, { "tipo": "cambio_enemigo", "indice": i }])
 					break
@@ -1094,6 +1158,15 @@ func _no_puede_actuar(l: Dictionary, s: Sprite2D) -> bool:
 		Sonido.efecto("fallo", 1.2)
 		await _decir("¡%s sigue cubierto de ácido y pierde el turno!" % l["nombre"])
 		return true
+	if l.get("confundido", 0) > 0 and randf() < 0.4:
+		var golpe := maxi(1, l["hp_max"] / 10)
+		l["hp"] = maxi(0, l["hp"] - golpe)
+		_destello(s, COLOR_TIPO["sonico"], 0.3)
+		_texto_flotante(s, str(golpe), Color("#f0d0ff"))
+		_actualizar_hud()
+		Sonido.efecto("golpe", 0.8)
+		await _decir("¡%s está confundido y se lastima solo!" % l["nombre"])
+		return true
 	if l["paralizado"] <= 0 or randf() >= 0.5:
 		return false
 	_destello(s, COLOR_TIPO["energia"], 0.3)
@@ -1105,7 +1178,18 @@ func _no_puede_actuar(l: Dictionary, s: Sprite2D) -> bool:
 ## Curas, comida y potenciadores (siempre en la criatura que está peleando).
 func _usar_objeto(id: String) -> void:
 	var info: Dictionary = Juego.OBJETOS[id]
+	# Los Humanoides de Kael a veces se lanzan sobre la jeringa y no dejan curar (no se gasta el objeto)
+	if info["tipo"] in ["cura", "comida"] and float(enemigo.get("bloquea_curas", 0.0)) > 0.0 and enemigo["hp"] > 0 \
+			and randf() < float(enemigo["bloquea_curas"]):
+		await _acometer(sprite_enemigo, sprite_aliado)
+		_regresar(sprite_enemigo)
+		Sonido.efecto("fallo")
+		await _decir("¡%s se lanza sobre Pan y le tapa la mano! La cura no llega a %s." % [enemigo["nombre"], aliado["nombre"]])
+		return
 	Juego.usar_objeto(id)
+	if info["tipo"] == "destello":
+		await _granada_de_luz(info)
+		return
 	await _decir("Pan usa %s en %s." % [info["nombre"], aliado["nombre"]], 0.2)
 	var o := await _lanzar(TEX_CARTA, sprite_aliado.position + Vector2(0, -24), 0.3)
 	o.queue_free()
@@ -1116,6 +1200,7 @@ func _usar_objeto(id: String) -> void:
 		aliado["paralizado"] = 0
 		aliado["cegado"] = 0
 		aliado["aturdido"] = false
+		aliado["confundido"] = 0
 		_destello(sprite_aliado, Color("#9ff0ff"), 0.6)
 		_texto_flotante(sprite_aliado, "SANO", Color("#9ff0ff"))
 		_actualizar_hud()
@@ -1208,6 +1293,8 @@ func _estados_cortos(l: Dictionary) -> String:
 		lista.append("LODO")
 	if l.get("camuflado", 0) > 0:
 		lista.append("OCULTO")
+	if l.get("confundido", 0) > 0:
+		lista.append("CONF")
 	if l.get("ataque", 0.0) > l.get("ataque_base", 1e9) + 0.01:
 		lista.append("ATK+")
 	if l.get("defensa", 0.0) > l.get("defensa_base", 1e9) + 0.01:
@@ -1219,7 +1306,7 @@ func _estados_cortos(l: Dictionary) -> String:
 
 func _tiene_estado_curable(l: Dictionary) -> bool:
 	return l.get("infectado", false) or l.get("quemado", false) or l.get("paralizado", 0) > 0 \
-		or l.get("cegado", 0) > 0 or l.get("aturdido", false)
+		or l.get("cegado", 0) > 0 or l.get("aturdido", false) or l.get("confundido", 0) > 0
 
 
 ## Nube de humo gris que tapa al que quedó cegado.
@@ -1233,6 +1320,99 @@ func _humo(s: Sprite2D) -> void:
 	t.tween_property(h, "emitting", false, 0.0)
 	t.tween_interval(2.4)
 	t.tween_callback(h.queue_free)
+
+
+## Lo especial de cada bestia de un comandante (datos del encuentro, ej. la Bestia Blanca de Silas
+## esquiva casi todo al principio, la Bailarina paraliza al que la golpea, los Humanoides de Kael bloquean curas).
+func _extras_de_entrenador(l: Dictionary, info: Dictionary) -> void:
+	if info.has("esquiva_inicial"):
+		l["esquivas_iniciales"] = int(info["esquiva_inicial"])
+	if info.has("represalia"):
+		l["represalia"] = float(info["represalia"])
+	if info.has("bloquea_curas"):
+		l["bloquea_curas"] = float(info["bloquea_curas"])
+
+
+## Evasión real de un golpe: los primeros ataques contra la Bestia Blanca de Silas fallan casi siempre (80%).
+func _evasion_efectiva(defensor: Dictionary, nunca_falla: bool) -> float:
+	if nunca_falla:
+		return 0.0
+	if int(defensor.get("esquivas_iniciales", 0)) > 0:
+		defensor["esquivas_iniciales"] = int(defensor["esquivas_iniciales"]) - 1
+		return maxf(float(defensor["evasion"]), 0.8)
+	return float(defensor["evasion"])
+
+
+## Granada de Luz: un destello que ciega a la bestia rival (falla más sus ataques).
+func _granada_de_luz(info: Dictionary) -> void:
+	await _decir("¡Pan lanza una %s!" % info["nombre"], 0.2)
+	var g := await _lanzar(Juego.textura("res://arte/objetos/granada_luz.png"), sprite_enemigo.position + Vector2(0, -24))
+	g.queue_free()
+	Sonido.efecto("destello")
+	transicion.color = Color(1, 1, 1, 0.95)
+	create_tween().tween_property(transicion, "color:a", 0.0, 0.5)
+	enemigo["cegado"] = 3
+	enemigo["esquivas_iniciales"] = 0
+	_texto_flotante(sprite_enemigo, "PREC-", Color("#c8c0b8"))
+	_actualizar_hud()
+	await _decir("¡El destello ciega a %s! Va a fallar más sus ataques." % enemigo["nombre"])
+
+
+## Juego de Luces (Silas): los colores del escenario cambian sin parar.
+func _armar_luces() -> void:
+	var luces := ColorRect.new()
+	luces.color = Color(1.0, 0.3, 0.85, 0.08)
+	luces.size = Vector2(480, 270)
+	luces.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	escenario.add_child(luces)
+	var t := create_tween().set_loops()
+	t.tween_property(luces, "color", Color(0.25, 0.95, 1.0, 0.14), 0.9).set_trans(Tween.TRANS_SINE)
+	t.tween_property(luces, "color", Color(1.0, 0.3, 0.85, 0.06), 0.9).set_trans(Tween.TRANS_SINE)
+	t.tween_property(luces, "color", Color(1.0, 0.85, 0.3, 0.12), 0.7).set_trans(Tween.TRANS_SINE)
+
+
+## Silas proyecta una ilusión de los padres de Pan: la carta de Pan queda confundida.
+func _ilusion() -> void:
+	var nombre_e: String = datos.get("entrenador", {}).get("nombre", "Silas")
+	var holo := Sprite2D.new()
+	holo.texture = Juego.textura("res://arte/personajes/%s.png" % ("holo_papa_mapa" if _turno_n % 2 == 0 else "holo_mama_mapa"))
+	holo.scale = Vector2(3, 3)
+	holo.position = sprite_aliado.position + Vector2(60, -40)
+	holo.modulate.a = 0.0
+	holo.z_index = 6
+	escenario.add_child(holo)
+	Sonido.efecto("destello", 0.7)
+	var t := create_tween()
+	t.tween_property(holo, "modulate:a", 0.9, 0.4)
+	await t.finished
+	var frases: Array = datos.get("frases", {}).get("ilusion", ["Mira quién vino a verte, Pan..."])
+	await _decir("%s: \"%s\"" % [nombre_e, frases[(_turno_n / _cada_intervencion()) % frases.size()]], 1.2)
+	var t2 := create_tween()
+	t2.tween_property(holo, "modulate:a", 0.0, 0.5)
+	t2.tween_callback(holo.queue_free)
+	if aliado["hp"] > 0 and aliado.get("confundido", 0) <= 0:
+		aliado["confundido"] = 2
+		_destello(sprite_aliado, Color("#ff9af0"), 0.5)
+		_texto_flotante(sprite_aliado, "CONF", Color("#f0d0ff"))
+		_actualizar_hud()
+		await _decir("La ilusión distrae a %s. ¡Quedó confundido!" % aliado["nombre"])
+
+
+## Kael se rinde: la música se apaga, cae de rodillas y suelta sus armas (la decisión es en el mapa).
+func _rendicion() -> void:
+	Sonido.musica("")
+	await get_tree().create_timer(0.6).timeout
+	var rodillas: String = datos.get("entrenador", {}).get("sprite_rodillas", "")
+	if rodillas != "" and sprite_entrenador.visible:
+		Sonido.efecto("metal", 0.7)
+		var t := create_tween()
+		t.tween_property(sprite_entrenador, "scale", Vector2(1.1, 0.8), 0.15)
+		t.tween_callback(func(): sprite_entrenador.texture = Juego.textura(rodillas))
+		t.tween_property(sprite_entrenador, "scale", Vector2.ONE, 0.2)
+		await t.finished
+	Sonido.efecto("llanto")
+	for linea in datos.get("frases", {}).get("rendicion", []):
+		await _decir(linea, 1.4)
 
 
 ## Campo Radioactivo (Vesper): luz verde que late y burbujas de gas que suben.

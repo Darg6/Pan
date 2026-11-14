@@ -3,6 +3,8 @@ extends Control
 ## - Continuar: aparece solo si hay una partida guardada (sigue donde la dejaste).
 ## - Nueva partida: empieza desde la intro (si ya había partida, pregunta antes de borrarla).
 ## El nombre del juego se cambia en scripts/juego.gd (NOMBRE_JUEGO y SUBTITULO_JUEGO).
+## MENÚ DE PRUEBA (oculto): toca 5 veces el título "PAN" o pulsa la tecla T. Te deja saltar a
+## cualquier ciudad (1 a 4) con un equipo armado. No toca tu partida guardada.
 ## Todo se arma por código para que sea fácil de leer y cambiar.
 
 const INTRO := "res://escenas/intro.tscn"
@@ -16,6 +18,9 @@ var _info: Label
 var _confirmar: PanelContainer
 var _transicion: ColorRect
 var _eligiendo := false
+var _prueba: PanelContainer
+var _toques_titulo := 0
+var _t_toque := 0
 
 
 func _ready() -> void:
@@ -26,6 +31,7 @@ func _ready() -> void:
 	_armar_titulo()
 	_armar_botones()
 	_armar_confirmacion()
+	_armar_prueba()
 	_transicion = ColorRect.new()
 	_transicion.color = Color.BLACK
 	_transicion.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -80,6 +86,8 @@ func _armar_titulo() -> void:
 	_titulo.text = Juego.NOMBRE_JUEGO
 	_titulo.theme_type_variation = &"TituloGrande"
 	_titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_titulo.mouse_filter = Control.MOUSE_FILTER_STOP   # para el menú de prueba (5 toques)
+	_titulo.gui_input.connect(_toque_titulo)
 	caja.add_child(_titulo)
 	_subtitulo = Label.new()
 	_subtitulo.text = Juego.SUBTITULO_JUEGO
@@ -247,3 +255,80 @@ func _empezar_de_cero() -> void:
 	Juego.borrar_partida()
 	Juego.nueva_partida()
 	Juego.cambiar_escena(INTRO)
+
+
+# ---------------------------------------------------------------------------
+# Menú de prueba (oculto): saltar a la Ciudad 1, 2, 3 o 4 con un equipo armado
+# ---------------------------------------------------------------------------
+func _toque_titulo(event: InputEvent) -> void:
+	var toque: bool = (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) \
+		or (event is InputEventScreenTouch and event.pressed)
+	if not toque:
+		return
+	var ahora := Time.get_ticks_msec()
+	if ahora - _t_toque > 1500:   # los toques tienen que ser seguidos
+		_toques_titulo = 0
+	_t_toque = ahora
+	_toques_titulo += 1
+	if _toques_titulo >= 5:
+		_toques_titulo = 0
+		_abrir_prueba()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_T:
+		_abrir_prueba()
+
+
+func _armar_prueba() -> void:
+	_prueba = PanelContainer.new()
+	_prueba.visible = false
+	_prueba.set_anchors_preset(Control.PRESET_CENTER)
+	_prueba.offset_left = -130
+	_prueba.offset_right = 130
+	_prueba.offset_top = -100
+	_prueba.offset_bottom = 100
+	_prueba.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_prueba.grow_vertical = Control.GROW_DIRECTION_BOTH
+	add_child(_prueba)
+	var caja := VBoxContainer.new()
+	caja.add_theme_constant_override("separation", 4)
+	_prueba.add_child(caja)
+	var texto := Label.new()
+	texto.text = "MODO PRUEBA\nTu partida guardada no se toca."
+	texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caja.add_child(texto)
+	var nombres := ["Ciudad 1: Bastión de Óxido", "Ciudad 2: El Sumidero", "Ciudad 3: Ciudad Neón", "Ciudad 4: Valle Ceniza"]
+	for i in nombres.size():
+		var b := Button.new()
+		b.text = nombres[i]
+		b.custom_minimum_size = Vector2(0, 22)
+		b.pressed.connect(Sonido.efecto.bind("boton"))
+		b.pressed.connect(_ir_a_prueba.bind(i + 1))
+		caja.add_child(b)
+	var volver := Button.new()
+	volver.text = "Volver"
+	volver.custom_minimum_size = Vector2(0, 22)
+	volver.pressed.connect(Sonido.efecto.bind("boton"))
+	volver.pressed.connect(_cerrar_prueba)
+	caja.add_child(volver)
+
+
+func _abrir_prueba() -> void:
+	if _eligiendo or _prueba == null or _prueba.visible:
+		return
+	_confirmar.visible = false
+	_botones.visible = false
+	_prueba.visible = true
+	(_prueba.get_child(0).get_child(1) as Control).grab_focus()
+
+
+func _cerrar_prueba() -> void:
+	_prueba.visible = false
+	_botones.visible = true
+	(_botones.get_child(0) as Control).grab_focus()
+
+
+func _ir_a_prueba(ciudad: int) -> void:
+	_prueba.visible = false
+	_salir_a(Juego.preparar_prueba.bind(ciudad))
