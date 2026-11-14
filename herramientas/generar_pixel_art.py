@@ -2658,9 +2658,13 @@ def generar_interfaz():
 if __name__ == "__main__":
     import arte_bastion   # arte de la Ciudad 1 (Bastión de Óxido): herramientas/arte_bastion.py
     import arte_sumidero  # arte de la Ciudad 2 (El Sumidero): herramientas/arte_sumidero.py
+    import arte_neon      # arte de la Ciudad 3 (Ciudad Neón): herramientas/arte_neon.py
+    import arte_valle     # arte de la Ciudad 4 (Valle Ceniza): herramientas/arte_valle.py
     FONDOS_COMBATE.update({"dunas": arte_bastion.fondo_dunas, "bastion": arte_bastion.fondo_bastion,
                            "sumidero": arte_sumidero.fondo_sumidero, "laboratorio": arte_sumidero.fondo_laboratorio,
-                           "autopista": arte_sumidero.fondo_autopista})
+                           "autopista": arte_sumidero.fondo_autopista,
+                           "smog": arte_neon.fondo_smog, "neon": arte_neon.fondo_neon, "casino": arte_neon.fondo_casino,
+                           "bosque": arte_valle.fondo_bosque, "valle": arte_valle.fondo_valle})
     generar_tiles_exterior()
     generar_tiles_interior()
     generar_objetos()
@@ -2677,6 +2681,12 @@ if __name__ == "__main__":
     arte_bastion.generar()
     arte_sumidero.generar()
     TILES_SUB = arte_sumidero.generar_tiles_subterraneo()
+    arte_neon.generar()
+    TILES_NEON = arte_neon.generar_tiles_neon()
+    arte_valle.generar()
+    TILES_CENIZA = arte_valle.generar_tiles_valle()
     with open(os.path.join(ARTE, "tiles", "tiles.json"), "w", encoding="utf-8") as f:
-        json.dump({"exterior": TILES_EXT, "interior": TILES_INT, "subterraneo": TILES_SUB}, f, indent=1, ensure_ascii=False)
-    print("Listo:", len(TILES_EXT), "tiles exteriores,", len(TILES_INT), "interiores,", len(TILES_SUB), "del subterráneo")
+        json.dump({"exterior": TILES_EXT, "interior": TILES_INT, "subterraneo": TILES_SUB,
+                   "neon": TILES_NEON, "ceniza": TILES_CENIZA}, f, indent=1, ensure_ascii=False)
+    print("Listo:", len(TILES_EXT), "tiles exteriores,", len(TILES_INT), "interiores,", len(TILES_SUB), "del subterráneo,",
+          len(TILES_NEON), "de Neón y", len(TILES_CENIZA), "de ceniza")

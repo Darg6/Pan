@@ -499,5 +499,207 @@ for (x, y) in ((50, 39), (60, 45), (61, 39)):
 # bordes
 srect(0, 0, 0, SH - 1, "#"); srect(SW - 1, 0, SW - 1, SH - 1, "#")
 srect(0, SH - 1, SW - 1, SH - 1, "#")
+# Salida este de la plaza: el túnel que la Organización tenía cerrado (lleva al Paso del Smog)
+s[24][SW - 1] = "."; s[25][SW - 1] = "."; s[24][SW - 2] = "."; s[25][SW - 2] = "."
 guardar("sumidero.txt", s)
 print("Mapas de la Ciudad 2 escritos")
+
+
+
+# ---------------------------------------------------------------------------
+# Ayudantes genéricos para los mapas nuevos (trabajan sobre cualquier grilla)
+# ---------------------------------------------------------------------------
+def grilla(ancho_, alto_, ch):
+    return [[ch for _ in range(ancho_)] for _ in range(alto_)]
+
+def g_rect(m_, x0, y0, x1, y1, ch):
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            if 0 <= y < len(m_) and 0 <= x < len(m_[0]):
+                m_[y][x] = ch
+
+def g_blob(m_, r_, cx, cy, rx, ry, ch, sobre=None):
+    for y in range(cy - ry, cy + ry + 1):
+        for x in range(cx - rx, cx + rx + 1):
+            if 0 <= y < len(m_) and 0 <= x < len(m_[0]) and (sobre is None or m_[y][x] in sobre):
+                dx = (x - cx) / rx
+                dy = (y - cy) / ry
+                if dx * dx + dy * dy <= 1.0 + r_.uniform(-0.25, 0.1):
+                    m_[y][x] = ch
+
+def g_manchas(m_, r_, x0, y0, x1, y1, ch, prob, sobre):
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            if 0 <= y < len(m_) and 0 <= x < len(m_[0]) and m_[y][x] in sobre and r_.random() < prob:
+                m_[y][x] = ch
+
+
+# ---------------------------------------------------------------------------
+# EL PASO DEL SMOG (camino del Sumidero a Ciudad Neón). Atlas "neon":
+#   .  asfalto   -  línea pintada   s S  smog (criaturas)   g  guardarrail   V  vacío
+#   #  techo     W w  pared / con ventana   o  barril   k  cajas   b  basura   n  cono   u  auto
+# ---------------------------------------------------------------------------
+r = random.Random(3101)
+PW, PH = 60, 26
+ps = grilla(PW, PH, ".")
+g_rect(ps, 0, 0, PW - 1, 1, "V"); g_rect(ps, 0, PH - 2, PW - 1, PH - 1, "V")
+g_rect(ps, 0, 0, 0, PH - 1, "V"); g_rect(ps, PW - 1, 0, PW - 1, PH - 1, "V")
+# la carretera (oeste a este) con su línea pintada y guardarraíles
+for x in range(1, PW - 1, 2):
+    ps[12][x] = "-"
+g_rect(ps, 0, 10, 0, 14, "."); g_rect(ps, PW - 1, 10, PW - 1, 14, ".")
+g_rect(ps, 1, 9, PW - 2, 9, "g"); g_rect(ps, 1, 15, PW - 2, 15, "g")
+for x in (14, 15, 16, 33, 34, 47, 48):
+    ps[9][x] = "."
+for x in (9, 10, 11, 27, 28, 29, 44, 45, 52, 53):
+    ps[15][x] = "."
+# norte: ruinas de edificios viejos tapados de smog
+for (x0, x1, y1) in ((3, 9, 4), (19, 27, 5), (38, 44, 4), (50, 56, 3)):
+    g_rect(ps, x0, 2, x1, y1 - 1, "#"); g_rect(ps, x0, y1, x1, y1, "W")
+    for x in range(x0 + 1, x1, 3):
+        ps[y1][x] = "w"
+g_blob(ps, r, 14, 5, 4, 2, "s", "."); g_blob(ps, r, 33, 6, 5, 2, "s", "."); g_blob(ps, r, 48, 6, 3, 2, "s", ".")
+# sur: el campo de smog (aquí cazan los Espectros Sónicos)
+g_blob(ps, r, 10, 19, 8, 3, "s", "."); g_blob(ps, r, 29, 20, 10, 3, "s", "."); g_blob(ps, r, 50, 19, 7, 3, "s", ".")
+g_manchas(ps, r, 1, 2, PW - 2, PH - 3, "S", 0.3, "s")
+for (x, y) in ((5, 17), (21, 22), (38, 18), (57, 22), (17, 7), (46, 7)):
+    ps[y][x] = r.choice("okb")
+# autos abandonados y conos en la carretera
+for (x, y) in ((18, 11), (24, 13), (37, 10), (41, 14), (55, 11)):
+    ps[y][x] = "u"
+for (x, y) in ((22, 10), (22, 14), (39, 12), (30, 13)):
+    ps[y][x] = "n"
+guardar("paso_smog.txt", ps)
+
+
+# ---------------------------------------------------------------------------
+# CIUDAD NEÓN (Ciudad 3). Atlas "neon":
+#   : ;  acera   , =  calle (= con línea)   a A  alfombra de la sala de juegos (criaturas)
+#   t  tarima del escenario   # W w C M  techo y paredes (con ventana / letrero cian / magenta)
+#   c m  línea de neón en el suelo   r  rejilla   l  charco de luz   x  arcade   X  mesa de casino
+#   o k b n  barril, cajas, basura, cono
+# ---------------------------------------------------------------------------
+r = random.Random(3303)
+NW, NH = 56, 40
+cn = grilla(NW, NH, ":")
+g_manchas(cn, r, 0, 0, NW - 1, NH - 1, ";", 0.12, ":")
+g_rect(cn, 0, 0, NW - 1, 0, "#")
+for x in range(NW):
+    cn[1][x] = r.choice("WWwWCM")
+g_rect(cn, 0, 0, 0, NH - 1, "#"); g_rect(cn, NW - 1, 0, NW - 1, NH - 1, "#")
+g_rect(cn, 0, NH - 1, NW - 1, NH - 1, "#")
+# avenida norte-sur (de la puerta del sur a la del norte) y la calle este-oeste
+g_rect(cn, 26, 0, 29, NH - 1, ",")
+for y in range(0, NH, 2):
+    cn[y][27] = "="; cn[y][28] = "="
+g_rect(cn, 1, 18, NW - 2, 21, ",")
+g_rect(cn, 25, 0, 25, 1, "#"); g_rect(cn, 30, 0, 30, 1, "#")
+g_rect(cn, 25, NH - 1, 25, NH - 1, "#"); g_rect(cn, 30, NH - 1, 30, NH - 1, "#")
+# líneas de neón que bordean la calle
+for x in range(1, NW - 1):
+    if cn[17][x] in ":;":
+        cn[17][x] = "c" if (x // 4) % 2 else ":"
+    if cn[22][x] in ":;":
+        cn[22][x] = "m" if (x // 4) % 2 else ":"
+# noreste: la tarima del escenario frente al Palacio Lumen
+g_rect(cn, 35, 10, 49, 13, "t")
+# suroeste: la sala de juegos sin techo (máquinas vacías y mesas de casino)
+g_rect(cn, 2, 25, 22, 36, "a")
+g_manchas(cn, r, 2, 25, 22, 36, "A", 0.35, "a")
+for (x, y) in ((4, 27), (8, 27), (12, 27), (16, 27), (20, 27), (4, 34), (9, 31), (15, 33), (20, 31), (12, 35)):
+    cn[y][x] = r.choice("xxX")
+# charcos de luz, rejillas y basura por todas partes
+for (x, y) in ((24, 12), (33, 18), (10, 20), (45, 21), (40, 30), (31, 35), (20, 8), (50, 26)):
+    cn[y][x] = "l"
+for (x, y) in ((3, 4), (52, 4), (33, 37), (53, 36), (3, 22), (52, 17)):
+    cn[y][x] = r.choice("okb")
+for (x, y) in ((31, 24), (52, 30), (2, 14)):
+    cn[y][x] = "r"
+guardar("ciudad_neon.txt", cn)
+
+
+# ---------------------------------------------------------------------------
+# EL BOSQUE CALCINADO (camino de Ciudad Neón a Valle Ceniza). Atlas "ceniza":
+#   . ,  ceniza (, con brote)   _  sendero   h H  hierba quemada (criaturas)   b B  brasas (queman)
+#   #  bosque cerrado   T  tronco   t  tocón   r  roca   y  arbusto seco   ~  arroyo   =  puente
+#   p  pasto verde (rebrota)
+# ---------------------------------------------------------------------------
+r = random.Random(4404)
+BW2, BH2 = 60, 30
+bc = grilla(BW2, BH2, ".")
+g_manchas(bc, r, 0, 0, BW2 - 1, BH2 - 1, ",", 0.04, ".")
+g_rect(bc, 0, 0, BW2 - 1, 1, "#"); g_rect(bc, 0, BH2 - 2, BW2 - 1, BH2 - 1, "#")
+g_rect(bc, 0, 0, 0, BH2 - 1, "#"); g_rect(bc, BW2 - 1, 0, BW2 - 1, BH2 - 1, "#")
+# el arroyo (norte a sur) que solo se cruza por el puente
+g_rect(bc, 30, 2, 31, BH2 - 3, "~")
+# el sendero: entra por el oeste, baja, cruza el puente, sube y sale por el este
+def sendero(m_, pts):
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        g_rect(m_, min(x0, x1), min(y0, y1), max(x0, x1) + 1, max(y0, y1) + 1, "_")
+sendero(bc, [(0, 13), (15, 13), (15, 20), (36, 20), (36, 9), (50, 9), (50, 13), (BW2 - 2, 13)])
+g_rect(bc, 30, 20, 31, 21, "=")
+# hierba quemada (criaturas) y brasas que todavía arden
+for (cx, cy, rx, ry) in ((8, 6, 6, 3), (22, 9, 6, 3), (8, 22, 6, 3), (22, 25, 6, 2), (43, 4, 6, 2), (45, 24, 8, 3), (55, 20, 3, 4)):
+    g_blob(bc, r, cx, cy, rx, ry, "h", ".,")
+g_manchas(bc, r, 1, 2, BW2 - 2, BH2 - 3, "H", 0.35, "h")
+for (cx, cy, rx, ry) in ((20, 16, 3, 1), (40, 15, 3, 2), (52, 4, 2, 1), (12, 17, 2, 1)):
+    g_blob(bc, r, cx, cy, rx, ry, "b", ".,h")
+g_manchas(bc, r, 1, 2, BW2 - 2, BH2 - 3, "B", 0.4, "b")
+# rebrotes verdes alrededor de los brotes que busca Lucía
+for (cx, cy) in ((6, 25), (41, 3), (56, 25)):
+    g_blob(bc, r, cx, cy, 2, 1, "p", ".,hHbB")
+# troncos, tocones, rocas y arbustos secos
+for _ in range(70):
+    x, y = r.randrange(1, BW2 - 1), r.randrange(2, BH2 - 2)
+    if bc[y][x] in ".,":
+        bc[y][x] = r.choice("TTttry")
+guardar("bosque_calcinado.txt", bc)
+
+
+# ---------------------------------------------------------------------------
+# VALLE CENIZA (Ciudad 4). Atlas "ceniza" (misma leyenda que el bosque) y además:
+#   u  huerto   m  piso de madera   f F  cerca (horizontal / vertical)   l  leña   w  barril de agua   k  canasto
+# ---------------------------------------------------------------------------
+r = random.Random(5505)
+VW, VH = 56, 40
+vc = grilla(VW, VH, ".")
+g_manchas(vc, r, 0, 0, VW - 1, VH - 1, ",", 0.08, ".")
+for (cx, cy, rx, ry) in ((14, 16, 6, 3), (40, 18, 6, 3), (12, 34, 6, 2), (44, 34, 6, 2), (33, 6, 4, 2)):
+    g_blob(vc, r, cx, cy, rx, ry, "p", ".,")
+g_rect(vc, 0, 0, VW - 1, 1, "#"); g_rect(vc, 0, VH - 2, VW - 1, VH - 1, "#")
+g_rect(vc, 0, 0, 1, VH - 1, "#"); g_rect(vc, VW - 2, 0, VW - 1, VH - 1, "#")
+# el camino principal (sur a norte) y los senderos a las cabañas
+g_rect(vc, 26, 2, 27, VH - 1, "_")
+g_rect(vc, 6, 20, 47, 21, "_")
+g_rect(vc, 10, 28, 46, 28, "_")
+g_rect(vc, 34, 10, 46, 11, "_"); g_rect(vc, 46, 8, 47, 11, "_")
+g_rect(vc, 12, 11, 25, 11, "_")
+g_rect(vc, 26, 0, 27, 1, "_")
+# el arroyo cruza el valle (con su puente)
+g_rect(vc, 2, 24, VW - 3, 25, "~")
+g_rect(vc, 26, 24, 27, 25, "=")
+g_rect(vc, 14, 24, 14, 25, "=")
+# la plaza de la olla común (piso de tablas)
+g_rect(vc, 20, 17, 25, 22, "m"); g_rect(vc, 28, 17, 31, 22, "m")
+# el huerto de Lucía frente al invernadero
+g_rect(vc, 5, 12, 18, 15, "u")
+g_rect(vc, 4, 12, 4, 15, "F"); g_rect(vc, 19, 12, 19, 15, "F"); g_rect(vc, 4, 16, 19, 16, "f")
+vc[16][11] = "_"; vc[16][12] = "_"
+# el claro del monumento
+g_blob(vc, r, 40, 13, 5, 3, "p", ".,")
+# cosas de todos los días: leña, barriles de agua, canastos
+for (x, y) in ((33, 31), (34, 31), (22, 35)):
+    vc[y][x] = "l"
+for (x, y) in ((19, 30), (8, 31), (43, 7), (24, 19)):
+    vc[y][x] = "w"
+for (x, y) in ((22, 22), (30, 17), (17, 31)):
+    vc[y][x] = "k"
+# borde este: la linde del bosque, con hierba alta (se oyen bestias)
+g_blob(vc, r, 50, 17, 3, 4, "h", ".,p")
+g_manchas(vc, r, 46, 12, 53, 22, "H", 0.35, "h")
+for _ in range(34):
+    x, y = r.randrange(2, VW - 2), r.randrange(2, VH - 2)
+    if vc[y][x] in ".," and not (24 <= x <= 29):
+        vc[y][x] = r.choice("Ttry")
+guardar("valle_ceniza.txt", vc)
+print("Mapas de las Ciudades 3 y 4 escritos")

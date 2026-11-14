@@ -132,6 +132,23 @@ const AMBIENTACION := {
 		"luces": { "fogon": Color(1.0, 0.6, 0.25), "hongo_grande": Color(0.35, 1.0, 0.9), "hongos_1": Color(0.75, 0.5, 1.0),
 			"escalera": Color(1.0, 0.95, 0.8), "cristal": Color(0.6, 1.0, 0.8) },
 		"burbujas": ["lodo_1", "lodo_2"] },
+	# El Paso del Smog: aire violeta y espeso (pero respirable: el "gas" es una mentira de Silas)
+	"paso_smog": { "musica": "paramo", "ambiente": "viento", "tinte": Color(0.82, 0.74, 0.9), "particulas": "smog",
+		"luces": { "charco_luz": Color(0.4, 0.95, 1.0) } },
+	# Ciudad Neón: siempre de noche, letreros cian y magenta, altavoces que repiten la voz de Silas
+	"ciudad_neon": { "musica": "neon", "ambiente": "neon", "tinte": Color(0.78, 0.74, 0.95), "particulas": "smog",
+		"luces": { "charco_luz": Color(0.4, 0.95, 1.0), "linea_cian": Color(0.35, 0.95, 1.0), "linea_magenta": Color(1.0, 0.35, 0.85) },
+		"cada_luz": 3,
+		"anuncios_hasta": "neon_liberado",
+		"anuncios": ["ALTAVOZ: ¡Sonrían! Silas los está mirando.", "ALTAVOZ: El aire de afuera es GAS LETAL. No salgan.",
+			"ALTAVOZ: Turno de pedales: ¡las luces nos protegen de los monstruos!", "ALTAVOZ: Quien deja de pedalear, deja a todos a oscuras.",
+			"ALTAVOZ: Silas los ama. Silas los cuida. Silas los escucha."] },
+	# El Bosque Calcinado: ceniza que cae como nieve y brasas escondidas que queman
+	"bosque_calcinado": { "musica": "paramo", "ambiente": "bosque", "tinte": Color(0.86, 0.84, 0.86), "particulas": "nieve",
+		"luces": { "brasa_1": Color(1.0, 0.45, 0.15), "brasa_2": Color(1.0, 0.45, 0.15) }, "cada_luz": 2, "brasas": true },
+	# Valle Ceniza: melancólico pero en paz. Si Pan ejecuta a Kael, el valle se vuelve frío y callado.
+	"valle_ceniza": { "musica": "valle", "ambiente": "bosque", "tinte": Color(0.95, 0.9, 0.86), "particulas": "nieve",
+		"tinte_si": { "kael_ejecutado": Color(0.62, 0.62, 0.7) }, "musica_si": { "kael_ejecutado": "" } },
 }
 
 # ---------------------------------------------------------------------------
@@ -171,13 +188,37 @@ func poner_tormenta(activa: bool, avisar := false) -> void:
 		hud.mostrar_aviso("¡Tormenta de óxido! Las bestias de chatarra salen a cazar." if Juego.tormenta else "La tormenta de óxido se calma.")
 
 
+## Un valor del ambiente que puede cambiar con la historia (ej. "tinte_si": { "bandera": color }).
+func _ambiente_valor(a: Dictionary, clave: String, por_defecto):
+	var segun: Dictionary = a.get(clave + "_si", {})
+	for bandera in segun:
+		if Juego.flag(bandera):
+			return segun[bandera]
+	return a.get(clave, por_defecto)
+
+
+var _tinte: CanvasModulate
+var _coords_brasa: Array[Vector2i] = []
+var _t_anuncio := 0.0
+
+
+## Vuelve a revisar la música y el color del mapa (cuando la historia cambia algo, ej. tras decidir sobre Kael).
+func actualizar_ambiente(duracion := 1.5) -> void:
+	var a: Dictionary = AMBIENTACION.get(nombre_mapa, {})
+	Sonido.musica(_ambiente_valor(a, "musica", ""))
+	if _tinte:
+		create_tween().tween_property(_tinte, "color", _ambiente_valor(a, "tinte", Color.WHITE), duracion)
+
+
 func _preparar_ambiente() -> void:
 	var a: Dictionary = AMBIENTACION.get(nombre_mapa, {})
-	Sonido.musica(a.get("musica", ""))
+	Sonido.musica(_ambiente_valor(a, "musica", ""))
 	Sonido.ambiente(a.get("ambiente", ""))
-	var tinte := CanvasModulate.new()
-	tinte.color = a.get("tinte", Color.WHITE)
-	add_child(tinte)
+	_tinte = CanvasModulate.new()
+	_tinte.color = _ambiente_valor(a, "tinte", Color.WHITE)
+	add_child(_tinte)
+	if a.get("brasas", false):
+		_coords_brasa = Ambiente.coords_de(suelo, ["brasa_1", "brasa_2"])
 	var camara: Camera2D = pan.get_node("Camara")
 	match a.get("particulas", ""):
 		"ceniza":
@@ -187,17 +228,27 @@ func _preparar_ambiente() -> void:
 		"niebla":
 			camara.add_child(Ambiente.niebla(get_viewport_rect().size / zoom_camara))
 			camara.add_child(Ambiente.polvo(get_viewport_rect().size / zoom_camara))
+		"smog":
+			camara.add_child(Ambiente.niebla(get_viewport_rect().size / zoom_camara, Color(0.72, 0.45, 0.95)))
+			camara.add_child(Ambiente.polvo(get_viewport_rect().size / zoom_camara))
+		"nieve":
+			camara.add_child(Ambiente.nieve_ceniza(get_viewport_rect().size / zoom_camara))
 	# Luces: un brillo suave que titila sobre ciertos tiles (fogatas, generadores...)
 	var luces: Dictionary = a.get("luces", {})
+	var cada_luz: int = maxi(1, int(a.get("cada_luz", 1)))   # en mapas con muchos tiles de luz, solo una de cada tantas
+	var n_luz := 0
 	for nombre_tile in luces:
 		for celda in Ambiente.celdas_con_tile(suelo, nombre_tile):
+			n_luz += 1
+			if n_luz % cada_luz != 0:
+				continue
 			var centro := suelo.map_to_local(celda)
 			$Entidades.add_child(Ambiente.luz(centro, luces[nombre_tile], nombre_tile == "fogata"))
 			if nombre_tile == "fogata":
 				$Entidades.add_child(Ambiente.brasas(centro))
 	# Luces de las construcciones grandes (hongos gigantes, el laboratorio...): metadato "luz" del nodo
 	for nodo in $Entidades.get_children():
-		if nodo.has_meta("luz"):
+		if nodo.has_meta("luz") and nodo.visible:
 			var l := Ambiente.luz(nodo.position + nodo.get_meta("luz_pos", Vector2(0, -24)), nodo.get_meta("luz"), false)
 			l.scale = Vector2(2.2, 2.2)
 			$Entidades.add_child(l)
@@ -227,6 +278,7 @@ func refrescar() -> void:
 
 func _process(_delta: float) -> void:
 	_clima(_delta)
+	_anuncios(_delta)
 	if ocupado or hud.menu_abierto():
 		_exclamacion.visible = false
 		pan.puede_moverse = not ocupado and not hud.menu_abierto()
@@ -275,6 +327,20 @@ func interactuar() -> void:
 		correr(Historia.ejecutar.bind(nodo.evento, nodo))
 
 
+## Altavoces de la ciudad (Ciudad Neón): cada tanto se oye la voz de Silas.
+func _anuncios(delta: float) -> void:
+	var a: Dictionary = AMBIENTACION.get(nombre_mapa, {})
+	var lista: Array = a.get("anuncios", [])
+	if lista.is_empty() or Juego.flag(a.get("anuncios_hasta", "")) or ocupado or hud.menu_abierto():
+		return
+	_t_anuncio += delta
+	if _t_anuncio < 35.0:
+		return
+	_t_anuncio = 0.0
+	Sonido.efecto("alerta", 1.5, -10.0)
+	hud.mostrar_aviso(lista.pick_random())
+
+
 # ---------------------------------------------------------------------------
 # Encuentros con criaturas salvajes (solo en tiles de pasto)
 # ---------------------------------------------------------------------------
@@ -306,6 +372,11 @@ func _on_paso_dado() -> void:
 			Juego.mochila[i]["infectada"] = true
 			Sonido.efecto("burbuja", 1.2)
 			hud.mostrar_aviso("¡El lodo tóxico salpica a %s! Quedó infectado." % Juego.criaturas[Juego.mochila[i]["id"]]["nombre"])
+	# Brasas escondidas bajo la ceniza (Bosque Calcinado): queman un poco a la carta del frente
+	if not _coords_brasa.is_empty() and randf() < 0.25:
+		var celda := suelo.local_to_map(suelo.to_local(pan.global_position))
+		if suelo.get_cell_atlas_coords(celda) in _coords_brasa:
+			_quemadura_brasa()
 	if not pisando_pasto():
 		return
 	if Juego.pasos_sin_encuentro > 0:
@@ -360,4 +431,21 @@ func gota_de_acido() -> void:
 	hud.mostrar_aviso(aviso)
 	var t := create_tween()
 	t.tween_property(pan, "modulate", Color(0.6, 1.0, 0.5), 0.1)
+	t.tween_property(pan, "modulate", Color.WHITE, 0.3)
+
+
+## Pan pisó una brasa: la carta del frente pierde 1/20 de su vida (nunca se rompe por esto).
+func _quemadura_brasa() -> void:
+	var i := Juego.carta_al_frente()
+	if i < 0:
+		return
+	var carta: Dictionary = Juego.mochila[i]
+	var danio := mini(carta["hp"] - 1, maxi(1, Juego.hp_max_carta(carta) / 20))
+	if danio <= 0:
+		return
+	carta["hp"] -= danio
+	Sonido.efecto("quemar", 1.3, -6.0)
+	hud.mostrar_aviso("¡Una brasa escondida! %s se quema y pierde %d de vida." % [Juego.criaturas[carta["id"]]["nombre"], danio])
+	var t := create_tween()
+	t.tween_property(pan, "modulate", Color(1.0, 0.55, 0.35), 0.1)
 	t.tween_property(pan, "modulate", Color.WHITE, 0.3)

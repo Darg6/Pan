@@ -133,7 +133,7 @@ func _siguiente_aviso() -> void:
 signal _eligio(i: int)
 
 
-func elegir(pregunta: String, opciones: Array) -> int:
+func elegir(pregunta: String, opciones: Array, a_la_derecha := false) -> int:
 	set_controles(false)
 	var panel := PanelContainer.new()
 	panel.name = "Eleccion"
@@ -160,9 +160,67 @@ func elegir(pregunta: String, opciones: Array) -> int:
 	move_child(panel, transicion.get_index())
 	await get_tree().process_frame
 	panel.position = (get_viewport().get_visible_rect().size - panel.size) / 2.0
+	if a_la_derecha:   # deja ver el primer plano de Pan a la izquierda
+		panel.position.x = get_viewport().get_visible_rect().size.x - panel.size.x - 12.0
 	botones[0].grab_focus()
 	var elegido: int = await _eligio
 	panel.name = "EleccionCerrada"   # libera el nombre por si enseguida se abre otra pregunta
 	panel.queue_free()
 	set_controles(true)
 	return elegido
+
+
+# ---------------------------------------------------------------------------
+# Primer plano (close-up) del rostro de Pan: lo usa la decisión sobre Kael.
+# ---------------------------------------------------------------------------
+var _primer_plano: Control = null
+
+
+func mostrar_primer_plano(ruta: String, duracion := 0.8) -> void:
+	if _primer_plano == null:
+		var raiz := Control.new()
+		raiz.name = "PrimerPlano"
+		raiz.set_anchors_preset(Control.PRESET_FULL_RECT)
+		raiz.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var fondo := ColorRect.new()
+		fondo.color = Color(0.02, 0.02, 0.04, 0.82)
+		fondo.set_anchors_preset(Control.PRESET_FULL_RECT)
+		fondo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		raiz.add_child(fondo)
+		var cara := TextureRect.new()
+		cara.name = "Cara"
+		cara.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		cara.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		cara.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		cara.size = Vector2(192, 192)
+		cara.position = Vector2(28, 6)
+		cara.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		raiz.add_child(cara)
+		add_child(raiz)
+		move_child(raiz, transicion.get_index())   # debajo del fundido; el diálogo y las preguntas quedan encima
+		_primer_plano = raiz
+		raiz.modulate.a = 0.0
+	var tex := Juego.textura(ruta)
+	var cara_actual: TextureRect = _primer_plano.get_node("Cara")
+	if _primer_plano.modulate.a < 0.5:
+		cara_actual.texture = tex
+		var t := create_tween()
+		t.tween_property(_primer_plano, "modulate:a", 1.0, duracion)
+		await t.finished
+	else:   # ya se ve: cambia la cara con un fundido rápido
+		var t := create_tween()
+		t.tween_property(cara_actual, "modulate:a", 0.0, duracion / 2.0)
+		t.tween_callback(func(): cara_actual.texture = tex)
+		t.tween_property(cara_actual, "modulate:a", 1.0, duracion / 2.0)
+		await t.finished
+
+
+func ocultar_primer_plano(duracion := 0.6) -> void:
+	if _primer_plano == null:
+		return
+	var p := _primer_plano
+	_primer_plano = null
+	var t := create_tween()
+	t.tween_property(p, "modulate:a", 0.0, duracion)
+	await t.finished
+	p.queue_free()

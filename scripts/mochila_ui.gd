@@ -113,6 +113,14 @@ func _refrescar(aviso := "") -> void:
 		etiqueta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		etiqueta.text = "%s  x%d/%d" % [Juego.nombre_objeto(id), cantidad, Juego.max_objeto(id)]
 		fila.add_child(etiqueta)
+		if id == "grabacion_padres":   # Valle Ceniza: la grabación de mamá y papá se puede volver a escuchar
+			var e := Button.new()
+			e.text = "Escuchar"
+			e.focus_mode = Control.FOCUS_NONE
+			e.custom_minimum_size = Vector2(56, 18)
+			e.pressed.connect(_escuchar_grabacion)
+			e.pressed.connect(Sonido.efecto.bind("boton"))
+			fila.add_child(e)
 		if Juego.tipo_objeto(id) in ["cura", "comida", "antidoto"]:
 			var b := Button.new()
 			b.text = "Usar"
@@ -153,6 +161,13 @@ func _ir_al_menu() -> void:
 		t.tween_property(fundido, "color:a", 1.0, 0.4)
 		await t.finished
 	Juego.cambiar_escena(Juego.MENU)
+
+
+func _escuchar_grabacion() -> void:
+	cerrar_mochila()
+	var m = Historia.mapa
+	if m != null and is_instance_valid(m) and m.is_inside_tree() and not m.ocupado:
+		m.correr(Historia.ejecutar.bind("escuchar_grabacion"))
 
 
 func _elegir_objeto(id: String) -> void:

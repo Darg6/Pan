@@ -2380,7 +2380,7 @@
 		},
 		{
 			"quien": "",
-			"texto": "¡El Sumidero es libre! La aventura hacia la Ciudad 3, Ciudad Neón, llegará en una próxima versión. Mientras tanto, puedes seguir explorando y capturando criaturas."
+			"texto": "Los vecinos arrancaron la reja del túnel del este. Desde ahí se llega al Paso del Smog y a Ciudad Neón."
 		}
 	],
 	"sin_cartas_vesper": [
@@ -2388,6 +2388,2084 @@
 			"quien": "Pan",
 			"retrato": "pan",
 			"texto": "Mis cartas están rotas. Si entro así, Vesper me va a convertir en su experimento."
+		}
+	],
+	"inv_reja_tunel": [
+		{
+			"quien": "",
+			"texto": "Una reja oxidada tapa un túnel que sigue hacia el este. Del otro lado se ve una luz violeta."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "La Organización cerró este túnel. Mientras Vesper mande aquí, no voy a poder abrirlo."
+		}
+	],
+	"inv_reja_tunel_libre": [
+		{
+			"quien": "",
+			"texto": "La reja del túnel está abierta."
+		}
+	],
+	"tunel_abierto_viejo": [
+		{
+			"quien": "",
+			"texto": "Los vecinos del Sumidero arrancaron la reja del túnel del este (al este de la plaza)."
+		},
+		{
+			"quien": "",
+			"texto": "Por ahí se llega al Paso del Smog... y a Ciudad Neón, donde manda Silas."
+		}
+	],
+	"smog_llegada": [
+		{
+			"quien": "",
+			"texto": "Al salir del túnel, el aire se vuelve espeso y violeta. Un smog tan denso que no se ve el sol."
+		},
+		{
+			"quien": "Altavoz",
+			"texto": "¡ATENCIÓN! El aire fuera de Ciudad Neón es GAS LETAL. Regrese a la ciudad. ¡Silas lo cuida!"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "¿Gas letal? Estoy respirando... y sigo vivo."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Ciudad Neón está al este. Ahí manda Silas, el tercer comandante."
+		}
+	],
+	"gas_falso": [
+		{
+			"quien": "",
+			"texto": "Una nube verde y brillante flota sobre el camino. Parece veneno."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(Si es gas, aguanto la respiración y paso corriendo...)"
+		},
+		{
+			"quien": "",
+			"texto": "Pan cruza la nube... pero no siente nada. Ni ardor, ni tos."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Esto no es gas. Es luz. Alguien está proyectando esta nube para asustar a la gente."
+		}
+	],
+	"inv_proyector": [
+		{
+			"quien": "",
+			"texto": "Una máquina vieja con un lente verde. Zumba y lanza luz hacia el camino."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Un proyector... La nube de \"gas\" es una película."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Silas encierra a toda una ciudad con una mentira."
+		}
+	],
+	"inv_proyector_libre": [
+		{
+			"quien": "",
+			"texto": "El proyector está apagado y con el lente roto. Ya nadie le tiene miedo a la nube verde."
+		}
+	],
+	"inv_letrero_aire": [
+		{
+			"quien": "",
+			"texto": "Un letrero de neón: «AIRE LETAL. NO SALGAS. SILAS TE CUIDA.»"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Lo pusieron mirando hacia la ciudad, no hacia afuera. No es para los viajeros. Es para los de adentro."
+		}
+	],
+	"inv_letrero_aire_libre": [
+		{
+			"quien": "",
+			"texto": "Alguien rayó el cartel con pintura. Ahora dice: «SILAS MIENTE. EL AIRE ES DE TODOS.»"
+		}
+	],
+	"leo_pide": [
+		{
+			"quien": "Leo",
+			"retrato": "leo",
+			"texto": "*cof* ¡No te acerques! ¿No tienes miedo del gas?"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "No hay gas. Es una luz que proyectan para asustarlos."
+		},
+		{
+			"quien": "Leo",
+			"retrato": "leo",
+			"texto": "...Me escapé de los pedales hace tres días. Pensé que el aire me iba a matar. Sigo esperando morirme."
+		},
+		{
+			"quien": "Leo",
+			"retrato": "leo",
+			"texto": "Mi hermana Mara se quedó en Ciudad Neón. Debe creer que estoy muerto."
+		},
+		{
+			"quien": "Leo",
+			"retrato": "leo",
+			"texto": "¿Le llevarías esta carta? Yo... todavía no me atrevo a volver. Si Silas me ve, me manda de vuelta al pedal."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Se la llevo. Te lo prometo."
+		}
+	],
+	"leo_espera": [
+		{
+			"quien": "Leo",
+			"retrato": "leo",
+			"texto": "¿Ya viste a Mara? Vive cerca del bar El Comodín, al sureste de la ciudad. Dile que estoy vivo."
+		}
+	],
+	"leo_despues": [
+		{
+			"quien": "Leo",
+			"retrato": "leo",
+			"texto": "¿Mara leyó la carta? ¿Lloró? Ella siempre llora... *cof*"
+		},
+		{
+			"quien": "Leo",
+			"retrato": "leo",
+			"texto": "Cuando Silas caiga, voy a volver. Te lo juro."
+		}
+	],
+	"patrullero": [
+		{
+			"quien": "Patrullero",
+			"retrato": "guardia_org",
+			"texto": "¡Alto! Nadie entra ni sale de Ciudad Neón sin permiso de Silas."
+		},
+		{
+			"quien": "Patrullero",
+			"retrato": "guardia_org",
+			"texto": "¿Respiras sin máscara? Eso es... ¡Bah! Igual te voy a sacar a golpes."
+		}
+	],
+	"patrullero_derrotado": [
+		{
+			"quien": "Patrullero",
+			"retrato": "guardia_org",
+			"texto": "Tsk... Silas no me paga lo suficiente para esto."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "¿El aire de afuera mata?"
+		},
+		{
+			"quien": "Patrullero",
+			"retrato": "guardia_org",
+			"texto": "¿Tú qué crees, niño? Yo vivo aquí afuera. Pero ni se te ocurra contárselo a nadie."
+		},
+		{
+			"quien": "",
+			"texto": "El patrullero huye entre el smog."
+		}
+	],
+	"neon_llegada": [
+		{
+			"quien": "",
+			"texto": "Ciudad Neón. Aquí siempre es de noche: el smog tapa el cielo y los letreros cian y magenta lastiman los ojos."
+		},
+		{
+			"quien": "",
+			"texto": "Por todas partes flota la cara sonriente de Silas en hologramas que parpadean."
+		},
+		{
+			"quien": "Altavoz",
+			"texto": "¡Buenas noches, Ciudad Neón! El aire de afuera es veneno, pero aquí dentro... ¡Silas los cuida! ¡Sonrían!"
+		}
+	],
+	"neon_pedalero": [
+		{
+			"quien": "Pedalero",
+			"retrato": "pedalero",
+			"texto": "¡Hola-hola! ¿Vienes-de-afuera? ¡Imposible! ¡Afuera-se-muere-todo-el-mundo!"
+		},
+		{
+			"quien": "Pedalero",
+			"retrato": "pedalero",
+			"texto": "Shh-shh. *sonrisa* Los micrófonos. Silas oye todo. ¡Todo-bien-todo-bien!"
+		},
+		{
+			"quien": "Pedalero",
+			"retrato": "pedalero",
+			"texto": "Tengo-que-volver-al-pedal. Dieciséis-horas. Si se apagan las luces, entran los monstruos. Eso-dice-Silas."
+		}
+	],
+	"neon_pan": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(Hablan rápido, les tiemblan las manos y sonríen a la fuerza. Están aterrados.)"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Silas vive en el Palacio Lumen, al noreste. Sus guardias cuidan el escenario."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "El motel del oeste tiene camas, y la tienda de al lado vende cosas. Me voy a preparar bien."
+		}
+	],
+	"puerta_norte_cerrada": [
+		{
+			"quien": "",
+			"texto": "La puerta norte zumba con una barrera sónica. Un cartel dice: «AFUERA HAY GAS. NO PASAR.»"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Mientras Silas tenga encendidas las torres, nadie puede salir por aquí."
+		}
+	],
+	"coral": [
+		{
+			"quien": "Coral",
+			"retrato": "coral",
+			"texto": "¡Bienvenido-bienvenido a Neones de Coral! *sonrisa*"
+		},
+		{
+			"quien": "Coral",
+			"retrato": "coral",
+			"texto": "(en voz baja) Las Granadas de Luz te sirven contra las bestias que esquivan. Y no-le-digas-a-nadie-que-te-lo-dije."
+		}
+	],
+	"coral_libre": [
+		{
+			"quien": "Coral",
+			"retrato": "coral",
+			"texto": "¡Ya no tengo que sonreír si no quiero! ...Pero hoy quiero. ¡Llévate lo que necesites!"
+		}
+	],
+	"cama_neon": [
+		{
+			"quien": "",
+			"texto": "La dueña del motel te cobra 10 monedas. Las sábanas huelen a humo, pero la cama es blanda."
+		},
+		{
+			"quien": "",
+			"texto": "Pan se sienta en el borde, deja la mochila a un lado y suspira antes de acostarse."
+		},
+		{
+			"quien": "",
+			"texto": "Tus cartas se repararon mientras dormías."
+		}
+	],
+	"cama_neon_fiada": [
+		{
+			"quien": "",
+			"texto": "No te alcanza para pagar... La dueña del motel mira a los lados y te deja pasar igual."
+		},
+		{
+			"quien": "Dueña del motel",
+			"texto": "Shh. Si Silas pregunta, pagaste."
+		},
+		{
+			"quien": "",
+			"texto": "Tus cartas se repararon mientras dormías."
+		}
+	],
+	"cama_neon_gratis": [
+		{
+			"quien": "",
+			"texto": "La dueña del motel ya no te cobra. «El que apagó las luces de Silas duerme gratis.»"
+		},
+		{
+			"quien": "",
+			"texto": "Tus cartas se repararon mientras dormías."
+		}
+	],
+	"tobi_pide": [
+		{
+			"quien": "Tobi",
+			"retrato": "tobi",
+			"texto": "¡No-puedo-parar! ¡No-puedo-parar!"
+		},
+		{
+			"quien": "Tobi",
+			"retrato": "tobi",
+			"texto": "Mamá se desmayó en el pedal. Si su generador se apaga, la castigan. Por eso pedaleo yo."
+		},
+		{
+			"quien": "Tobi",
+			"retrato": "tobi",
+			"texto": "Pero me duelen mucho las piernas... y todavía falta un montón para que termine su turno."
+		}
+	],
+	"tobi_no": [
+		{
+			"quien": "Tobi",
+			"retrato": "tobi",
+			"texto": "Está bien... *sonrisa* ¡Todo-bien! ¡Gracias, Silas!"
+		}
+	],
+	"tobi_pedal_empieza": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Bájate, Tobi. Yo pedaleo. Tú cuida a tu mamá."
+		},
+		{
+			"quien": "",
+			"texto": "Pan se sube al generador. Los pedales están duros, como si empujaran una montaña."
+		}
+	],
+	"tobi_gracias": [
+		{
+			"quien": "",
+			"texto": "El turno termina. La luz del generador sigue encendida."
+		},
+		{
+			"quien": "Tobi",
+			"retrato": "tobi",
+			"texto": "¡Lo lograste! ¡Mamá, mira, despertó!"
+		},
+		{
+			"quien": "Mamá de Tobi",
+			"texto": "Gracias, niño. Nadie había hecho algo así por nosotros."
+		},
+		{
+			"quien": "Mamá de Tobi",
+			"texto": "Toma. Las guardé para el día que alguien se atreviera contra Silas. Sus bestias de luz odian los destellos."
+		}
+	],
+	"tobi_despues": [
+		{
+			"quien": "Tobi",
+			"retrato": "tobi",
+			"texto": "Mamá ya está mejor. ¡Y yo dormí cuatro horas seguidas! *sonrisa de verdad*"
+		}
+	],
+	"tobi_despues_libre": [
+		{
+			"quien": "Tobi",
+			"retrato": "tobi",
+			"texto": "¡Ya nadie pedalea! ¡Mamá dice que mañana vamos a ver el cielo de afuera!"
+		}
+	],
+	"tobi_libre": [
+		{
+			"quien": "Tobi",
+			"retrato": "tobi",
+			"texto": "¡Los generadores se apagaron! ¡Mamá puede dormir! ¡Todos pueden dormir!"
+		}
+	],
+	"mama_tobi": [
+		{
+			"quien": "Mamá de Tobi",
+			"texto": "Cuídate de Silas. Mueve las luces como un mago. Nunca sabes dónde está de verdad."
+		}
+	],
+	"mama_tobi_libre": [
+		{
+			"quien": "Mamá de Tobi",
+			"texto": "Por primera vez en años, dormí sin oír los pedales. Gracias, Pan."
+		}
+	],
+	"pedalero": [
+		{
+			"quien": "Pedalero",
+			"retrato": "pedalero",
+			"texto": "¡Pedalear-pedalear! Si-paro-se-apaga-todo. *sonrisa*"
+		},
+		{
+			"quien": "Pedalero",
+			"retrato": "pedalero",
+			"texto": "(susurra) ¿De verdad vienes de afuera? ¿Y no te moriste?"
+		}
+	],
+	"pedalero_libre": [
+		{
+			"quien": "Pedalero",
+			"retrato": "pedalero",
+			"texto": "¡Salí de la ciudad! ¡Respiré el aire de afuera! Olía a lluvia... ¡y no me morí!"
+		}
+	],
+	"vigia_neon": [
+		{
+			"quien": "Vigía",
+			"retrato": "guardia_org",
+			"texto": "¡Sonríe, ciudadano! Silas quiere caras felices."
+		},
+		{
+			"quien": "Vigía",
+			"retrato": "guardia_org",
+			"texto": "¿Y tú por qué no estás pedaleando? ...Bah, sigue caminando."
+		}
+	],
+	"ciro": [
+		{
+			"quien": "Don Ciro",
+			"texto": "Muchacho, acércate. Soy viejo; a los viejos Silas ya no nos escucha."
+		},
+		{
+			"quien": "Don Ciro",
+			"texto": "Las bestias de luz de Silas esquivan casi todo. Pero los ataques de sonido no fallan nunca. Nunca."
+		},
+		{
+			"quien": "Don Ciro",
+			"texto": "Y su Bailarina Eléctrica... odia la tierra. Un buen golpe de tierra y se apaga."
+		},
+		{
+			"quien": "Don Ciro",
+			"texto": "Ah, y si le pegas a la Bailarina con el cuerpo, te puede paralizar. Ten cuidado."
+		}
+	],
+	"ciro_libre": [
+		{
+			"quien": "Don Ciro",
+			"texto": "Nos devolviste el cielo, muchacho. Aunque sea gris, es nuestro."
+		}
+	],
+	"bar_comodin": [
+		{
+			"quien": "Cantinero",
+			"texto": "¿Algo de tomar? Solo hay agua con gas... gas de verdad, no el de Silas. Ja."
+		},
+		{
+			"quien": "Cantinero",
+			"texto": "Dicen que en Valle Ceniza, más al norte, manda un tal Kael. Lo raro es que la gente de allá lo quiere."
+		},
+		{
+			"quien": "Cantinero",
+			"texto": "Un comandante de la Organización que la gente quiere... Eso no lo había visto nunca."
+		}
+	],
+	"bar_comodin_libre": [
+		{
+			"quien": "Cantinero",
+			"texto": "¡Ronda gratis para el niño que apagó a Silas! ...Es agua. Pero es gratis."
+		},
+		{
+			"quien": "Cantinero",
+			"texto": "Si vas a Valle Ceniza, ten cuidado. Dicen que Kael sabe cosas de la noche en que... bueno, de cosas viejas."
+		}
+	],
+	"leo_neon": [
+		{
+			"quien": "Leo",
+			"retrato": "leo",
+			"texto": "¡Volví! Mara lloró tanto que casi me ahoga. *cof* Gracias por la carta, Pan."
+		}
+	],
+	"leo_neon_libre": [
+		{
+			"quien": "Leo",
+			"retrato": "leo",
+			"texto": "¡Volví! Mara lloró tanto que casi me ahoga. *cof* Gracias por la carta, Pan."
+		}
+	],
+	"inv_generador": [
+		{
+			"quien": "",
+			"texto": "Un generador gigante a pedales. Doce bicicletas oxidadas, todas ocupadas."
+		},
+		{
+			"quien": "",
+			"texto": "Hay marcas en los pedales: rayitas que alguien hizo para contar los días."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Dieciséis horas al día... para encender las luces que los tienen presos."
+		}
+	],
+	"inv_generador_libre": [
+		{
+			"quien": "",
+			"texto": "El generador está quieto. Alguien colgó flores de papel en los pedales."
+		}
+	],
+	"inv_holograma": [
+		{
+			"quien": "",
+			"texto": "Un holograma gigante de Silas, sonriendo. Parpadea cada pocos segundos."
+		},
+		{
+			"quien": "",
+			"texto": "«SILAS TE AMA. SILAS TE CUIDA. SILAS TE ESCUCHA.»"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Su cara está en todas partes. Así nadie se siente solo... ni libre."
+		}
+	],
+	"inv_holograma_libre": [
+		{
+			"quien": "",
+			"texto": "El proyector del holograma está apagado. Solo queda un círculo de vidrio vacío."
+		}
+	],
+	"inv_torre": [
+		{
+			"quien": "",
+			"texto": "Una torre de altavoces que zumba bajito. Del otro lado de la puerta norte, las bestias se alejan del ruido."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Las torres sónicas. Espantan a los monstruos... y también encierran a la gente."
+		}
+	],
+	"inv_torre_libre": [
+		{
+			"quien": "",
+			"texto": "Rina desarmó la torre. Ahora es un nido de palomas de ceniza."
+		}
+	],
+	"inv_casino": [
+		{
+			"quien": "",
+			"texto": "El Palacio Lumen: un casino viejo convertido en el escenario de Silas."
+		},
+		{
+			"quien": "",
+			"texto": "Las máquinas de juego están vacías. Ya nadie apuesta: todos pedalean."
+		}
+	],
+	"inv_casino_libre": [
+		{
+			"quien": "",
+			"texto": "El Palacio Lumen está oscuro. Los vecinos lo van a usar de comedor."
+		}
+	],
+	"inv_arcade": [
+		{
+			"quien": "",
+			"texto": "Una sala de juegos sin techo. Las pantallas viejas todavía brillan solas."
+		},
+		{
+			"quien": "",
+			"texto": "Entre las máquinas se mueven bestias hechas de luz."
+		}
+	],
+	"inv_arcade_libre": [
+		{
+			"quien": "",
+			"texto": "Los niños juegan entre las máquinas apagadas. Las bestias de luz los miran con curiosidad."
+		}
+	],
+	"inv_letrero_neon": [
+		{
+			"quien": "",
+			"texto": "«EL AIRE DE AFUERA MATA. QUÉDATE. SONRÍE.»"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Mentira. Yo vengo de afuera."
+		}
+	],
+	"rina_pide": [
+		{
+			"quien": "Rina",
+			"retrato": "rina",
+			"texto": "Tú no sonríes. Bien. Los que sonríen están asustados."
+		},
+		{
+			"quien": "Rina",
+			"retrato": "rina",
+			"texto": "Soy técnica. Yo armaba las torres de Silas, antes de saber para qué eran."
+		},
+		{
+			"quien": "Rina",
+			"retrato": "rina",
+			"texto": "Silas escondió micrófonos por toda la ciudad. Tráeme tres y con sus lentes te armo algo contra sus luces."
+		},
+		{
+			"quien": "Rina",
+			"retrato": "rina",
+			"texto": "Busca cerca de los generadores, en la sala de juegos y por el este de la avenida."
+		}
+	],
+	"rina_espera": [
+		{
+			"quien": "Rina",
+			"retrato": "rina",
+			"texto": "¿Y los micrófonos? Con tres me alcanza."
+		}
+	],
+	"rina_gracias": [
+		{
+			"quien": "Rina",
+			"retrato": "rina",
+			"texto": "Tres micrófonos... y tres lentes polarizados. Dame un segundo."
+		},
+		{
+			"quien": "",
+			"texto": "Rina desarma los micrófonos y los suelda en un visor."
+		},
+		{
+			"quien": "Rina",
+			"retrato": "rina",
+			"texto": "Toma. Con este visor, los focos de Silas te van a marear mucho menos."
+		}
+	],
+	"rina_despues": [
+		{
+			"quien": "Rina",
+			"retrato": "rina",
+			"texto": "Usa el visor contra Silas. Y si oyes un zumbido raro, es otro micrófono. Rómpelo."
+		}
+	],
+	"rina_despues_libre": [
+		{
+			"quien": "Rina",
+			"retrato": "rina",
+			"texto": "Desarmé todas las torres. Ahora hago radios. Para escuchar música, no a la gente."
+		}
+	],
+	"microfono": [
+		{
+			"quien": "",
+			"texto": "Detrás de un panel suelto hay un micrófono pequeño, con una luz roja encendida."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Así es como Silas escucha todo. Me lo llevo."
+		}
+	],
+	"mara": [
+		{
+			"quien": "Mara",
+			"retrato": "mara",
+			"texto": "*sonrisa* ¡Todo-bien! ...No. Nada está bien. Mi hermano Leo se fue al gas hace tres días."
+		},
+		{
+			"quien": "Mara",
+			"retrato": "mara",
+			"texto": "Silas dice que ya está muerto."
+		}
+	],
+	"mara_libre": [
+		{
+			"quien": "Mara",
+			"retrato": "mara",
+			"texto": "Salí a buscar a Leo afuera de la ciudad. No lo encontré... pero el aire no me mató."
+		}
+	],
+	"mara_carta": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Mara. Tu hermano está vivo. Me pidió que te diera esto."
+		},
+		{
+			"quien": "",
+			"texto": "Mara lee la carta. Se tapa la boca con las manos. Llora sin hacer ruido, por los micrófonos."
+		},
+		{
+			"quien": "Mara",
+			"retrato": "mara",
+			"texto": "Está vivo... ¡Está vivo! Y el aire de afuera no lo mató..."
+		},
+		{
+			"quien": "Mara",
+			"retrato": "mara",
+			"texto": "Toma. No es mucho, pero es todo lo que guardé."
+		}
+	],
+	"mara_leo_vuelve": [
+		{
+			"quien": "Mara",
+			"retrato": "mara",
+			"texto": "¡Ahora que Silas se fue, Leo puede volver! ¡Voy a ir a buscarlo yo misma!"
+		}
+	],
+	"mara_espera_leo": [
+		{
+			"quien": "Mara",
+			"retrato": "mara",
+			"texto": "Leo dice que va a volver cuando Silas caiga. ¿Tú crees que pueda?"
+		}
+	],
+	"mara_con_leo": [
+		{
+			"quien": "Mara",
+			"retrato": "mara",
+			"texto": "Leo volvió. Gracias por traerme su carta, Pan. Nunca lo voy a olvidar."
+		}
+	],
+	"paso_escenario": [
+		{
+			"quien": "Guardia",
+			"retrato": "guardia_org",
+			"texto": "¡Eh, eh! ¡Nadie sube al escenario sin entrada!"
+		}
+	],
+	"guardia_neon_1": [
+		{
+			"quien": "Guardia Destello",
+			"retrato": "guardia_org",
+			"texto": "¿Tú eres el que apagó a Rictus y a Vesper? Aquí no hay trituradoras ni gas, niño."
+		},
+		{
+			"quien": "Guardia Destello",
+			"retrato": "guardia_org",
+			"texto": "Aquí hay luces. Y en la luz, nadie te ve venir."
+		}
+	],
+	"guardia_neon_1_derrotado": [
+		{
+			"quien": "Guardia Destello",
+			"retrato": "guardia_org",
+			"texto": "Se... se me cayó la sonrisa. Silas me va a reemplazar por un holograma."
+		}
+	],
+	"guardia_neon_2": [
+		{
+			"quien": "Guardia Reflejo",
+			"retrato": "guardia_org",
+			"texto": "El show de Silas es a la medianoche. Y tú no tienes boleto."
+		}
+	],
+	"guardia_neon_2_derrotado": [
+		{
+			"quien": "Guardia Reflejo",
+			"retrato": "guardia_org",
+			"texto": "Bien... Sube al escenario. A ver si te gusta el acto de magia."
+		}
+	],
+	"silas_aparece": [
+		{
+			"quien": "",
+			"texto": "Un destello. Las luces del escenario giran... y aparece un hombre delgado con un traje que brilla."
+		},
+		{
+			"quien": "Silas",
+			"retrato": "silas",
+			"texto": "¡Damas y caballeros! ¡El niño del collar! ¡El que hizo llorar a Rictus y dejó a Vesper sin datos!"
+		},
+		{
+			"quien": "Silas",
+			"retrato": "silas",
+			"texto": "Sube, sube. El escenario es tuyo... por un ratito."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(Silas. El tercero.)"
+		}
+	],
+	"silas_reto_primera": [
+		{
+			"quien": "Silas",
+			"retrato": "silas",
+			"texto": "Pan. Qué gusto. Te estuve mirando desde que cruzaste el smog."
+		},
+		{
+			"quien": "Silas",
+			"retrato": "silas",
+			"texto": "¿Sabes qué es lo mejor de la luz? Que puede ser cualquier cosa. Incluso... ellos."
+		}
+	],
+	"silas_ilusion": [
+		{
+			"quien": "",
+			"texto": "Dos figuras de luz aparecen junto a Silas. Un hombre y una mujer."
+		},
+		{
+			"quien": "Papá",
+			"retrato": "papa",
+			"texto": "Pan, hijo. Quédate. Aquí hay luz, hay música... ya no tienes que pelear."
+		},
+		{
+			"quien": "Mamá",
+			"retrato": "mama",
+			"texto": "Quédate con nosotros, mi amor. Afuera solo hay dolor."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "..."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Mamá nunca me dijo «quédate». Mamá me dijo: «No llores, Pan. Construye.»"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Ustedes no son ellos."
+		}
+	],
+	"silas_ilusion_rota": [
+		{
+			"quien": "",
+			"texto": "Las figuras parpadean y se deshacen en chispas."
+		},
+		{
+			"quien": "Silas",
+			"retrato": "silas",
+			"texto": "¡Bravo! ¡Qué escena! El público está llorando."
+		},
+		{
+			"quien": "Silas",
+			"retrato": "silas",
+			"texto": "Lástima que el público también quiera ver sangre. ¡Que empiece el show!"
+		}
+	],
+	"silas_reto": [
+		{
+			"quien": "Silas",
+			"retrato": "silas",
+			"texto": "¿Volviste por la segunda función? ¡Me encanta un público fiel!"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Esta vez no te vas a esconder detrás de tus luces."
+		}
+	],
+	"silas_derrotado": [
+		{
+			"quien": "Silas",
+			"retrato": "silas",
+			"texto": "¡No, no, no! ¡Mi rostro! ¡Mi público!"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "¿Qué sabes de mis padres?"
+		},
+		{
+			"quien": "Silas",
+			"retrato": "silas",
+			"texto": "¿Yo? Yo solo hago luces, niño. Yo no estuve esa noche."
+		},
+		{
+			"quien": "Silas",
+			"retrato": "silas",
+			"texto": "El que estuvo es Kael. Valle Ceniza, al norte, pasando el bosque quemado. Pregúntale a él."
+		},
+		{
+			"quien": "Silas",
+			"retrato": "silas",
+			"texto": "Y ahora... ¡mi último truco! ¡Desaparezco!"
+		}
+	],
+	"silas_escapa": [
+		{
+			"quien": "",
+			"texto": "Cuando el destello se apaga, Silas ya no está. Solo queda su sombrero brillando en el suelo."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Kael... Alguien que estuvo ahí esa noche."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Primero, apago este circo."
+		}
+	],
+	"neon_apagon": [
+		{
+			"quien": "",
+			"texto": "Pan arranca los cables del escenario. Los hologramas parpadean... y se apagan, uno por uno."
+		},
+		{
+			"quien": "",
+			"texto": "Las torres sónicas dejan de zumbar. Los generadores se quedan quietos."
+		},
+		{
+			"quien": "",
+			"texto": "Por primera vez en años, Ciudad Neón queda a oscuras."
+		}
+	],
+	"celebracion_neon": [
+		{
+			"quien": "",
+			"texto": "La gente baja de los pedales. Tienen miedo. Esperan que entren los monstruos... pero no pasa nada."
+		},
+		{
+			"quien": "Coral",
+			"retrato": "coral",
+			"texto": "¡Abrimos la puerta norte! ¡Respiramos el aire de afuera y... huele a lluvia!"
+		},
+		{
+			"quien": "Tobi",
+			"retrato": "tobi",
+			"texto": "¡Mamá puede dormir! ¡Todos pueden dormir!"
+		},
+		{
+			"quien": "Rina",
+			"retrato": "rina",
+			"texto": "¡Desarmé las torres! ¡Se acabaron los micrófonos!"
+		},
+		{
+			"quien": "Don Ciro",
+			"texto": "Muchacho, nos devolviste el cielo. Aunque sea gris, es nuestro."
+		},
+		{
+			"quien": "",
+			"texto": "Toda Ciudad Neón aplaude. Esta vez, las sonrisas son de verdad."
+		}
+	],
+	"celebracion_neon_fuerzas": [
+		{
+			"quien": "",
+			"texto": "Los aplausos le dan fuerzas a Pan y a sus compañeros. ¡El ataque de tus criaturas sube un 10%!"
+		},
+		{
+			"quien": "",
+			"texto": "Recibiste 150 monedas, 2 Granadas de Luz y una Cura 80%. Tus cartas se curaron."
+		}
+	],
+	"neon_libre": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Tres menos. Quedan tres."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Kael. Valle Ceniza. Por fin alguien que estuvo ahí esa noche."
+		},
+		{
+			"quien": "",
+			"texto": "La puerta norte de Ciudad Neón está abierta. Más allá empieza el Bosque Calcinado."
+		}
+	],
+	"bosque_llegada": [
+		{
+			"quien": "",
+			"texto": "Un bosque quemado. Troncos negros, silencio... y una ceniza gris que cae despacio, como nieve."
+		},
+		{
+			"quien": "",
+			"texto": "Bajo la ceniza todavía hay brasas encendidas. Pisarlas quema."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Cuidado donde piso."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Pero mira... Entre la ceniza están saliendo brotes verdes."
+		}
+	],
+	"brote": [
+		{
+			"quien": "",
+			"texto": "Un brote verde crece entre la ceniza. Pan lo saca con cuidado, con raíz y todo, y lo envuelve en un trapo."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Alguien en el valle podría cuidarlo."
+		}
+	],
+	"inv_trampa": [
+		{
+			"quien": "",
+			"texto": "Una trampa de cazador... desarmada a propósito. Le sacaron el resorte."
+		},
+		{
+			"quien": "",
+			"texto": "Al lado hay una marca tallada en el tronco: una flecha que apunta lejos de una madriguera."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Un cazador que no quiere atrapar a las crías..."
+		}
+	],
+	"recaudador": [
+		{
+			"quien": "Recaudador",
+			"retrato": "recaudador",
+			"texto": "¿Un niño solo en el bosque? Qué raro. Voy al valle a cobrar la cuota."
+		},
+		{
+			"quien": "Recaudador",
+			"retrato": "recaudador",
+			"texto": "Kael se puso blando: no les cobra. Pero el Líder sí cobra."
+		},
+		{
+			"quien": "Recaudador",
+			"retrato": "recaudador",
+			"texto": "Si no pagan, quemamos el invernadero. Órdenes de arriba."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "No vas a llegar al valle."
+		}
+	],
+	"recaudador_derrotado": [
+		{
+			"quien": "Recaudador",
+			"retrato": "recaudador",
+			"texto": "¡Ya, ya! ¡Me voy!"
+		},
+		{
+			"quien": "",
+			"texto": "El recaudador huye. Se le cae un papel con el sello de la Organización."
+		},
+		{
+			"quien": "",
+			"texto": "«Si Kael no cobra la cuota de Valle Ceniza, quemen el invernadero. Que aprenda. —El Líder.»"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Kael protege al valle... de su propio jefe."
+		}
+	],
+	"valle_llegada": [
+		{
+			"quien": "",
+			"texto": "Valle Ceniza. Cabañas de madera, un invernadero, humo de cocina... La ceniza cae en silencio, como nieve."
+		},
+		{
+			"quien": "",
+			"texto": "Aquí no hay hologramas, ni guardias, ni altavoces. La gente trabaja junta y se saluda por su nombre."
+		}
+	],
+	"valle_kael_baja": [
+		{
+			"quien": "",
+			"texto": "Por el sendero del norte baja un hombre alto, con una lanza y la caza del día al hombro."
+		},
+		{
+			"quien": "Niña",
+			"texto": "¡Kael! ¡Kael volvió! ¡Trajo comida!"
+		}
+	],
+	"valle_kael_olla": [
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Para la olla. Que coman primero los niños y los viejos."
+		},
+		{
+			"quien": "Cocinera",
+			"texto": "Kael, ¿y tú cuándo comes?"
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Después. Siempre hay un después."
+		}
+	],
+	"valle_kael_collar": [
+		{
+			"quien": "",
+			"texto": "Kael se da vuelta. Ve a Pan... y se queda mirando el collar del gato."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Ese collar... Un gato con una perla morada."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Así que eres tú. Eres el hijo de..."
+		},
+		{
+			"quien": "",
+			"texto": "Kael se calla. Mira a los niños que comen alrededor de la olla."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Aquí no. No delante de ellos."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Te espero en el monumento a los caídos, al noreste. Ven cuando estés listo."
+		}
+	],
+	"valle_nita_llegada": [
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Niño. Tú eres el que liberó las otras ciudades, ¿verdad? Lo cuentan los viajeros."
+		},
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Sabemos que Kael trabaja para la Organización. Pero es un buen hombre. Nos salvó la vida."
+		},
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Por favor... no le hagas daño."
+		},
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Mi cabaña está al suroeste. Si no causas problemas, la cama es gratis."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(Un comandante de la Organización... que la gente quiere. ¿Qué hago con eso?)"
+		}
+	],
+	"valle_norte_antes": [
+		{
+			"quien": "",
+			"texto": "El camino del norte sube por la montaña."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Primero tengo que hablar con Kael."
+		}
+	],
+	"valle_norte": [
+		{
+			"quien": "",
+			"texto": "El camino del norte sube hacia la Fortaleza de Hierro, donde manda Valera."
+		},
+		{
+			"quien": "",
+			"texto": "(Esta parte de la aventura llegará en una próxima versión.)"
+		}
+	],
+	"cama_valle": [
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Pasa, niño. La cama es tuya mientras no causes problemas."
+		},
+		{
+			"quien": "",
+			"texto": "Pan se sienta en el borde, deja la mochila a un lado y suspira antes de acostarse. Afuera cae la ceniza, en silencio."
+		},
+		{
+			"quien": "",
+			"texto": "Tus cartas se repararon mientras dormías."
+		}
+	],
+	"cama_valle_perdon": [
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Tu cama ya está lista. Y te guardé pan dulce. Gracias por devolvernos a Kael."
+		},
+		{
+			"quien": "",
+			"texto": "Pan duerme tranquilo. Hace mucho que no dormía así."
+		},
+		{
+			"quien": "",
+			"texto": "Tus cartas se repararon mientras dormías."
+		}
+	],
+	"cama_valle_ejecutado": [
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Duerme, si quieres. La cama es gratis. Lo prometí."
+		},
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Pero no me pidas que te hable."
+		},
+		{
+			"quien": "",
+			"texto": "Pan no puede dormir bien. Cada vez que cierra los ojos, ve a alguien de rodillas."
+		},
+		{
+			"quien": "",
+			"texto": "Tus cartas se repararon de todas formas."
+		}
+	],
+	"hugo": [
+		{
+			"quien": "Hugo",
+			"retrato": "hugo",
+			"texto": "Bienvenido a la despensa. Aquí no vendemos mucho: casi todo se comparte."
+		},
+		{
+			"quien": "Hugo",
+			"retrato": "hugo",
+			"texto": "Pero para un viajero siempre hay algo. Kael dice que a los viajeros hay que tratarlos bien."
+		}
+	],
+	"hugo_vuelve_perdon": [
+		{
+			"quien": "Hugo",
+			"retrato": "hugo",
+			"texto": "¡Para ti, precio de amigo! Bueno... es el mismo precio. Pero con cariño."
+		}
+	],
+	"hugo_vuelve_ejecutado": [
+		{
+			"quien": "Hugo",
+			"retrato": "hugo",
+			"texto": "...Te vendo porque es mi trabajo. Nada más."
+		}
+	],
+	"olla_comun": [
+		{
+			"quien": "Cocinera",
+			"texto": "¿Tienes hambre? Aquí nadie se queda sin comer. Siéntate."
+		},
+		{
+			"quien": "",
+			"texto": "La cocinera le sirve a Pan un plato de guiso caliente. Las criaturas de Pan también comen."
+		}
+	],
+	"olla_comun_despues": [
+		{
+			"quien": "Cocinera",
+			"texto": "La olla es de todos, pero hoy ya comiste. Mañana hay más."
+		},
+		{
+			"quien": "",
+			"texto": "(La olla común solo te cura una vez.)"
+		}
+	],
+	"olla_comun_ejecutado": [
+		{
+			"quien": "",
+			"texto": "La cocinera te da la espalda y tapa la olla."
+		},
+		{
+			"quien": "Cocinera",
+			"texto": "Para ti no hay."
+		}
+	],
+	"cocinera": [
+		{
+			"quien": "Cocinera",
+			"texto": "Kael caza todos los días para la olla. Y él come al último."
+		},
+		{
+			"quien": "Cocinera",
+			"texto": "Si te lo llevas, ¿quién va a cazar?"
+		}
+	],
+	"cocinera_perdon": [
+		{
+			"quien": "Cocinera",
+			"texto": "¡Kael comió primero hoy! Lo obligamos entre todos."
+		},
+		{
+			"quien": "Cocinera",
+			"texto": "Siéntate, niño. Aquí siempre va a haber un plato para ti."
+		}
+	],
+	"cocinera_ejecutado": [
+		{
+			"quien": "Cocinera",
+			"texto": "Ya nadie caza para la olla. Vamos a tener que aprender solos."
+		}
+	],
+	"lucia_pide": [
+		{
+			"quien": "Lucía",
+			"retrato": "lucia",
+			"texto": "¿Ves el invernadero? Lo levantamos con vidrios de autos viejos. Ahí crece lo único verde del valle."
+		},
+		{
+			"quien": "Lucía",
+			"retrato": "lucia",
+			"texto": "En el bosque están saliendo brotes. Si me traes tres, los planto aquí, donde la ceniza no los ahogue."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Te los traigo."
+		}
+	],
+	"lucia_pide_ejecutado": [
+		{
+			"quien": "Lucía",
+			"retrato": "lucia",
+			"texto": "...Si quieres hacer algo útil, tráeme tres brotes del bosque. Hay que replantar."
+		}
+	],
+	"lucia_espera": [
+		{
+			"quien": "Lucía",
+			"retrato": "lucia",
+			"texto": "¿Encontraste brotes? Sácalos con raíz, por favor."
+		}
+	],
+	"lucia_gracias": [
+		{
+			"quien": "Lucía",
+			"retrato": "lucia",
+			"texto": "¡Tres brotes! Con raíz y todo. Los voy a plantar junto a las papas."
+		},
+		{
+			"quien": "Lucía",
+			"retrato": "lucia",
+			"texto": "Toma. Kael siempre dice que hay que devolver lo que te dan."
+		}
+	],
+	"lucia_gracias_ejecutado": [
+		{
+			"quien": "Lucía",
+			"retrato": "lucia",
+			"texto": "Tres brotes. Bien."
+		},
+		{
+			"quien": "Lucía",
+			"retrato": "lucia",
+			"texto": "Toma. No es un regalo. Es un pago."
+		}
+	],
+	"lucia_despues": [
+		{
+			"quien": "Lucía",
+			"retrato": "lucia",
+			"texto": "Los brotes están creciendo. Algún día este valle va a ser verde otra vez."
+		}
+	],
+	"lucia_despues_perdon": [
+		{
+			"quien": "Lucía",
+			"retrato": "lucia",
+			"texto": "Kael me ayudó a ampliar el invernadero. Dice que va a mandar semillas a las otras ciudades."
+		}
+	],
+	"lucia_despues_ejecutado": [
+		{
+			"quien": "Lucía",
+			"retrato": "lucia",
+			"texto": "El invernadero sigue en pie. Por ahora."
+		}
+	],
+	"nita": [
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Kael nos trae comida, nos arregla los techos y nunca nos cobra la cuota."
+		},
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Cuando la Organización viene a castigar a alguien, él se pone adelante. Por eso tiene tantas cicatrices."
+		},
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Por favor, niño. No le hagas daño."
+		}
+	],
+	"nita_perdon": [
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Lo perdonaste. Eso es más difícil que pelear, ¿sabes?"
+		},
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Tus padres estarían orgullosos."
+		}
+	],
+	"nita_ejecutado": [
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "..."
+		},
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "Prometí una cama. No prometí perdonarte."
+		}
+	],
+	"nina_valle": [
+		{
+			"quien": "Niña",
+			"texto": "¿Tú conoces a Kael? Me enseñó a hacer trampas que no lastiman."
+		},
+		{
+			"quien": "Niña",
+			"texto": "No le pegues, ¿ya?"
+		}
+	],
+	"nina_valle_perdon": [
+		{
+			"quien": "Niña",
+			"texto": "¡Kael me va a enseñar a pescar! ¡Y tú puedes venir!"
+		}
+	],
+	"nina_valle_ejecutado": [
+		{
+			"quien": "Niña",
+			"texto": "¿Dónde está Kael? Dijo que me iba a enseñar a pescar..."
+		},
+		{
+			"quien": "",
+			"texto": "Pan no le contesta."
+		}
+	],
+	"aldeano_valle": [
+		{
+			"quien": "Aldeano",
+			"texto": "Sabemos que Kael trabaja para la Organización. Pero es un buen hombre. Nos salvó la vida."
+		},
+		{
+			"quien": "Aldeano",
+			"texto": "Si vienes por él... mejor vete."
+		}
+	],
+	"aldeano_valle_perdon": [
+		{
+			"quien": "Aldeano",
+			"texto": "Te juzgué mal, niño. Gracias por escucharlo."
+		}
+	],
+	"aldeano_valle_ejecutado": [
+		{
+			"quien": "Aldeano",
+			"texto": "No te acerques a mis hijos."
+		}
+	],
+	"aldeana_valle": [
+		{
+			"quien": "Aldeana",
+			"texto": "Cuando bombardearon el valle, Kael sacó a mis hijos del fuego con sus propias manos."
+		},
+		{
+			"quien": "Aldeana",
+			"texto": "No sé quién eres. Pero si le haces daño, nunca te lo voy a perdonar."
+		}
+	],
+	"aldeana_valle_perdon": [
+		{
+			"quien": "Aldeana",
+			"texto": "Kael está vivo. Gracias. De verdad, gracias."
+		}
+	],
+	"aldeana_valle_ejecutado": [
+		{
+			"quien": "Aldeana",
+			"texto": "Te lo dije. Nunca te lo voy a perdonar."
+		}
+	],
+	"ramiro": [
+		{
+			"quien": "Ramiro",
+			"retrato": "ramiro",
+			"texto": "Corto leña para el invierno. Aquí todo el año es invierno, por la ceniza."
+		},
+		{
+			"quien": "Ramiro",
+			"retrato": "ramiro",
+			"texto": "Kael corta el doble que yo. Y yo soy leñador."
+		},
+		{
+			"quien": "Ramiro",
+			"retrato": "ramiro",
+			"texto": "No le hagas daño, chico. Te lo pido de hombre a hombre."
+		}
+	],
+	"ramiro_perdon": [
+		{
+			"quien": "Ramiro",
+			"retrato": "ramiro",
+			"texto": "Hiciste bien, chico. Hace falta más valor para bajar el arma que para usarla."
+		}
+	],
+	"ramiro_ejecutado": [
+		{
+			"quien": "Ramiro",
+			"retrato": "ramiro",
+			"texto": "Sigue caminando, chico. Aquí no tienes nada que hacer."
+		}
+	],
+	"ana": [
+		{
+			"quien": "Ana",
+			"retrato": "ana",
+			"texto": "Soy la esposa de Kael. Sé a qué viniste."
+		},
+		{
+			"quien": "Ana",
+			"retrato": "ana",
+			"texto": "Mi esposo no duerme desde hace años. Algo pasó antes de que llegáramos aquí. Nunca me lo quiso contar."
+		},
+		{
+			"quien": "Ana",
+			"retrato": "ana",
+			"texto": "Sea lo que sea... él ya se está castigando solo todos los días."
+		}
+	],
+	"ana_perdon": [
+		{
+			"quien": "Ana",
+			"retrato": "ana",
+			"texto": "Anoche Kael durmió de corrido. Por primera vez desde que lo conozco."
+		},
+		{
+			"quien": "Ana",
+			"retrato": "ana",
+			"texto": "Gracias por dejarlo vivir, Pan."
+		}
+	],
+	"ana_ejecutado": [
+		{
+			"quien": "Ana",
+			"retrato": "ana",
+			"texto": "...Vete."
+		}
+	],
+	"teo": [
+		{
+			"quien": "Teo",
+			"retrato": "teo",
+			"texto": "¡Mi papá es el mejor cazador del mundo! ¡Me va a enseñar a usar la lanza!"
+		},
+		{
+			"quien": "Teo",
+			"retrato": "teo",
+			"texto": "¿Tú también tienes papá?"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "...Tenía."
+		}
+	],
+	"teo_perdon": [
+		{
+			"quien": "Teo",
+			"retrato": "teo",
+			"texto": "¡Papá dice que eres valiente! ¡Más valiente que él!"
+		}
+	],
+	"teo_ejecutado": [
+		{
+			"quien": "Teo",
+			"retrato": "teo",
+			"texto": "¿Has visto a mi papá? Mamá no para de llorar..."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "..."
+		}
+	],
+	"inv_invernadero": [
+		{
+			"quien": "",
+			"texto": "Un invernadero hecho con vidrios de autos viejos. Adentro hay papas, habas y hojas verdes."
+		},
+		{
+			"quien": "",
+			"texto": "Un cartel escrito a mano: «Lo que crece aquí es de todos.»"
+		}
+	],
+	"inv_invernadero_perdon": [
+		{
+			"quien": "",
+			"texto": "Al invernadero le agregaron una sala nueva. Kael está separando semillas en sacos: «Para Bastión», «Para el Sumidero», «Para Neón»."
+		}
+	],
+	"inv_invernadero_ejecutado": [
+		{
+			"quien": "",
+			"texto": "El invernadero sigue en pie, pero nadie lo cuida como antes. Algunas plantas se están secando."
+		}
+	],
+	"inv_monumento": [
+		{
+			"quien": "",
+			"texto": "Un monumento a los caídos del bombardeo. Hay muchos nombres tallados en la piedra."
+		},
+		{
+			"quien": "",
+			"texto": "Al pie hay flores de papel y una lanza vieja, apoyada con cuidado."
+		}
+	],
+	"inv_monumento_perdon": [
+		{
+			"quien": "",
+			"texto": "Alguien talló dos nombres nuevos en el monumento, al final de la lista. Pan los lee en silencio."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(Kael los recuerda. Igual que yo.)"
+		}
+	],
+	"inv_monumento_ejecutado": [
+		{
+			"quien": "",
+			"texto": "Alguien talló un nombre nuevo en la piedra, con letras temblorosas: KAEL."
+		}
+	],
+	"inv_puesto_caza": [
+		{
+			"quien": "",
+			"texto": "El puesto de caza de Kael. Lanzas, cuerdas, pieles secándose."
+		},
+		{
+			"quien": "",
+			"texto": "En una tabla hay una lista: «Olla: 3 conejos. Nita: leña. Techo de Ramiro: lunes.»"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "No es una lista de cuotas. Es una lista de favores."
+		}
+	],
+	"inv_puesto_caza_perdon": [
+		{
+			"quien": "",
+			"texto": "Kael dejó una lanza pequeña junto a la suya. Tiene tallado el nombre de Teo."
+		}
+	],
+	"inv_puesto_caza_ejecutado": [
+		{
+			"quien": "",
+			"texto": "Las pieles se están pudriendo. Nadie volvió a cazar."
+		}
+	],
+	"kael_reto": [
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Viniste."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "No te voy a mentir, Pan. Sé quién eres. Conocí a tus padres."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Pero no puedo decirte nada más. Si hablo, el Líder quema este valle... con mi familia adentro."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "No quiero pelear contigo. Mis bestias solo se van a defender."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "..."
+		},
+		{
+			"quien": "",
+			"texto": "Pan deja de sonreír. Su mirada se vuelve fría como el hielo."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Entonces defiéndete."
+		}
+	],
+	"kael_reto_otra": [
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Otra vez tú... Sigo sin querer hacer esto."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Defiéndete."
+		}
+	],
+	"kael_suplica": [
+		{
+			"quien": "",
+			"texto": "Kael está de rodillas. Soltó la lanza. Está llorando."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael_llora",
+			"texto": "Por favor... Tengo una esposa. Tengo un hijo. Esta gente me necesita."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael_llora",
+			"texto": "Sé lo que hice. Sé que estuve del lado equivocado."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael_llora",
+			"texto": "Pero si me matas... vas a ser igual que él. Igual que el Líder."
+		}
+	],
+	"kael_decision_pan": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(El hombre que estuvo ahí la noche que murieron mis padres... está de rodillas frente a mí.)"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(Podría terminar con esto ahora mismo.)"
+		}
+	],
+	"kael_perdon_pan": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "...Levántate."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Si te mato, mis padres no vuelven. Y los niños de este valle se quedan sin nadie que cace para ellos."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Ellos querían construir. No destruir."
+		}
+	],
+	"kael_verdad": [
+		{
+			"quien": "",
+			"texto": "Kael se levanta despacio. Se seca la cara con la manga."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "No merezco esto... Gracias."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Escucha bien, Pan, porque te voy a contar todo."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Conocí a tus padres. Diego y Danitza. Tenían un plan para limpiar el agua y repartir semillas a todas las ciudades."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Eso no le convenía al Líder. Un pueblo que come y bebe solo no necesita a la Organización."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Lo que les pasó no fue un robo. Fue un asesinato político. La orden vino de arriba. De Marcus, el Líder."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Yo estaba en esa patrulla. No disparé... pero tampoco los salvé. Me uní a la Organización para que no tocaran a mi familia."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Esa es mi culpa. La cargo todos los días."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Toma. Es todo lo que tengo: los códigos de la Capital, lo que sé de las defensas de Marcus... y esto."
+		}
+	],
+	"kael_grabacion": [
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Esa grabación la encontré en el refugio de tus padres, años después. Nunca me atreví a escucharla entera."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Es tuya."
+		}
+	],
+	"escuchar_grabacion": [
+		{
+			"quien": "",
+			"texto": "Pan aprieta el botón. La grabación chisporrotea..."
+		},
+		{
+			"quien": "Papá",
+			"retrato": "papa",
+			"texto": "¿Ya está grabando? ...Pan, hijo. Si estás escuchando esto, es que no pudimos volver."
+		},
+		{
+			"quien": "Mamá",
+			"retrato": "mama",
+			"texto": "Mi amor, perdónanos por dejarte solo."
+		},
+		{
+			"quien": "Papá",
+			"retrato": "papa",
+			"texto": "Todo lo que hicimos fue por ti. Por un mundo donde nadie tenga que esconderse."
+		},
+		{
+			"quien": "Mamá",
+			"retrato": "mama",
+			"texto": "No dejes que la rabia te convierta en ellos. Tú eres bueno, Pan. Siempre lo fuiste."
+		},
+		{
+			"quien": "Papá",
+			"retrato": "papa",
+			"texto": "Y acuérdate de lo que siempre te decíamos..."
+		},
+		{
+			"quien": "Mamá",
+			"retrato": "mama",
+			"texto": "No llores, Pan. Construye."
+		},
+		{
+			"quien": "",
+			"texto": "La grabación termina."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "..."
+		}
+	],
+	"kael_despues_grabacion": [
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Ve a la Fortaleza de Hierro, al norte. Ahí manda Valera. Ella no va a suplicar como yo."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Y Pan... gracias por dejarme ver crecer a mi hijo."
+		}
+	],
+	"kael_perdonado_charla": [
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Voy a mandar semillas y madera a las otras ciudades. Es lo que tus padres habrían querido."
+		},
+		{
+			"quien": "Kael",
+			"retrato": "kael",
+			"texto": "Cuídate en la Fortaleza, Pan. Valera no perdona a nadie."
+		}
+	],
+	"celebracion_valle": [
+		{
+			"quien": "",
+			"texto": "La gente del valle sale de sus cabañas. Al ver a Kael vivo, corren hacia la plaza."
+		},
+		{
+			"quien": "Abuela Nita",
+			"retrato": "nita",
+			"texto": "¡Lo perdonó! ¡Kael está vivo!"
+		},
+		{
+			"quien": "Teo",
+			"retrato": "teo",
+			"texto": "¡Papá! ¡Papá!"
+		},
+		{
+			"quien": "Ana",
+			"retrato": "ana",
+			"texto": "Gracias... gracias, Pan."
+		},
+		{
+			"quien": "Lucía",
+			"retrato": "lucia",
+			"texto": "Este valle siempre va a tener una cama y un plato para ti."
+		},
+		{
+			"quien": "",
+			"texto": "Todo Valle Ceniza aplaude. La ceniza sigue cayendo, pero hoy nadie la mira."
+		}
+	],
+	"celebracion_valle_fuerzas": [
+		{
+			"quien": "",
+			"texto": "El cariño del valle le da fuerzas a Pan y a sus compañeros. ¡El ataque de tus criaturas sube un 10%!"
+		},
+		{
+			"quien": "",
+			"texto": "Recibiste 120 monedas, 2 Curas 80% y 2 Piñas en lata. Tus cartas se curaron."
+		}
+	],
+	"valle_libre": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Cuatro menos. Quedan dos."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Marcus. Ahora sé tu nombre. Y sé lo que hiciste."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Pero no voy a ser como tú."
+		}
+	],
+	"kael_ejecutar_pan": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "..."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Ellos también suplicaron, ¿cierto?"
+		},
+		{
+			"quien": "",
+			"texto": "La sombra del pelo de Pan le tapa los ojos. Solo se ve un brillo verde en la oscuridad."
+		}
+	],
+	"kael_ejecutado_negro": [
+		{
+			"quien": "",
+			"texto": "La pantalla se queda a oscuras."
+		},
+		{
+			"quien": "",
+			"texto": "Se escucha el viento. Y después, nada."
+		}
+	],
+	"kael_ejecutado_monologo": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(Le quité todo lo que llevaba encima. Monedas. Reliquias. Su lanza.)"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(No encontré nada sobre mis padres. Lo que sabía, se lo llevó con él.)"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(No siento nada. Mejor así. Si no siento, no duele.)"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(Uno menos. Los que quedan van a suplicar igual. Y les va a servir igual de poco.)"
+		}
+	],
+	"valle_reaccion_ejecutado": [
+		{
+			"quien": "",
+			"texto": "La gente del valle sale de sus cabañas. Nadie aplaude."
+		},
+		{
+			"quien": "",
+			"texto": "Una mujer cae de rodillas frente al monumento. Un niño pregunta por su papá."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(Kael escondía algo. Su cabaña, el monumento, su puesto de caza... Lo voy a encontrar yo solo.)"
+		}
+	],
+	"pista_cabana": [
+		{
+			"quien": "",
+			"texto": "Bajo la cama de Kael hay una caja de madera. Adentro, envuelta en un pañuelo, hay una grabadora vieja."
+		},
+		{
+			"quien": "",
+			"texto": "Tiene una etiqueta escrita a mano: «Para Pan.»"
+		}
+	],
+	"pista_grabacion_despues": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "..."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(«No dejes que la rabia te convierta en ellos.»)"
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "(Llegó tarde.)"
+		}
+	],
+	"pista_monumento": [
+		{
+			"quien": "",
+			"texto": "Detrás del monumento, debajo de una piedra suelta, hay un sobre sellado."
+		},
+		{
+			"quien": "",
+			"texto": "Adentro hay tarjetas de acceso y números: los Códigos de la Capital."
+		}
+	],
+	"pista_puesto": [
+		{
+			"quien": "",
+			"texto": "En el puesto de caza, entre las pieles, hay un mapa doblado muchas veces."
+		},
+		{
+			"quien": "",
+			"texto": "Son las defensas del Líder. Alguien marcó en rojo los puntos débiles. Abajo hay un nombre: Marcus."
+		}
+	],
+	"pistas_completas": [
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Marcus. Ahora sé tu nombre."
+		},
+		{
+			"quien": "Pan",
+			"retrato": "pan",
+			"texto": "Cuatro menos. Quedan dos."
+		},
+		{
+			"quien": "",
+			"texto": "El camino del norte lleva a la Fortaleza de Hierro."
+		}
+	],
+	"hugo_vuelve": [
+		{
+			"quien": "Hugo",
+			"retrato": "hugo",
+			"texto": "¿Necesitas algo más para el camino?"
 		}
 	]
 }

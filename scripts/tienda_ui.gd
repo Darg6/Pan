@@ -9,12 +9,16 @@ signal cerrado
 const SURTIDO := ["cura_40", "cura_50", "cura_80", "potenciador_20", "potenciador_70", "racion", "carta_vinculo"]
 ## El Sumidero vende los primeros objetos para curar estados alterados (GDD) y la máscara de gas.
 const SURTIDO_SUMIDERO := ["antidoto", "mascara_filtro", "cura_40", "cura_50", "potenciador_20", "racion", "carta_vinculo"]
+## Ciudad Neón: Coral vende Granadas de Luz (ciegan a las bestias de Silas).
+const SURTIDO_NEON := ["granada_luz", "antidoto", "cura_40", "cura_50", "cura_80", "potenciador_20", "potenciador_70", "racion", "carta_vinculo"]
+## Valle Ceniza: la despensa de Hugo (comida del huerto y de la caza de Kael, más barata en curas grandes).
+const SURTIDO_VALLE := ["racion", "cura_50", "cura_80", "antidoto", "potenciador_20", "potenciador_70", "granada_luz", "carta_vinculo"]
 const ICONOS := {
 	"cura_40": "res://arte/objetos/cura_40.png", "cura_50": "res://arte/objetos/cura_50.png",
 	"cura_80": "res://arte/objetos/cura_80.png", "potenciador_20": "res://arte/objetos/potenciador_20.png",
 	"potenciador_70": "res://arte/objetos/potenciador_70.png", "racion": "res://arte/objetos/racion.png",
 	"carta_vinculo": "res://arte/objetos/cartas.png", "antidoto": "res://arte/objetos/antidoto.png",
-	"mascara_filtro": "res://arte/objetos/mascara_filtro.png",
+	"mascara_filtro": "res://arte/objetos/mascara_filtro.png", "granada_luz": "res://arte/objetos/granada_luz.png",
 }
 
 var _titulo: Label

@@ -1,5 +1,5 @@
 {
-	"_ayuda": "Para agregar una criatura, copia un bloque dentro de 'criaturas', cambia su id (ej. 'oso_de_escoria') y sus valores. Tipos (escribelos sin tilde): feral, toxico, termico, fluido, chatarra, energia, sombra, terrestre, sonico. 'debil_a' recibe x2, 'resiste' recibe x0.5, 'inmune' recibe x0. 'ia' puede ser 'agresivo', 'evasivo' o 'tanque'. 'valor' es lo que pagan por la carta en el Mercado de Bestias y 'parte' lo que suelta al derrotarla. Efectos de movimientos: infectar, quemar, cegar, lodo, drenar, anular, evasion_arriba, defensa_arriba, defensa_abajo, paralizar, bajo_tierra. Pasivas: sin_infeccion, estatica, membrana, simbiosis, camuflaje, abrumado. La imagen de cada criatura está en arte/criaturas/<id>.png (64x64, mirando a la derecha). 'precision' (opcional) va de 0 a 1.",
+	"_ayuda": "Para agregar una criatura, copia un bloque dentro de 'criaturas', cambia su id (ej. 'oso_de_escoria') y sus valores. Tipos (escribelos sin tilde): feral, toxico, termico, fluido, chatarra, energia, sombra, terrestre, sonico. 'debil_a' recibe x2, 'resiste' recibe x0.5, 'inmune' recibe x0. 'ia' puede ser 'agresivo', 'evasivo' o 'tanque'. 'valor' es lo que pagan por la carta en el Mercado de Bestias y 'parte' lo que suelta al derrotarla. Efectos de movimientos: infectar, quemar, cegar, lodo, drenar, anular, evasion_arriba, defensa_arriba, defensa_abajo, paralizar, bajo_tierra, confundir. Pasivas: sin_infeccion, estatica, membrana, simbiosis, camuflaje, abrumado, reflejo (devuelve el 30% de los golpes de cuerpo), justicia_ciega (nunca falla e ignora evasión y defensa). La imagen de cada criatura está en arte/criaturas/<id>.png (64x64, mirando a la derecha). 'precision' (opcional) va de 0 a 1.",
 	"carta_inicial": "",
 	"criaturas": {
 		"bestia_blanca": {
@@ -908,6 +908,277 @@
 							"poder": 22,
 							"tipo": "feral",
 							"golpes": 1
+						}
+					]
+				}
+			]
+		},
+		"caballero_de_neon": {
+			"nombre": "Caballero de Neón",
+			"descripcion": "Armadura vacía que se llenó de luz en los casinos de Ciudad Neón. Su destello deja ciego a quien lo mira. Débil a la tierra y al metal.",
+			"tipo": "energia",
+			"debil_a": [
+				"terrestre",
+				"chatarra"
+			],
+			"resiste": [
+				"sonico",
+				"energia"
+			],
+			"inmune": [],
+			"hp": 86,
+			"ataque": 54,
+			"defensa": 58,
+			"velocidad": 62,
+			"evasion": 0.08,
+			"facilidad_captura": 0.5,
+			"ia": "tanque",
+			"valor": 70,
+			"parte": {
+				"id": "tubo_neon",
+				"nombre": "Tubo de Neón",
+				"precio": 20
+			},
+			"color": "#3a3a66",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Lanza de Neón",
+							"poder": 20,
+							"tipo": "energia",
+							"golpes": 1
+						},
+						{
+							"desde_nivel": 4,
+							"nombre": "Lanza Prismática",
+							"poder": 30,
+							"tipo": "energia",
+							"golpes": 1
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Destello Cegador",
+							"poder": 0,
+							"tipo": "energia",
+							"golpes": 1,
+							"efecto": "cegar",
+							"precision": 0.9
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Escudo de Luz",
+							"poder": 0,
+							"tipo": "energia",
+							"golpes": 1,
+							"efecto": "defensa_arriba"
+						}
+					]
+				}
+			]
+		},
+		"espectro_sonico": {
+			"nombre": "Espectro Sónico",
+			"descripcion": "Fantasma hecho de eco que vive en el smog. Sus chillidos nunca fallan y su eco confunde. Los golpes de garra y de metal lo deshacen.",
+			"tipo": "sonico",
+			"debil_a": [
+				"chatarra",
+				"feral"
+			],
+			"resiste": [
+				"energia"
+			],
+			"inmune": [
+				"sombra"
+			],
+			"hp": 62,
+			"ataque": 52,
+			"defensa": 34,
+			"velocidad": 86,
+			"evasion": 0.15,
+			"facilidad_captura": 0.6,
+			"ia": "agresivo",
+			"valor": 55,
+			"parte": {
+				"id": "cristal_resonante",
+				"nombre": "Cristal Resonante",
+				"precio": 18
+			},
+			"color": "#6a5a8a",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Chillido",
+							"poder": 18,
+							"tipo": "sonico",
+							"golpes": 1
+						},
+						{
+							"desde_nivel": 3,
+							"nombre": "Alarido",
+							"poder": 28,
+							"tipo": "sonico",
+							"golpes": 1
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Eco Confuso",
+							"poder": 0,
+							"tipo": "sonico",
+							"golpes": 1,
+							"efecto": "confundir",
+							"precision": 0.85
+						}
+					]
+				}
+			]
+		},
+		"bestia_blindada": {
+			"nombre": "Bestia Blindada",
+			"descripcion": "Bestia acorazada con placas de chatarra soldadas por el fuego. Devuelve parte de los golpes de cuerpo que recibe. La electricidad y el agua la oxidan.",
+			"tipo": "chatarra",
+			"debil_a": [
+				"energia",
+				"fluido"
+			],
+			"resiste": [
+				"feral",
+				"sombra"
+			],
+			"inmune": [
+				"sonico"
+			],
+			"pasiva": "reflejo",
+			"hp": 110,
+			"ataque": 48,
+			"defensa": 74,
+			"velocidad": 22,
+			"evasion": 0.0,
+			"facilidad_captura": 0.4,
+			"ia": "tanque",
+			"valor": 80,
+			"parte": {
+				"id": "placa_blindada",
+				"nombre": "Placa Blindada",
+				"precio": 22
+			},
+			"color": "#7a6a5a",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Embestida Blindada",
+							"poder": 22,
+							"tipo": "chatarra",
+							"golpes": 1
+						},
+						{
+							"desde_nivel": 4,
+							"nombre": "Ariete de Acero",
+							"poder": 32,
+							"tipo": "chatarra",
+							"golpes": 1
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Blindaje",
+							"poder": 0,
+							"tipo": "chatarra",
+							"golpes": 1,
+							"efecto": "defensa_arriba"
+						}
+					]
+				}
+			]
+		},
+		"vigilante_ciego": {
+			"nombre": "Vigilante Ciego",
+			"descripcion": "Guardián vendado que escucha cada latido. No ve, pero nunca falla: atraviesa la evasión y las armaduras. Solo el metal y las garras lo detienen.",
+			"tipo": "sonico",
+			"debil_a": [
+				"chatarra",
+				"feral"
+			],
+			"resiste": [
+				"energia"
+			],
+			"inmune": [
+				"sombra"
+			],
+			"pasiva": "justicia_ciega",
+			"hp": 96,
+			"ataque": 60,
+			"defensa": 48,
+			"velocidad": 58,
+			"evasion": 0.0,
+			"facilidad_captura": 0.3,
+			"ia": "agresivo",
+			"valor": 120,
+			"parte": {
+				"id": "campana_vigilante",
+				"nombre": "Campana del Vigilante",
+				"precio": 30
+			},
+			"color": "#8a8478",
+			"movimientos": [
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Sentencia",
+							"poder": 24,
+							"tipo": "sonico",
+							"golpes": 1
+						},
+						{
+							"desde_nivel": 5,
+							"nombre": "Juicio Final",
+							"poder": 34,
+							"tipo": "sonico",
+							"golpes": 1
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Eco del Juicio",
+							"poder": 12,
+							"tipo": "sonico",
+							"golpes": 2
+						}
+					]
+				},
+				{
+					"versiones": [
+						{
+							"desde_nivel": 1,
+							"nombre": "Silencio",
+							"poder": 8,
+							"tipo": "sonico",
+							"golpes": 1,
+							"efecto": "anular"
 						}
 					]
 				}
