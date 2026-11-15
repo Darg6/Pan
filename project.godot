@@ -31,6 +31,10 @@ window/stretch/mode="viewport"
 window/stretch/aspect="expand"
 window/handheld/orientation=4
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/importador_pan/plugin.cfg")
+
 [gui]
 
 theme/custom="res://arte/tema.tres"

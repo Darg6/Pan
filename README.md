@@ -17,9 +17,15 @@ RPG 2D top-down de captura de criaturas por turnos, en pixel art (Godot 4.3, ren
 
 ## Si algo no carga (pantalla negra o mensaje de error)
 
-Cierra Godot, borra la carpeta `.godot` dentro del proyecto (es solo caché; en Windows activa
-*Vista > Elementos ocultos* si no la ves), abre Godot de nuevo, espera a que termine la barra de
-importación y pulsa F5. Al iniciar, el juego hace un **autodiagnóstico** y te dice en pantalla qué falla.
+Lo más común es que Godot no haya importado las imágenes nuevas después de un Pull. El plugin
+**Importador Pan** (`addons/importador_pan`, ya viene activado) lo arregla solo: al abrir Godot y
+antes de cada F5 importa cualquier imagen, sonido o letra que falte. Por eso conviene **cerrar Godot
+antes de hacer Pull** y abrirlo después.
+
+Si aun así falla: cierra Godot, borra la carpeta `.godot` dentro del proyecto (es solo caché; en
+Windows activa *Vista > Elementos ocultos* si no la ves), abre Godot de nuevo, espera a que termine
+la barra de importación y pulsa F5. Al iniciar, el juego hace un **autodiagnóstico** y te dice en
+pantalla qué falla.
 
 ## Exportar para celular y navegador
 

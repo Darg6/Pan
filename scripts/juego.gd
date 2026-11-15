@@ -251,9 +251,9 @@ func _autodiagnostico() -> void:
 	if not sin_importar.is_empty():
 		texto = "Godot no importó estas imágenes/letras: " + ", ".join(sin_importar) \
 			+ "\nPor eso no cargan el tema, los tilesets ni los mapas.\n\n" \
-			+ "ARREGLO: cierra Godot. Abre la carpeta del proyecto en el Explorador de Windows y borra la carpeta \".godot\" " \
-			+ "(es solo caché; si no la ves, activa Vista > Elementos ocultos). Abre Godot otra vez, espera a que termine " \
-			+ "la barra de importación y pulsa F5.\n\n" + texto
+			+ "ARREGLO: cierra el juego y pulsa F5 otra vez (el Importador Pan las importa antes de correr). " \
+			+ "Si sigue igual: cierra Godot, ábrelo otra vez, espera a que termine la barra de importación y pulsa F5. " \
+			+ "Revisa que el plugin esté activo en Proyecto > Configuración del proyecto > Plugins > Importador Pan.\n\n" + texto
 	if not distintos.is_empty():
 		texto += "\n\nEstos archivos son distintos a los de GitHub (quizás Godot guardó encima una versión vieja):\n" \
 			+ "\n".join(distintos.slice(0, 8)) + ("\n..." if distintos.size() > 8 else "")
