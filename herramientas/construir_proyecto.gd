@@ -6,7 +6,8 @@ extends Node
 ##
 ## NO necesitas correrlo para jugar. Solo sirve para regenerar todo desde cero.
 ## Uso (desde la carpeta del proyecto):
-##   godot --headless --editor --quit           (importa las imágenes)
+##   godot --headless --editor --quit-after 3000   (importa las imágenes; con --quit, Godot 4.3
+##                                                  se cae al cerrar si hay plugins activos)
 ##   godot --headless --path . res://herramientas/construir_proyecto.tscn
 ## OJO: sobrescribe los mapas; si ya los editaste a mano en Godot, perderás esos cambios.
 

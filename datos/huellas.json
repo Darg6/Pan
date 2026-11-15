@@ -35,7 +35,7 @@
  "res://scripts/interactuable.gd": "fe5fd67b326d93c248af1fe4f63424da",
  "res://scripts/intro.gd": "4ae1cd9fcd1ce6ab3d46bd1df70e1e16",
  "res://scripts/joystick.gd": "b7305215baab590185f5b3515085145e",
- "res://scripts/juego.gd": "3515bf7027d47e200a3f470563cc4d1d",
+ "res://scripts/juego.gd": "374cb3b4469457b6705f87a030ae6da1",
  "res://scripts/mapa.gd": "aeadc310481b48c39be3bfb30974d132",
  "res://scripts/menu.gd": "7da1f1f81a9bc7adcc656dcacc02a5ef",
  "res://scripts/mochila_ui.gd": "7f083d32ac5e62f309970cb0afa8b396",
